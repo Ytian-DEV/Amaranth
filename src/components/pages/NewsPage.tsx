@@ -1,147 +1,228 @@
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { NewsCard } from "../NewsCard";
-import { Calendar, TrendingUp, Filter, Search } from "lucide-react";
+import { Calendar, Filter, Search, Loader, FileText } from "lucide-react";
 import { Input } from "../ui/input";
+import { supabase } from "../../lib/supabase";
+import type { Article } from "../../types/database";
 
-export function NewsPage() {
-  const newsArticles = [
-    {
-      title: "University President Inaugurates New Research Facility",
-      excerpt: "VSU opens state-of-the-art research facility to advance scientific studies and innovation in the region.",
-      author: "Maria Rodriguez",
-      date: "Sep 22, 2024",
-      category: "News",
-      imageUrl: "https://images.unsplash.com/photo-1618053238059-cc7761222f2a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzY2llbmNlJTIwbGFib3JhdG9yeSUyMHJlc2VhcmNofGVufDF8fHx8MTc1ODUwMDg1N3ww&ixlib=rb-4.1.0&q=80&w=1080"
-    },
-    {
-      title: "VSU Receives Recognition for Sustainable Campus Initiatives",
-      excerpt: "The university's commitment to environmental sustainability earns national recognition from the Department of Environment.",
-      author: "Environmental Team",
-      date: "Sep 21, 2024",
-      category: "News",
-      imageUrl: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdXN0YWluYWJsZSUyMGNhbXB1cyUyMGVudmlyb25tZW50fGVufDF8fHx8MTc1ODU1NzY1MXww&ixlib=rb-4.1.0&q=80&w=1080"
-    },
-    {
-      title: "New Academic Programs Launch for 2024-2025",
-      excerpt: "VSU introduces innovative degree programs in data science, renewable energy, and digital marketing to meet industry demands.",
-      author: "Academic Affairs",
-      date: "Sep 20, 2024",
-      category: "News",
-      imageUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1bml2ZXJzaXR5JTIwY2xhc3Nyb29tfGVufDF8fHx8MTc1ODU1NzY1MXww&ixlib=rb-4.1.0&q=80&w=1080"
-    },
-    {
-      title: "International Partnership Agreement Signed",
-      excerpt: "VSU forms strategic partnership with leading universities in Southeast Asia to enhance academic collaboration.",
-      author: "International Affairs",
-      date: "Sep 19, 2024",
-      category: "News",
-      imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbnRlcm5hdGlvbmFsJTIwcGFydG5lcnNoaXB8ZW58MXx8fHwxNzU4NTU3NjUxfDA&ixlib=rb-4.1.0&q=80&w=1080"
-    },
-    {
-      title: "Campus Infrastructure Modernization Begins",
-      excerpt: "Major renovation project kicks off to upgrade campus facilities and improve student learning environments.",
-      author: "Campus Development",
-      date: "Sep 18, 2024",
-      category: "News",
-      imageUrl: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1bml2ZXJzaXR5JTIwYnVpbGRpbmd8ZW58MXx8fHwxNzU4NTU3NjUxfDA&ixlib=rb-4.1.0&q=80&w=1080"
+interface NewsPageProps {
+  activeCategory?: string;
+}
+
+export function NewsPage({ activeCategory }: NewsPageProps) {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  // Map URL categories to database category titles
+  const categoryMap: { [key: string]: string } = {
+    'news': 'News',
+    'views': 'Views',
+    'sports': 'Sports',
+    'feature': 'Feature',
+    's&t': 'S&T',
+    'literary': 'Literary',
+    'blog': 'Blog',
+    'specials': 'Specials',
+    'investigative': 'Investigative',
+    'explainer': 'Explainer',
+    'bulletin': 'Bulletin',
+    'stories': 'Stories'
+  };
+
+  // Function to handle article click
+  const handleArticleClick = (articleId: string) => {
+    navigate(`/article/${articleId}`);
+  };
+
+  useEffect(() => {
+    fetchArticles();
+  }, [activeCategory, searchQuery]);
+
+  async function fetchArticles() {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Fetching articles for category:', activeCategory);
+      console.log('Mapped category:', activeCategory ? categoryMap[activeCategory] : 'All');
+      
+      let query = supabase
+        .from('articles')
+        .select('*')
+        .eq('publish', true)
+        .order('published_date', { ascending: false });
+
+      // Filter by category if activeCategory is provided and exists in map
+      if (activeCategory && categoryMap[activeCategory]) {
+        const dbCategory = categoryMap[activeCategory];
+        console.log('Filtering by category:', dbCategory);
+        query = query.eq('category_title', dbCategory);
+      }
+
+      // Search filter if searchQuery exists
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,contents.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Supabase error:', error);
+        setError(error.message);
+        return;
+      }
+
+      console.log('Fetched articles:', data);
+      setArticles(data || []);
+      
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError('Failed to load articles');
+    } finally {
+      setLoading(false);
     }
-  ];
+  }
 
-  const breakingNews = [
-    "VSU receives P50M research grant from DOST",
-    "New student dormitory construction approved",
-    "VSU alumni wins international research award"
-  ];
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-64">
+        <Loader className="h-8 w-8 animate-spin text-emerald-600" />
+        <span className="ml-2">Loading articles...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">Error: {error}</div>
+        <Button onClick={fetchArticles} variant="outline">
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2">
-          <TrendingUp className="w-6 h-6 text-emerald-700" />
-          <h1 className="text-3xl font-bold text-foreground">Latest News</h1>
-        </div>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Stay updated with the latest happenings, announcements, and developments at Visayas State University
-        </p>
-      </div>
-
-      {/* Breaking News Ticker */}
-      <Card className="border-emerald-200 bg-emerald-50">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-emerald-800">
-            <Badge className="bg-red-600 text-white">BREAKING</Badge>
-            Breaking News
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {breakingNews.map((news, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm">
-                <div className="w-2 h-2 bg-emerald-600 rounded-full"></div>
-                <span className="text-emerald-800">{news}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search news articles..." 
+    <div className="space-y-6">
+      {/* Search and Filter Section */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Input
+            placeholder="Search articles..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>
-        <Button variant="outline" className="border-emerald-200 text-emerald-700 hover:bg-emerald-50">
-          <Filter className="w-4 h-4 mr-2" />
-          Filter by Date
-        </Button>
+        
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <Filter className="h-4 w-4" />
+          <span>Category: {activeCategory ? categoryMap[activeCategory] || activeCategory : 'All'}</span>
+        </div>
       </div>
 
-      {/* News Articles Grid */}
-      <div className="space-y-6">
-        {newsArticles.map((article, index) => (
-          <NewsCard key={index} {...article} />
+      {/* Results Count */}
+      <div className="text-sm text-gray-600">
+        Found {articles.length} article{articles.length !== 1 ? 's' : ''}
+      </div>
+
+      {/* Articles Grid */}
+      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-2">
+        {articles.map((article) => (
+          <ArticleCard 
+            key={article.id} 
+            article={article} 
+            onClick={() => handleArticleClick(article.id)}
+          />
         ))}
       </div>
 
-      {/* Load More */}
-      <div className="text-center pt-8">
-        <Button size="lg" className="bg-emerald-700 hover:bg-emerald-800">
-          Load More Articles
-        </Button>
-      </div>
-
-      {/* News Categories */}
-      <Card>
-        <CardHeader>
-          <CardTitle>News Categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { name: "Campus Updates", count: 24 },
-              { name: "Academic News", count: 18 },
-              { name: "Research", count: 15 },
-              { name: "Student Life", count: 12 },
-              { name: "Faculty", count: 10 },
-              { name: "Alumni", count: 8 },
-              { name: "Events", count: 20 },
-              { name: "Announcements", count: 16 }
-            ].map((category, index) => (
-              <div key={index} className="text-center p-4 border border-emerald-200 rounded-lg hover:bg-emerald-50 cursor-pointer transition-colors">
-                <div className="font-medium text-emerald-700">{category.name}</div>
-                <div className="text-sm text-muted-foreground">{category.count} articles</div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {articles.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-12">
+            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No articles found</h3>
+            <p className="text-gray-600">
+              {searchQuery 
+                ? `No articles match your search for "${searchQuery}"`
+                : activeCategory
+                ? `No articles found in the ${categoryMap[activeCategory] || activeCategory} category`
+                : 'No articles have been published yet'
+              }
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
+  );
+}
+
+// Individual Article Card Component with click functionality
+interface ArticleCardProps {
+  article: Article;
+  onClick: () => void;
+}
+
+function ArticleCard({ article, onClick }: ArticleCardProps) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <Card 
+      className="h-full hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+      onClick={onClick}
+    >
+      <CardContent className="p-0">
+        {/* Article Image */}
+        {article.image_url && (
+          <div className="aspect-video overflow-hidden">
+            <img 
+              src={article.image_url} 
+              alt={article.title}
+              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            />
+          </div>
+        )}
+        
+        <div className="p-4">
+          {/* Category Badge */}
+          <Badge variant="secondary" className="mb-2">
+            {article.category_title}
+          </Badge>
+
+          {/* Title */}
+          <h3 className="font-semibold text-lg mb-2 line-clamp-2 hover:text-emerald-700 transition-colors">
+            {article.title}
+          </h3>
+
+          {/* Excerpt */}
+          <p className="text-gray-600 text-sm mb-3 line-clamp-3">
+            {article.excerpt}
+          </p>
+
+          {/* Author and Date */}
+          <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
+            <span>By {article.author_name}</span>
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>{formatDate(article.published_date)}</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

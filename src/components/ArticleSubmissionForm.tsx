@@ -7,7 +7,7 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Card, CardContent } from "./ui/card";
 import { FileText, Upload, X } from "lucide-react";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 interface ArticleSubmissionFormProps {
   isOpen: boolean;
@@ -126,16 +126,19 @@ export function ArticleSubmissionForm({ isOpen, onClose }: ArticleSubmissionForm
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select article category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category.toLowerCase()}>
-                      {category}
-                    </SelectItem>
+<label htmlFor="category">Category *</label>
+<Select 
+  value={formData.category} 
+  onValueChange={(value) => handleInputChange("category", value)}
+>
+  <SelectTrigger>
+    <SelectValue placeholder="Select article category" />
+  </SelectTrigger>
+  <SelectContent>
+    {categories.map((category) => (
+      <SelectItem key={category} value={category.toLowerCase()}>
+        {category}
+      </SelectItem>
                   ))}
                 </SelectContent>
               </Select>

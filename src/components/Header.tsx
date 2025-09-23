@@ -4,7 +4,6 @@ import { useState } from "react";
 import { SearchDialog } from "./SearchDialog";
 import { LoginDialog } from "./LoginDialog";
 
-
 interface HeaderProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
@@ -21,13 +20,16 @@ export function Header({ activeSection, onSectionChange, user, onLogin, onLogout
   const navItems = [
     { label: "NEWS", value: "news" },
     { label: "VIEWS", value: "views" },
-    { label: "FEATURE", value: "feature" },
     { label: "SPORTS", value: "sports" },
-    { label: "SAI", value: "sai" },
-    { label: "LITERATURE", value: "literature" },
-    { label: "SPECIALS", value: "specials" },
+    { label: "FEATURE", value: "feature" },
+    { label: "S&T", value: "s&t" },
+    { label: "LITERARY", value: "literary" },
     { label: "BLOGS", value: "blogs" },
-    { label: "BULLETIN", value: "bulletin" }
+    { label: "SPECIALS", value: "specials" },
+    { label: "INVESTIGATIVE", value: "investigative" },
+    { label: "EXPLAINER", value: "explainer" },
+    { label: "BULLETIN", value: "bulletin" },
+    { label: "STORIES", value: "stories" }
   ];
 
   return (
@@ -72,7 +74,7 @@ export function Header({ activeSection, onSectionChange, user, onLogin, onLogout
         </div>
       </div>
 
-      {/* Main header - reduced height */}
+      {/* Main header */}
       <div className="max-w-7xl mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           {/* Logo */}
