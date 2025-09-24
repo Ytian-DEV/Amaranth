@@ -6,36 +6,29 @@ import { Button } from "../ui/button";
 import { Calendar, Filter, Search, Loader, FileText } from "lucide-react";
 import { Input } from "../ui/input";
 import { supabase } from "../../lib/supabase";
-import type { Article } from "../../types/database";
+import type { Article, ArticleWithCategory } from "../../types/database";
 
 interface NewsPageProps {
   activeCategory?: string;
 }
 
+// Define the news types we want to display in columns
+const newsTypes = [
+  { key: 'latest-news', title: 'Latest News', category: null },
+  { key: 'campus-news', title: 'Campus News', category: 'News - Campus News' },
+  { key: 'community-news', title: 'Community News', category: 'News - Community News' },
+  { key: 'regional-news', title: 'Regional News', category: 'News - Regional News' },
+  { key: 'national-news', title: 'National News', category: 'News - National News' },
+  { key: 'global-news', title: 'Global News', category: 'News - Global News' }
+] as const;
+
 export function NewsPage({ activeCategory }: NewsPageProps) {
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<ArticleWithCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
-  // Map URL categories to database category titles
-  const categoryMap: { [key: string]: string } = {
-    'news': 'News',
-    'views': 'Views',
-    'sports': 'Sports',
-    'feature': 'Feature',
-    's&t': 'S&T',
-    'literary': 'Literary',
-    'blog': 'Blog',
-    'specials': 'Specials',
-    'investigative': 'Investigative',
-    'explainer': 'Explainer',
-    'bulletin': 'Bulletin',
-    'stories': 'Stories'
-  };
-
-  // Function to handle article click
   const handleArticleClick = (articleId: string) => {
     navigate(`/article/${articleId}`);
   };
@@ -49,28 +42,26 @@ export function NewsPage({ activeCategory }: NewsPageProps) {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching articles for category:', activeCategory);
-      console.log('Mapped category:', activeCategory ? categoryMap[activeCategory] : 'All');
-      
+      // Build the base query with JOIN
       let query = supabase
         .from('articles')
-        .select('*')
-        .eq('publish', true)
-        .order('published_date', { ascending: false });
+        .select(`
+          *,
+          categories!inner (
+            title,
+            slug,
+            description
+          )
+        `)
+        .eq('publish', true);
 
-      // Filter by category if activeCategory is provided and exists in map
-      if (activeCategory && categoryMap[activeCategory]) {
-        const dbCategory = categoryMap[activeCategory];
-        console.log('Filtering by category:', dbCategory);
-        query = query.eq('category_title', dbCategory);
-      }
-
-      // Search filter if searchQuery exists
+      // Apply search filter if needed
       if (searchQuery) {
         query = query.or(`title.ilike.%${searchQuery}%,contents.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`);
       }
 
-      const { data, error } = await query;
+      // Add ordering and execute
+      const { data, error } = await query.order('published_date', { ascending: false });
 
       if (error) {
         console.error('Supabase error:', error);
@@ -78,8 +69,12 @@ export function NewsPage({ activeCategory }: NewsPageProps) {
         return;
       }
 
-      console.log('Fetched articles:', data);
-      setArticles(data || []);
+      // Filter for news categories only using the joined category title
+      const newsArticles = (data || []).filter(article => 
+        article.categories?.title?.includes('News')
+      );
+
+      setArticles(newsArticles as ArticleWithCategory[]);
       
     } catch (err) {
       console.error('Fetch error:', err);
@@ -88,6 +83,18 @@ export function NewsPage({ activeCategory }: NewsPageProps) {
       setLoading(false);
     }
   }
+
+  // Filter articles for each news type
+  const getArticlesForType = (newsType: typeof newsTypes[number]) => {
+    if (newsType.key === 'latest-news') {
+      // Latest News: Show latest 3 articles from all news types
+      return articles.slice(0, 3);
+    }
+    
+    return articles.filter(article => 
+      article.categories?.title === newsType.category
+    );
+  };
 
   if (loading) {
     return (
@@ -110,52 +117,42 @@ export function NewsPage({ activeCategory }: NewsPageProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Search and Filter Section */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <Input
-            placeholder="Search articles..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+    <div className="space-y-8">
+
+      {/* News Columns */}
+      {newsTypes.map((newsType) => {
+        const typeArticles = getArticlesForType(newsType);
         
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Filter className="h-4 w-4" />
-          <span>Category: {activeCategory ? categoryMap[activeCategory] || activeCategory : 'All'}</span>
-        </div>
-      </div>
+        if (typeArticles.length === 0) return null;
 
-      {/* Results Count */}
-      <div className="text-sm text-gray-600">
-        Found {articles.length} article{articles.length !== 1 ? 's' : ''}
-      </div>
+        return (
+          <section key={newsType.key} className="space-y-4">
+            <div className="border-b border-gray-200 pb-2">
+              <h2 className="text-2xl font-bold text-gray-900">{newsType.title}</h2>
+            </div>
 
-      {/* Articles Grid */}
-      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-2">
-        {articles.map((article) => (
-          <ArticleCard 
-            key={article.id} 
-            article={article} 
-            onClick={() => handleArticleClick(article.id)}
-          />
-        ))}
-      </div>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {typeArticles.map((article) => (
+                <ArticleCard 
+                  key={article.id} 
+                  article={article} 
+                  onClick={() => handleArticleClick(article.id)}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
 
       {articles.length === 0 && (
         <Card>
           <CardContent className="text-center py-12">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No articles found</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No news articles found</h3>
             <p className="text-gray-600">
               {searchQuery 
-                ? `No articles match your search for "${searchQuery}"`
-                : activeCategory
-                ? `No articles found in the ${categoryMap[activeCategory] || activeCategory} category`
-                : 'No articles have been published yet'
+                ? `No news articles match your search for "${searchQuery}"`
+                : 'No news articles have been published yet'
               }
             </p>
           </CardContent>
@@ -165,9 +162,9 @@ export function NewsPage({ activeCategory }: NewsPageProps) {
   );
 }
 
-// Individual Article Card Component with click functionality
+// Individual Article Card Component
 interface ArticleCardProps {
-  article: Article;
+  article: ArticleWithCategory;
   onClick: () => void;
 }
 
@@ -182,38 +179,33 @@ function ArticleCard({ article, onClick }: ArticleCardProps) {
 
   return (
     <Card 
-      className="h-full hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+      className="h-full hover:shadow-lg transition-shadow duration-200 cursor-pointer group"
       onClick={onClick}
     >
-      <CardContent className="p-0">
-        {/* Article Image */}
+      <CardContent className="p-0 h-full flex flex-col">
         {article.image_url && (
           <div className="aspect-video overflow-hidden">
             <img 
               src={article.image_url} 
               alt={article.title}
-              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           </div>
         )}
         
-        <div className="p-4">
-          {/* Category Badge */}
-          <Badge variant="secondary" className="mb-2">
-            {article.category_title}
+        <div className="p-4 flex-1 flex flex-col">
+          <Badge variant="secondary" className="mb-2 self-start">
+            {article.categories?.title || 'Uncategorized'}
           </Badge>
 
-          {/* Title */}
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2 hover:text-emerald-700 transition-colors">
+          <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-emerald-700 transition-colors flex-1">
             {article.title}
           </h3>
 
-          {/* Excerpt */}
           <p className="text-gray-600 text-sm mb-3 line-clamp-3">
             {article.excerpt}
           </p>
 
-          {/* Author and Date */}
           <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
             <span>By {article.author_name}</span>
             <div className="flex items-center gap-1">

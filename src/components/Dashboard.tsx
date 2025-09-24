@@ -187,7 +187,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
                       <div>
                         <h4 className="font-medium">{article.title}</h4>
                         <p className="text-sm text-muted-foreground">
-                          {article.category_title} • {new Date(article.published_date).toLocaleDateString()}
+                          {article.category} • {new Date(article.published_date).toLocaleDateString()}
                         </p>
                       </div>
                       <Badge variant={article.publish ? "default" : "outline"}>

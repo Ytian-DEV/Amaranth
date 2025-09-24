@@ -1,44 +1,25 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { NewsCard } from "../NewsCard";
-import { Trophy, Medal, Users, Calendar } from "lucide-react";
+import { Trophy, Medal, Users, Calendar, Loader, FileText } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabase";
+import type { ArticleWithCategory } from "../../types/database";
 
 export function SportsPage() {
-  const sportsNews = [
-    {
-      title: "VSU Volleyball Team Wins Regional Championship",
-      excerpt: "The VSU women's volleyball team secured their third consecutive regional championship with a thrilling victory in the finals.",
-      author: "Sports Desk",
-      date: "Sep 22, 2024",
-      category: "Volleyball",
-      imageUrl: "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2b2xsZXliYWxsJTIwdGVhbXxlbnwxfHx8fDE3NTg1NTc2NTF8MA&ixlib=rb-4.1.0&q=80&w=1080"
-    },
-    {
-      title: "Swimming Athletes Break University Records",
-      excerpt: "Two VSU swimmers shattered long-standing university records at the national collegiate swimming championships.",
-      author: "Aquatics Reporter",
-      date: "Sep 20, 2024",
-      category: "Swimming",
-      imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzd2ltbWluZyUyMGNvbXBldGl0aW9ufGVufDF8fHx8MTc1ODU1NzY1MXww&ixlib=rb-4.1.0&q=80&w=1080"
-    },
-    {
-      title: "Basketball Season Opens with Victory",
-      excerpt: "The VSU men's basketball team kicked off the new season with an impressive win against their traditional rivals.",
-      author: "Basketball Beat",
-      date: "Sep 18, 2024",
-      category: "Basketball",
-      imageUrl: "https://images.unsplash.com/photo-1546519638-68e109498ffc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYXNrZXRiYWxsJTIwZ2FtZXxlbnwxfHx8fDE3NTg1NTc2NTF8MA&ixlib=rb-4.1.0&q=80&w=1080"
-    },
-    {
-      title: "Track and Field Athletes Qualify for Nationals",
-      excerpt: "Five VSU track and field athletes have qualified for the national championships after outstanding performances at regionals.",
-      author: "Track Reporter",
-      date: "Sep 15, 2024",
-      category: "Track & Field",
-      imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cmFjayUyMGFuZCUyMGZpZWxkfGVufDF8fHx8MTc1ODU1NzY1MXww&ixlib=rb-4.1.0&q=80&w=1080"
-    }
-  ];
+  const [sportsNews, setSportsNews] = useState<ArticleWithCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Define sports categories similar to NewsPage
+  const sportsTypes = [
+    { key: 'latest-sports', title: 'Latest Sports News', category: null },
+    { key: 'salingkusog', title: 'Salingkusog', category: 'Sports - Salingkusog' },
+    { key: 'scuaa', title: 'SCUAA', category: 'Sports - SCUAA' },
+    { key: 'nat-sports', title: 'National Sports News', category: 'Sports - National Sports News' },
+    { key: 'sports-feature', title: 'Sports Feature', category: 'Sports - Sports Feature' },
+    { key: 'world-sports', title: 'World Sports News', category: 'Sports - World Sports News' }
+  ] as const;
 
   const sportsTeams = [
     { name: "Basketball", season: "Active", record: "12-3", status: "Winning Streak" },
@@ -56,60 +37,142 @@ export function SportsPage() {
     { event: "Track & Field Nationals", date: "Oct 8, 2024", venue: "National Stadium" }
   ];
 
+  // Fetch sports articles from Supabase
+  useEffect(() => {
+    const fetchSportsArticles = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch articles WITH category information (join categories table)
+        const { data, error } = await supabase
+          .from('articles')
+          .select(`
+            *,
+            categories!inner (
+              title,
+              slug,
+              description
+            )
+          `)
+          .eq('publish', true)
+          .order('published_date', { ascending: false });
+
+        if (error) {
+          console.error('Error fetching articles:', error);
+          setError(error.message);
+          return;
+        }
+        
+        // Define sports categories based on TITLES from your CSV
+        const sportsCategoryTitles = [
+          'Sports - Salingkusog',
+          'Sports - SCUAA', 
+          'Sports - National Sports News',
+          'Sports - Sports Feature',
+          'Sports - World Sports News'
+        ];
+        
+        // Filter for sports articles using category TITLES
+        const filteredData = (data || []).filter((article) => {
+          const categoryTitle = article.categories?.title || '';
+          return sportsCategoryTitles.includes(categoryTitle);
+        });
+        
+        // Sort by date
+        const sortedData = filteredData.sort((a, b) => 
+          new Date(b.published_date).getTime() - new Date(a.published_date).getTime()
+        );
+        
+        setSportsNews(sortedData as ArticleWithCategory[]);
+      } catch (error) {
+        console.error('Error fetching sports articles:', error);
+        setError('Failed to load sports articles');
+        setSportsNews([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSportsArticles();
+  }, []);
+
+  // Filter articles for each sports type
+  const getArticlesForType = (sportsType: typeof sportsTypes[number]) => {
+    if (sportsType.key === 'latest-sports') {
+      // Latest Sports: Show latest 3 articles from all sports types
+      return sportsNews.slice(0, 3);
+    }
+    
+    return sportsNews.filter(article => 
+      article.categories?.title === sportsType.category
+    );
+  };
+
+  const handleArticleClick = (articleId: string) => {
+    window.location.href = `/article/${articleId}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-64">
+        <Loader className="h-8 w-8 animate-spin text-emerald-600" />
+        <span className="ml-2">Loading sports articles...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">Error: {error}</div>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
-      {/* Page Header */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center gap-2">
-          <Trophy className="w-6 h-6 text-emerald-700" />
-          <h1 className="text-3xl font-bold text-foreground">VSU Sports</h1>
-        </div>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
-          Follow the achievements, competitions, and athletic excellence of Visayas State University's sports teams
-        </p>
-      </div>
 
-      {/* Sports Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="text-center border-emerald-200">
-          <CardContent className="p-6">
-            <Trophy className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-foreground">23</div>
-            <div className="text-sm text-muted-foreground">Championships</div>
-          </CardContent>
-        </Card>
-        <Card className="text-center border-emerald-200">
-          <CardContent className="p-6">
-            <Medal className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-foreground">156</div>
-            <div className="text-sm text-muted-foreground">Student Athletes</div>
-          </CardContent>
-        </Card>
-        <Card className="text-center border-emerald-200">
-          <CardContent className="p-6">
-            <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-foreground">12</div>
-            <div className="text-sm text-muted-foreground">Sports Teams</div>
-          </CardContent>
-        </Card>
-        <Card className="text-center border-emerald-200">
-          <CardContent className="p-6">
-            <Calendar className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-            <div className="text-2xl font-bold text-foreground">45</div>
-            <div className="text-sm text-muted-foreground">Events This Year</div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Sports News Categories - Similar to NewsPage layout */}
+      {sportsTypes.map((sportsType) => {
+        const typeArticles = getArticlesForType(sportsType);
+        
+        if (typeArticles.length === 0) return null;
 
-      {/* Latest Sports News */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-foreground">Latest Sports News</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {sportsNews.map((news, index) => (
-            <NewsCard key={index} {...news} />
-          ))}
-        </div>
-      </div>
+        return (
+          <section key={sportsType.key} className="space-y-6">
+            <div className="border-b border-gray-200 pb-2">
+              <h2 className="text-2xl font-bold text-gray-900">{sportsType.title}</h2>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {typeArticles.map((article) => (
+                <ArticleCard 
+                  key={article.id} 
+                  article={article} 
+                  onClick={() => handleArticleClick(article.id)}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      {/* Show message if no sports articles found */}
+      {sportsNews.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-12">
+            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No sports articles found</h3>
+            <p className="text-gray-600">
+              No sports articles have been published yet
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Teams Overview */}
       <Card>
@@ -182,5 +245,62 @@ export function SportsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Individual Article Card Component (Same as NewsPage)
+interface ArticleCardProps {
+  article: ArticleWithCategory;
+  onClick: () => void;
+}
+
+function ArticleCard({ article, onClick }: ArticleCardProps) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <Card 
+      className="h-full hover:shadow-lg transition-shadow duration-200 cursor-pointer group"
+      onClick={onClick}
+    >
+      <CardContent className="p-0 h-full flex flex-col">
+        {article.image_url && (
+          <div className="aspect-video overflow-hidden">
+            <img 
+              src={article.image_url} 
+              alt={article.title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
+        )}
+        
+        <div className="p-4 flex-1 flex flex-col">
+          <Badge variant="secondary" className="mb-2 self-start">
+            {article.categories?.title || 'Uncategorized'}
+          </Badge>
+
+          <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-emerald-700 transition-colors flex-1">
+            {article.title}
+          </h3>
+
+          <p className="text-gray-600 text-sm mb-3 line-clamp-3">
+            {article.excerpt || (article.contents ? article.contents.substring(0, 150) + '...' : 'No content available')}
+          </p>
+
+          <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
+            <span>By {article.author_name}</span>
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>{formatDate(article.published_date)}</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

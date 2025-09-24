@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
 import { Footer } from "./components/Footer";
@@ -8,13 +8,26 @@ import { Dashboard } from "./components/Dashboard";
 import { Button } from "./components/ui/button";
 import { Toaster } from "./components/ui/sonner";
 import { ArticlePage } from "./components/pages/ArticlePage";
-// Remove this import: import { MainLayout } from "./components/MainLayout";
+import { HomePage } from "./components/pages/HomePage";
 
-// Main Layout Component (for non-article pages)
+// Main Layout Component (for all pages including articles)
 function MainLayout() {
-  const [activeSection, setActiveSection] = useState("news");
   const [user, setUser] = useState<any>(null);
-  const [showDashboard, setShowDashboard] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isArticlePage = location.pathname.startsWith("/article/");
+  const isDashboardPage = location.pathname === "/dashboard";
+
+  // Get active section from URL path
+  const getActiveSectionFromPath = () => {
+    const path = location.pathname;
+    if (path === "/" || path === "/home") return "home";
+    if (isArticlePage) return "article";
+    return path.substring(1);
+  };
+
+  const activeSection = getActiveSectionFromPath();
 
   // Check for existing login on component mount
   useEffect(() => {
@@ -31,17 +44,29 @@ function MainLayout() {
 
   const handleLogin = (userData: any) => {
     setUser(userData);
-    setShowDashboard(true);
+    navigate("/dashboard");
   };
 
   const handleLogout = () => {
     setUser(null);
-    setShowDashboard(false);
     localStorage.removeItem("amaranth_user");
+    navigate("/");
   };
 
-  // Show dashboard if user is logged in and wants dashboard view
-  if (user && showDashboard) {
+  const handleSectionChange = (section: string) => {
+    if (section === "home") {
+      navigate("/");
+    } else {
+      navigate(`/${section}`);
+    }
+  };
+
+  const handleLogoClick = () => {
+    navigate("/");
+  };
+
+  // Show dashboard if on dashboard route
+  if (isDashboardPage && user) {
     return <Dashboard user={user} onLogout={handleLogout} />;
   }
 
@@ -49,14 +74,15 @@ function MainLayout() {
     <div className="min-h-screen bg-background">
       <Header 
         activeSection={activeSection} 
-        onSectionChange={setActiveSection}
+        onSectionChange={handleSectionChange}
         user={user}
         onLogin={handleLogin}
         onLogout={handleLogout}
+        onLogoClick={handleLogoClick}
       />
 
-      {/* Dashboard Access Button for Logged Users */}
-      {user && !showDashboard && (
+      {/* Dashboard Access Button for Logged Users (hide on article and dashboard pages) */}
+      {user && !isArticlePage && !isDashboardPage && (
         <div className="bg-emerald-50 border-b border-emerald-200">
           <div className="max-w-7xl mx-auto px-4 py-2">
             <div className="flex items-center justify-between">
@@ -65,7 +91,7 @@ function MainLayout() {
               </span>
               <Button 
                 size="sm" 
-                onClick={() => setShowDashboard(true)}
+                onClick={() => navigate("/dashboard")}
                 className="bg-emerald-700 hover:bg-emerald-800"
               >
                 Go to Dashboard
@@ -76,20 +102,28 @@ function MainLayout() {
       )}
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            <SectionContent section={activeSection} />
+        <div className={`grid gap-8 ${isArticlePage ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-3'}`}>
+          {/* Main Content - full width for articles, with sidebar for other pages */}
+          <div className={isArticlePage ? '' : 'lg:col-span-2'}>
+            {activeSection === "home" ? (
+              <HomePage />
+            ) : isArticlePage ? (
+              <ArticlePage />
+            ) : (
+              <SectionContent section={activeSection} />
+            )}
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <Sidebar />
-          </div>
+          {/* Sidebar - hidden on article pages */}
+          {!isArticlePage && (
+            <div className="lg:col-span-1">
+              <Sidebar />
+            </div>
+          )}
         </div>
       </main>
 
-      <Footer onSectionChange={setActiveSection} />
+      <Footer onSectionChange={handleSectionChange} />
       <Toaster />
     </div>
   );
@@ -100,10 +134,18 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        {/* Article detail page */}
-        <Route path="/article/:id" element={<ArticlePage />} />
-        
-        {/* All other pages use the main layout */}
+        {/* All routes use MainLayout */}
+        <Route path="/article/:id" element={<MainLayout />} />
+        <Route path="/news" element={<MainLayout />} />
+        <Route path="/sports" element={<MainLayout />} />
+        <Route path="/features" element={<MainLayout />} />
+        <Route path="/literary" element={<MainLayout />} />
+        <Route path="/blog" element={<MainLayout />} />
+        <Route path="/specials" element={<MainLayout />} />
+        <Route path="/views" element={<MainLayout />} />
+        <Route path="/dashboard" element={<MainLayout />} />
+        <Route path="/" element={<MainLayout />} />
+        <Route path="/home" element={<MainLayout />} />
         <Route path="*" element={<MainLayout />} />
       </Routes>
     </Router>

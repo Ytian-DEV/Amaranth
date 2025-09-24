@@ -19,7 +19,7 @@ export function Footer({ onSectionChange }: FooterProps) {
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 flex items-center justify-center">
                 <img 
-                  src="/amaranth-logo.png"
+                  src="/amaranth-logo.svg"
                   alt="Amaranth Logo"
                   className="w-10 h-10"
                 />
