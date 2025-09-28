@@ -100,55 +100,27 @@ export function HomePage() {
   };
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-6">
       <ArticleSection 
         title="Latest Articles" 
         icon={<TrendingUp className="h-6 w-6" />} 
         articles={latestArticles}
-        iconColor="text-blue-500"
+        iconColor="text-emerald-600"
       />
 
       <ArticleSection 
         title="Top Articles" 
         icon={<Star className="h-6 w-6" />} 
         articles={topArticles}
-        iconColor="text-yellow-500"
+        iconColor="text-red-700"
       />
 
       <ArticleSection 
         title="Hottest Articles" 
         icon={<Flame className="h-6 w-6" />} 
         articles={hottestArticles}
-        iconColor="text-red-500"
+        iconColor="text-youtube-50"
       />
-
-      {/* Quick Links */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8">
-        <Button onClick={() => navigate('/news')} variant="outline" className="h-20">
-          <div className="text-center">
-            <FileText className="h-6 w-6 mx-auto mb-2" />
-            <span>All News</span>
-          </div>
-        </Button>
-        <Button onClick={() => navigate('/sports')} variant="outline" className="h-20">
-          <div className="text-center">
-            <Trophy className="h-6 w-6 mx-auto mb-2" />
-            <span>Sports</span>
-          </div>
-        </Button>
-        <Button onClick={() => navigate('/features')} variant="outline" className="h-20">
-          <div className="text-center">
-            <Star className="h-6 w-6 mx-auto mb-2" />
-            <span>Features</span>
-          </div>
-        </Button>
-        <Button onClick={() => navigate('/literary')} variant="outline" className="h-20">
-          <div className="text-center">
-            <FileText className="h-6 w-6 mx-auto mb-2" />
-            <span>Literary</span>
-          </div>
-        </Button>
-      </section>
     </div>
   );
 }
@@ -170,21 +142,21 @@ function BigArticleCard({ article }: { article: any }) {
   };
 
   return (
-    <Card className="cursor-pointer hover:shadow-xl transition-all duration-300 h-full" onClick={handleCardClick}>
+    <Card className="cursor-pointer hover:shadow-lg transition-all duration-300 h-full" onClick={handleCardClick}>
       {article.image_url && (
         <img 
           src={article.image_url} 
           alt={article.title}
-          className="w-full h-64 object-cover rounded-t-lg"
+          className="w-full h-64 object-cover rounded-lg"
         />
       )}
       <CardContent className="p-6">
         {/* Category below image, above title */}
         {article.category_title && (
-          <span className="text-gray-400 text-sm font-medium mb-2 block">{article.category_title}</span>
+          <span className="text-gray-400 text-sm font-medium mb-2 pb-2 block">{article.category_title}</span>
         )}
-        <h3 className="font-bold text-2xl mb-3 line-clamp-3">{article.title}</h3>
-        <p className="text-gray-600 mb-4 line-clamp-3">{article.excerpt}</p>
+        <h3 className="text-emerald-600 font-bold text-2xl mb-3 line-clamp-3 pt-2">{article.title}</h3>
+        <p className="text-black mb-4 line-clamp-3">{article.excerpt}</p>
         
         <Button 
           onClick={(e) => {
@@ -193,15 +165,14 @@ function BigArticleCard({ article }: { article: any }) {
           }}
           variant="outline" 
           size="sm"
-          className="flex items-center gap-2 w-full justify-center bg-emerald-50 hover:bg-emerald-100 border-emerald-200 text-emerald-700"
-        >
+          className=" cursor-pointer flex items-center p-2 gap-2 w-full justify-center bg-emerald-700 border-emerald-900 text-white">
           Read More
           <ArrowRight className="h-4 w-4" />
         </Button>
         
-        <div className="flex items-center justify-between text-sm text-gray-500 mt-4">
+        <div className="flex items-center justify-between text-sm mt-4 text-emerald-900 font-semibold">
           <span>{formatDate(article.published_date)}</span>
-          <span>By {article.author_name}</span>
+          <span>{article.author_name}</span>
         </div>
       </CardContent>
     </Card>
@@ -232,19 +203,19 @@ function SmallArticleCard({ article, index }: { article: any; index: number }) {
             <img 
               src={article.image_url} 
               alt={article.title}
-              className="w-16 h-16 object-cover rounded flex-shrink-0"
+              className="w-24 h-16 object-cover rounded flex-shrink-0"
             />
           )}
           <div className="min-w-0 flex-1">
             {/* Category above title */}
             {article.category_title && (
-              <span className="text-gray-400 text-xs font-medium mb-1 block">{article.category_title}</span>
+              <span className="text-emerald-900 text-xs font-bold mb-1 block">{article.category_title}</span>
             )}
-            <h4 className="font-semibold text-sm mb-2 line-clamp-2">{article.title}</h4>
-            
-            <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
+            <h4 className="text-emerald-600 font-bold text-sm mb-2 line-clamp-2">{article.title}</h4>
+
+            <div className="flex items-center justify-between text-xs m-1 text-emerald-900 font-semibold">
               <span>{formatDate(article.published_date)}</span>
-              <span>By {article.author_name}</span>
+              <span>{article.author_name}</span>
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot@1.1.2";
-import { cva, type VariantProps } from "class-variance-authority@0.7.1";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "./utils";
 
@@ -10,13 +10,17 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
+          "border-transparent bg-[#1a472a] text-white [a&]:hover:bg-[#1a472a]/90",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
+          "border-emerald-900 bg-emerald-600 text-emerald-100 [a&]:hover:bg-[#2d5a2d]/90",
+        accent:
+          "border-transparent bg-[#4a7c59] text-white [a&]:hover:bg-[#4a7c59]/90",
         destructive:
-          "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+          "border-transparent bg-emerald-600 text-white [a&]:hover:bg-emerald-700",
         outline:
-          "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+          "border-emerald-600 text-emerald-700 bg-transparent [a&]:hover:bg-emerald-50",
+        muted:
+          "border-transparent bg-muted text-muted-foreground [a&]:hover:bg-muted/90",
       },
     },
     defaultVariants: {

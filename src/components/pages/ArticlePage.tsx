@@ -107,17 +107,17 @@ export function ArticlePage() {
 
         {/* Article Content */}
         <Card>
-          <CardContent className="p-3">
+          <CardContent className="p-8">
           <Badge variant="secondary" className="mb-2 self-start">
             {article.categories?.title}
           </Badge>
 
             {/* Title */}
-            <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
+            <h1 className="text-4xl font-bold mb-3 text-emerald-600">{article.title}</h1>
 
             {/* Meta Information */}
             <div className="flex items-center justify-between text-sm text-gray-500 mb-8 pb-6 border-b">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 font-bold text-emerald-700">
                 <span>By {article.author_name}</span>
                 <div className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />

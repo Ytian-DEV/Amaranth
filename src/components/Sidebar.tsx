@@ -5,10 +5,12 @@ import { TrendingUp, Calendar, Users, BookOpen, ExternalLink } from "lucide-reac
 import { useState } from "react";
 import { ArticleSubmissionForm } from "./ArticleSubmissionForm";
 import { EventReportForm } from "./EventReportForm";
+import { url } from "inspector";
 
 export function Sidebar() {
   const [isArticleFormOpen, setIsArticleFormOpen] = useState(false);
   const [isEventFormOpen, setIsEventFormOpen] = useState(false);
+  
   const trendingStories = [
     {
       title: "To Protect the Press is to Protect Democracy",
@@ -39,23 +41,54 @@ export function Sidebar() {
     { label: "VSU Website", icon: ExternalLink },
   ];
 
+  const socialMediaLinks = [
+    { 
+      platform: "facebook" as const, 
+      label: "Facebook", 
+      icon: "/facebook-logo.svg",
+      borderColor: "border-facebook-700",
+      url: "https://www.facebook.com/amaranthvsu"
+    },
+    { 
+      platform: "tiktok" as const, 
+      label: "TikTok", 
+      icon: "/tiktok-logo.svg",
+      borderColor: "border-tiktok-700",
+      url: "https://www.tiktok.com/@amaranthvsu"
+    },
+    { 
+      platform: "instagram" as const, 
+      label: "Instagram", 
+      icon: "/instagram-logo.svg",
+      borderColor: "border-instagram-700",
+      url: "https://www.instagram.com/amaranthvsu"
+    },
+    { 
+      platform: "youtube" as const, 
+      label: "YouTube", 
+      icon: "/youtube-logo-1.svg",
+      borderColor: "border-youtube-700",
+      url: "https://www.youtube.com/@amaranthvsu"
+    },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Submit Article */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-1">
           <CardTitle className="text-lg">Contribute</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Button 
-            className="w-full bg-emerald-700 hover:bg-emerald-800"
+            className="cursor-pointer w-full bg-emerald-700 hover:bg-emerald-800"
             onClick={() => setIsArticleFormOpen(true)}
           >
             Submit an Article
           </Button>
           <Button 
             variant="outline" 
-            className="w-full border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+            className="cursor-pointer w-full border-emerald-200 text-emerald-900 hover:bg-emerald-50 hover:text-emerald-500"
             onClick={() => setIsEventFormOpen(true)}
           >
             Report an Event
@@ -95,27 +128,38 @@ export function Sidebar() {
         </CardContent>
       </Card>
 
-
-
       {/* Social Media */}
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-1">
           <CardTitle className="text-lg">Follow Amaranth</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" size="sm" className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
-              Facebook
-            </Button>
-            <Button variant="outline" size="sm" className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100">
-              Twitter
-            </Button>
-            <Button variant="outline" size="sm" className="bg-pink-50 border-pink-200 text-pink-700 hover:bg-pink-100">
-              Instagram
-            </Button>
-            <Button variant="outline" size="sm" className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100">
-              YouTube
-            </Button>
+            {socialMediaLinks.map((social) => (
+              <a
+                key={social.platform}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex" // This ensures the link doesn't break flex layout
+              >
+                <Button
+                  variant={social.platform}
+                  size="sm"
+                  className="w-full"
+                  asChild // This makes the Button render as a child of the anchor
+                >
+                  <span> {/* Additional wrapper span for proper styling */}
+                    <img 
+                      src={social.icon} 
+                      alt={social.label} 
+                      className="w-4 h-4" 
+                    />
+                    {social.label}
+                  </span>
+                </Button>
+              </a>
+            ))}
           </div>
         </CardContent>
       </Card>

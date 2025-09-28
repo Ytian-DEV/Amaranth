@@ -10,7 +10,7 @@ interface HeaderProps {
   user: any;
   onLogin: (userData: any) => void;
   onLogout: () => void;
-  onLogoClick?: () => void; // Add this
+  onLogoClick?: () => void;
 }
 
 export function Header({ activeSection, onSectionChange, user, onLogin, onLogout, onLogoClick }: HeaderProps) {
@@ -54,7 +54,7 @@ export function Header({ activeSection, onSectionChange, user, onLogin, onLogout
               />
             </div>
             <div>
-              <h1 className="text-xl font-bold">AMARANTH</h1>
+              <h1 className="text-xl font-bold font-trajan">AMARANTH</h1>
               <p className="text-xs opacity-90">Visayas State University</p>
             </div>
           </div>

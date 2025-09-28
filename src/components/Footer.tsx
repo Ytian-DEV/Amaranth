@@ -25,7 +25,7 @@ export function Footer({ onSectionChange }: FooterProps) {
                 />
               </div>
               <div>
-                <h3 className="font-bold text-lg">AMARANTH</h3>
+                <h3 className="font-bold text-lg font-trajan">AMARANTH</h3>
                 <p className="text-sm opacity-80">VSU Student Publication</p>
               </div>
             </div>
@@ -66,15 +66,24 @@ export function Footer({ onSectionChange }: FooterProps) {
             <div className="space-y-3 text-sm opacity-80">
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>Visayas State University<br />Baybay City, Leyte, Philippines</span>
+                <a href="https://maps.app.goo.gl/RkTiVWu3LPgkGawA8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-100 hover:text-emerald-800 underline hover:no-underline hover:underline-offset-2 transition-all duration-200">
+                  ADE Building, Amaranth Newsroom<br />
+                  Visayas State University<br />
+                  Baybay City, Leyte, Philippines<br />
+                  6521
+                </a>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 flex-shrink-0" />
-                <span>amaranth@vsu.edu.ph</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4 flex-shrink-0" />
-                <span>+63 53 335 2601</span>
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=amaranth@vsu.edu.ph"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-100 hover:text-emerald-800 underline hover:underline-offset-2 transition-colors">
+                  amaranth@vsu.edu.ph
+                </a>
               </div>
             </div>
             
@@ -82,17 +91,25 @@ export function Footer({ onSectionChange }: FooterProps) {
             <div className="mt-6">
               <h5 className="font-medium mb-3">Follow Us</h5>
               <div className="flex gap-3">
-                <a href="#" className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-500 transition-colors">
-                  <Facebook className="w-4 h-4" />
+                <a href="https://www.facebook.com/amaranthvsu" 
+                  target="_blank" 
+                  rel="noopener noreferrer">
+                  <img src="/facebook-logo.svg" alt="Facebook" className="w-6 h-6" />
                 </a>
-                <a href="#" className="w-8 h-8 bg-blue-400 rounded-full flex items-center justify-center hover:bg-blue-300 transition-colors">
-                  <Twitter className="w-4 h-4" />
+                <a href="https://www.tiktok.com/@amaranthvsu" 
+                  target="_blank" 
+                  rel="noopener noreferrer">
+                  <img src="/tiktok-logo.svg" alt="TikTok" className="w-6 h-6" />
                 </a>
-                <a href="#" className="w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center hover:bg-pink-500 transition-colors">
-                  <Instagram className="w-4 h-4" />
+                <a href="https://www.instagram.com/amaranthvsu" 
+                  target="_blank" 
+                  rel="noopener noreferrer">
+                  <img src="/instagram-logo.svg" alt="Instagram" className="w-6 h-6" />
                 </a>
-                <a href="#" className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center hover:bg-red-500 transition-colors">
-                  <Youtube className="w-4 h-4" />
+                <a href="https://www.youtube.com/@amaranthvsu" 
+                  target="_blank" 
+                  rel="noopener noreferrer">
+                  <img src="/youtube-logo-1.svg" alt="YouTube" className="w-6 h-6" />
                 </a>
               </div>
             </div>

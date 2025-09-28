@@ -1,27 +1,196 @@
+/* Local Fonts Setup */
+@font-face {
+  font-family: 'Trajan Pro';
+  src: url('/fonts/trajan-pro/TrajanPro-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Trajan Pro';
+  src: url('/fonts/trajan-pro/TrajanPro-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Montserrat Font Faces */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* FIXED: Corrected font-style for ExtraLight */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-ExtraLight.ttf') format('truetype');
+  font-weight: 200; /* CHANGED: ExtraLight is usually 200, not 300 */
+  font-style: normal; /* CHANGED: Should be normal, not italic */
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-ExtraLightItalic.ttf') format('truetype');
+  font-weight: 200; /* CHANGED: ExtraLight is usually 200 */
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-LightItalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-MediumItalic.ttf') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-SemiBoldItalic.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-ExtraBoldItalic.ttf') format('truetype');
+  font-weight: 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-BlackItalic.ttf') format('truetype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat/Montserrat-ThinItalic.ttf') format('truetype');
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-size: 16px;
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-heading: "Trajan Pro", serif;
+
+  /* CHANGED: Removed duplicate color variables - using your custom green palette */
+  --primary: #212e19;
+  --primary-foreground: #ffffff;
+  --secondary: #597622;
+  --secondary-foreground: #ffffff;
+  --accent: #a7d806;
+  --accent-foreground: #212e19;
   --background: #ffffff;
-  --foreground: oklch(0.145 0 0);
+  --foreground: #212e19;
   --card: #ffffff;
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #030213;
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.0058 264.53);
-  --secondary-foreground: #030213;
-  --muted: #ececf0;
-  --muted-foreground: #717182;
-  --accent: #e9ebef;
-  --accent-foreground: #030213;
-  --destructive: #d4183d;
-  --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.1);
+  --card-foreground: #212e19;
+  --muted: #f8f9f7;
+  --muted-foreground: #597622;
+  --border: #e8eed0;
   --input: transparent;
   --input-background: #f3f3f5;
   --switch-background: #cbced4;
+
+  /* CHANGED: Removed duplicate variables below - keeping only your custom ones above */
+  --font-size: 16px;
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --ring: oklch(0.708 0 0);
@@ -42,24 +211,27 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  /* CHANGED: Updated dark mode to use your green palette */
+  --background: #212e19;
+  --foreground: #ffffff;
+  --card: #2a3a20;
+  --card-foreground: #ffffff;
+  --popover: #212e19;
+  --popover-foreground: #ffffff;
+  --primary: #a7d806;
+  --primary-foreground: #212e19;
+  --secondary: #597622;
+  --secondary-foreground: #ffffff;
+  --muted: #597622;
+  --muted-foreground: #e8eed0;
+  --accent: #597622;
+  --accent-foreground: #ffffff;
+  --border: #597622;
+  --input: #597622;
+
+  /* Keep other dark mode variables */
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
   --ring: oklch(0.439 0 0);
   --font-weight-medium: 500;
   --font-weight-normal: 400;
@@ -126,6 +298,8 @@
 
   body {
     @apply bg-background text-foreground;
+    /* ADDED: Apply Montserrat to body for consistent base font */
+    font-family: var(--font-sans);
   }
 }
 
@@ -134,34 +308,34 @@
  */
 @layer base {
   :where(:not(:has([class*=" text-"]), :not(:has([class^="text-"])))) {
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      font-weight: 700; /* Use bold weight for Trajan Pro */
+    }
+    
     h1 {
       font-size: var(--text-2xl);
-      font-weight: var(--font-weight-medium);
       line-height: 1.5;
     }
-
+    
     h2 {
       font-size: var(--text-xl);
-      font-weight: var(--font-weight-medium);
       line-height: 1.5;
     }
-
+    
     h3 {
       font-size: var(--text-lg);
-      font-weight: var(--font-weight-medium);
       line-height: 1.5;
     }
-
+    
     h4 {
       font-size: var(--text-base);
-      font-weight: var(--font-weight-medium);
       line-height: 1.5;
     }
-
-    p {
-      font-size: var(--text-base);
-      font-weight: var(--font-weight-normal);
-      line-height: 1.5;
+    
+    /* CHANGED: Removed individual font-family declarations since body already has Montserrat */
+    p, span, div, a, li, label, button, input {
+      font-family: var(--font-sans);
     }
 
     label {
