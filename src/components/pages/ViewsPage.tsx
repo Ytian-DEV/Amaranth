@@ -8,20 +8,19 @@ import { Input } from "../ui/input";
 import { supabase } from "../../lib/supabase";
 import type { Article, ArticleWithCategory } from "../../types/database";
 
-interface FeaturesPageProps {
+interface viewsPageProps {
   activeCategory?: string;
 }
 
-const featureTypes = [
-  { key: 'latest-feature', title: 'Latest Feature', category: null },
-  { key: 'campus-feature', title: 'Campus Feature', category: 'Feature - Campus Feature' },
-  { key: 'people-events', title: 'People & Events', category: 'Feature - People & Events' },
-  { key: 'experiences', title: 'Experiences', category: 'Feature - Experiences' },
-  { key: 'lifestyle', title: 'Lifestyle', category: 'Feature - Lifestyle' },
-  { key: 'entertainment', title: 'Entertainment', category: 'Feature - Entertainment' }
+// Define the views types we want to display in columns
+const viewsTypes = [
+  { key: 'latest-views', title: 'Latest Views', category: null },
+  { key: 'editorial', title: 'Editorial', category: 'Views - Editorial' },
+  { key: 'opinion', title: 'Opinion', category: 'Views - Opinion' },
+  { key: 'vox-pop', title: 'Vox-Pop', category: 'Views - Vox Pop' }
 ] as const;
 
-export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
+export function ViewsPage({ activeCategory }: viewsPageProps) {
   const [articles, setArticles] = useState<ArticleWithCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,11 +67,12 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
         return;
       }
 
-      const featuresArticles = (data || []).filter(article => 
-        article.categories?.title?.includes('Feature -')
+      // Filter for views categories only using the joined category title
+      const viewsArticles = (data || []).filter(article => 
+        article.categories?.title?.includes('Views -')
       );
 
-      setArticles(featuresArticles as ArticleWithCategory[]);
+      setArticles(viewsArticles as ArticleWithCategory[]);
       
     } catch (err) {
       console.error('Fetch error:', err);
@@ -82,14 +82,15 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
     }
   }
 
-  const getArticlesForType = (featuresType: typeof featureTypes[number]) => {
-    if (featuresType.key === 'latest-feature') {
-      // Latest News: Show latest 3 articles from all news types
+  // Filter articles for each views type
+  const getArticlesForType = (viewsType: typeof viewsTypes[number]) => {
+    if (viewsType.key === 'latest-views') {
+      // Latest views: Show latest 3 articles from all views types
       return articles.slice(0, 3);
     }
     
     return articles.filter(article => 
-      article.categories?.title === featuresType.category
+      article.categories?.title === viewsType.category
     );
   };
 
@@ -116,16 +117,16 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
   return (
     <div className="space-y-8">
 
-      {/* News Columns */}
-      {featureTypes.map((featuresType) => {
-        const typeArticles = getArticlesForType(featuresType);
+      {/* views Columns */}
+      {viewsTypes.map((viewsType) => {
+        const typeArticles = getArticlesForType(viewsType);
         
         if (typeArticles.length === 0) return null;
 
         return (
-          <section key={featuresType.key} className="space-y-4">
+          <section key={viewsType.key} className="space-y-4">
             <div className="border-b border-gray-200 pb-2">
-              <h2 className="text-2xl font-bold text-gray-900">{featuresType.title}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{viewsType.title}</h2>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -145,11 +146,11 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
         <Card>
           <CardContent className="text-center py-12">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No features articles found</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No views articles found</h3>
             <p className="text-gray-600">
               {searchQuery 
-                ? `No features articles match your search for "${searchQuery}"`
-                : 'No features articles have been published yet'
+                ? `No views articles match your search for "${searchQuery}"`
+                : 'No views articles have been published yet'
               }
             </p>
           </CardContent>

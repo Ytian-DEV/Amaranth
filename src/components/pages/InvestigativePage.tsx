@@ -8,20 +8,17 @@ import { Input } from "../ui/input";
 import { supabase } from "../../lib/supabase";
 import type { Article, ArticleWithCategory } from "../../types/database";
 
-interface FeaturesPageProps {
+interface investigativePageProps {
   activeCategory?: string;
 }
 
-const featureTypes = [
-  { key: 'latest-feature', title: 'Latest Feature', category: null },
-  { key: 'campus-feature', title: 'Campus Feature', category: 'Feature - Campus Feature' },
-  { key: 'people-events', title: 'People & Events', category: 'Feature - People & Events' },
-  { key: 'experiences', title: 'Experiences', category: 'Feature - Experiences' },
-  { key: 'lifestyle', title: 'Lifestyle', category: 'Feature - Lifestyle' },
-  { key: 'entertainment', title: 'Entertainment', category: 'Feature - Entertainment' }
+// Define the investigative types we want to display in columns
+const investigativeTypes = [
+  { key: 'latest-investigative', title: 'Latest Investigative', category: null },
+  { key: 'investigative', title: 'Investigative', category: 'Investigative' }
 ] as const;
 
-export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
+export function InvestigativePage({ activeCategory }: investigativePageProps) {
   const [articles, setArticles] = useState<ArticleWithCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,11 +65,12 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
         return;
       }
 
-      const featuresArticles = (data || []).filter(article => 
-        article.categories?.title?.includes('Feature -')
+      // Filter for investigative categories only using the joined category title
+      const investigativeArticles = (data || []).filter(article => 
+        article.categories?.title?.includes('Investigative')
       );
 
-      setArticles(featuresArticles as ArticleWithCategory[]);
+      setArticles(investigativeArticles as ArticleWithCategory[]);
       
     } catch (err) {
       console.error('Fetch error:', err);
@@ -82,14 +80,15 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
     }
   }
 
-  const getArticlesForType = (featuresType: typeof featureTypes[number]) => {
-    if (featuresType.key === 'latest-feature') {
-      // Latest News: Show latest 3 articles from all news types
+  // Filter articles for each investigative type
+  const getArticlesForType = (investigativeType: typeof investigativeTypes[number]) => {
+    if (investigativeType.key === 'latest-investigative') {
+      // Latest investigative: Show latest 3 articles from all investigative types
       return articles.slice(0, 3);
     }
     
     return articles.filter(article => 
-      article.categories?.title === featuresType.category
+      article.categories?.title === investigativeType.category
     );
   };
 
@@ -116,16 +115,16 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
   return (
     <div className="space-y-8">
 
-      {/* News Columns */}
-      {featureTypes.map((featuresType) => {
-        const typeArticles = getArticlesForType(featuresType);
+      {/* investigative Columns */}
+      {investigativeTypes.map((investigativeType) => {
+        const typeArticles = getArticlesForType(investigativeType);
         
         if (typeArticles.length === 0) return null;
 
         return (
-          <section key={featuresType.key} className="space-y-4">
+          <section key={investigativeType.key} className="space-y-4">
             <div className="border-b border-gray-200 pb-2">
-              <h2 className="text-2xl font-bold text-gray-900">{featuresType.title}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">{investigativeType.title}</h2>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -145,11 +144,11 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
         <Card>
           <CardContent className="text-center py-12">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No features articles found</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No investigative articles found</h3>
             <p className="text-gray-600">
               {searchQuery 
-                ? `No features articles match your search for "${searchQuery}"`
-                : 'No features articles have been published yet'
+                ? `No investigative articles match your search for "${searchQuery}"`
+                : 'No investigative articles have been published yet'
               }
             </p>
           </CardContent>
