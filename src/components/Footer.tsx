@@ -26,13 +26,11 @@ export function Footer({ onSectionChange }: FooterProps) {
               </div>
               <div>
                 <h3 className="font-bold text-lg font-trajan">AMARANTH</h3>
-                <p className="text-sm opacity-80">VSU Student Publication</p>
+                <p className="text-sm opacity-80">Visayas State University</p>
               </div>
             </div>
             <p className="text-sm opacity-80 leading-relaxed">
-              The official student publication of Visayas State University, 
-              committed to delivering quality journalism and fostering 
-              intellectual discourse within the university community.
+              The Official Student Media Organization of the Visayas State University.
             </p>
           </div>
 
@@ -53,10 +51,11 @@ export function Footer({ onSectionChange }: FooterProps) {
             <h4 className="font-semibold mb-4">Categories</h4>
             <ul className="space-y-2 text-sm opacity-80">
               <li><button onClick={() => handleLinkClick('news')} className="hover:text-yellow-400 transition-colors text-left">News</button></li>
-              <li><button onClick={() => handleLinkClick('features')} className="hover:text-yellow-400 transition-colors text-left">Features</button></li>
+              <li><button onClick={() => handleLinkClick('feature')} className="hover:text-yellow-400 transition-colors text-left">Features</button></li>
               <li><button onClick={() => handleLinkClick('sports')} className="hover:text-yellow-400 transition-colors text-left">Sports</button></li>
-              <li><button onClick={() => handleLinkClick('literature')} className="hover:text-yellow-400 transition-colors text-left">Literature</button></li>
-              <li><button onClick={() => handleLinkClick('opinion')} className="hover:text-yellow-400 transition-colors text-left">Opinion</button></li>
+              <li><button onClick={() => handleLinkClick('literary')} className="hover:text-yellow-400 transition-colors text-left">Literary</button></li>
+              <li><button onClick={() => handleLinkClick('stories')} className="hover:text-yellow-400 transition-colors text-left">Stories</button></li>
+              <li><button onClick={() => handleLinkClick('specials')} className="hover:text-yellow-400 transition-colors text-left">Specials</button></li>
             </ul>
           </div>
 
@@ -118,6 +117,7 @@ export function Footer({ onSectionChange }: FooterProps) {
 
         <div className="border-t border-emerald-800 mt-8 pt-8 text-center text-sm opacity-60">
           <p>&copy; 2024 Amaranth - Visayas State University. All rights reserved.</p>
+          <p>-powered by Lily🌸</p>
         </div>
       </div>
     </footer>
