@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
-import { Calendar, Loader, FileText, Trophy, Star, TrendingUp, Flame, ArrowRight } from "lucide-react";
+import { Calendar, Loader, FileText, Trophy, Star, TrendingUp, Flame, ArrowRight, Badge } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import type { Article } from "../../types/database";
 
@@ -81,7 +81,7 @@ export function HomePage() {
           <div className={iconColor}>
             {icon}
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
+          <h2 className="text-3xl font-bold text-gray-font">{title}</h2>
         </div>
         
         <div className="grid gap-6 lg:grid-cols-4">
@@ -119,7 +119,7 @@ export function HomePage() {
         title="Hottest Articles" 
         icon={<Flame className="h-6 w-6" />} 
         articles={hottestArticles}
-        iconColor="text-youtube-50"
+        iconColor="text-youtube-600"
       />
     </div>
   );
@@ -153,10 +153,10 @@ function BigArticleCard({ article }: { article: any }) {
       <CardContent className="p-6">
         {/* Category below image, above title */}
         {article.category_title && (
-          <span className="text-gray-400 text-sm font-medium mb-2 pb-2 block">{article.category_title}</span>
-        )}
+          <span className="text-light-gray text-sm font-bold mb-2 pb-2 block">{article.category_title}</span>
+        )} 
         <h3 className="text-emerald-600 font-bold text-2xl mb-3 line-clamp-3 pt-2">{article.title}</h3>
-        <p className="text-black mb-4 line-clamp-3">{article.excerpt}</p>
+        <p className="text-light-gray mb-4 line-clamp-3">{article.excerpt}</p>
         
         <Button 
           onClick={(e) => {

@@ -190,15 +190,15 @@ function ArticleCard({ article, onClick }: ArticleCardProps) {
             {article.categories?.title || 'Uncategorized'}
           </Badge>
 
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-emerald-700 transition-colors flex-1">
+          <h3 className="font-semibold text-emerald-600 text-lg mb-2 line-clamp-2 group-hover:text-light-gray transition-colors flex-1">
             {article.title}
           </h3>
 
-          <p className="text-gray-600 text-sm mb-3 line-clamp-3">
+          <p className="text-light-gray text-sm mb-3 line-clamp-3">
             {article.excerpt}
           </p>
 
-          <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
+          <div className="flex items-center justify-between text-xs text-emerald-900 mt-auto">
             <span>By {article.author_name}</span>
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />

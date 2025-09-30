@@ -266,6 +266,12 @@
     --youtube-600: oklch(.50 .30 25);   /* Dark YouTube red */
     --youtube-700: oklch(.40 .28 25);   /* Deeper YouTube red */
 
+    --typeface-gray: #212121;
+    --typeface-light-gray: #1e1e1e;
+
+    --offwhite: #faf9f6;
+    --ghostwhite: #f8f8ff;
+
     --color-red-50: oklch(.98 .008 145);   /* Very light mint */
     --color-red-100: oklch(.95 .015 145);  /* Light mint */
     --color-red-200: oklch(.88 .035 145);  /* Soft mint */
@@ -328,8 +334,8 @@
     --color-gray-600: oklch(.44 .03 145);   /* Muted green */
     --color-gray-900: oklch(.20 .04 145);   /* Dark green-gray */
 
-    --color-black: #000;
-    --color-white: #fff;
+    --color-black: #000000;
+    --color-white: #ffffff;
 
     --spacing: .25rem;
     --container-md: 28rem;
@@ -690,7 +696,7 @@
 
 .font-trajan {
   font-family: var(--font-heading);
-  font-weight: 700;
+  font-weight: var(--font-weight-normal);
 }
 
 @layer utilities {
@@ -1382,6 +1388,16 @@
     border-color: #0000;
   }
 
+  .bg-offwhite
+  {
+    background-color: var(--offwhite);
+  }
+
+  .bg-ghostwhite
+  {
+    background-color: var(--ghostwhite);
+  }
+
   .bg-background {
     background-color: var(--background);
   }
@@ -1747,6 +1763,11 @@
     line-height: var(--leading-tight);
   }
 
+  .font-regular
+  {
+    --tw-font-weight: var(--font-weight-normal);
+  }
+
   .font-bold {
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
@@ -1873,6 +1894,117 @@
   .text-yellow-700 {
     color: var(--color-yellow-700);
   }
+
+  .text-youtube-700
+  {
+    color: var(--youtube-700)
+  }
+
+  .text-youtube-600
+  {
+    color: var(--youtube-600);
+  }
+
+  .text-youtube-500
+  {
+    color: var(--youtube-500);
+  }
+
+  .text-youtube-100
+  {
+    color: var(--youtube-100);
+  }
+  
+  .text-youtube-50
+  {
+    color: var(--youtube-50);
+  }
+
+  .text-facebook-50
+  {
+    color: var(--facebook-50);
+  }
+
+  .text-facebook-100
+  {
+    color: var(--facebook-100);
+  }
+
+  .text-facebook-500
+  {
+    color: var(--facebook-500);
+  }
+
+  .text-facebook-600
+  {
+    color: var(--facebook-600);
+  }
+
+  .text-facebook-700
+  {
+    color: var(--facebook-700);
+  }
+
+  .text-tiktok-50
+  {
+    color: var(--tiktok-50);
+  }
+
+  .text-tiktok-100
+  {
+    color: var(--tiktok-100);
+  }
+
+  .text-tiktok-500
+  {
+    color: var(--tiktok-500);
+  }
+
+  .text-tiktok-600
+  {
+    color: var(--tiktok-600);
+  }
+
+  .text-tiktok-700
+  {
+    color: var(--tiktok-700);
+  }
+
+  .text-instagram-50
+  {
+    color: var(--instagram-50);
+  }
+
+  .text-instagram-100
+  {
+    color: var(--instagram-100);
+  }
+
+  .text-instagram-500
+  {
+    color: var(--instagram-500);
+  }
+
+  .text-instagram-600
+  {
+    color: var(--instagram-600);
+  }
+
+  .text-instagram-700
+  {
+    color: var(--instagram-700);
+  }
+
+  .text-gray-font{
+    color: var(--typeface-gray);
+  }
+
+  .text-light-gray
+  {
+    color: var(--typeface-light-gray);
+  }
+
+
 
   .italic {
     font-style: italic;
@@ -2091,7 +2223,7 @@
 
   @media (hover: hover) {
     .hover\:bg-accent:hover {
-      background-color: var(--accent);
+      background-color: var(--color-emerald-700);
     }
   }
 
@@ -2199,7 +2331,7 @@
 
   @media (hover: hover) {
     .hover\:text-accent-foreground:hover {
-      color: var(--accent-foreground);
+      color: var(--color-emerald-50);
     }
   }
 
@@ -2807,7 +2939,7 @@
 
   @media (hover: hover) {
     a.\[a\&\]\:hover\:text-accent-foreground:hover {
-      color: var(--accent-foreground);
+      color: var(--color-emerald-50);
     }
   }
 }

@@ -71,7 +71,7 @@ function MainLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-offwhite">
       <Header 
         activeSection={activeSection} 
         onSectionChange={handleSectionChange}

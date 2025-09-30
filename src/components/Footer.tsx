@@ -25,7 +25,7 @@ export function Footer({ onSectionChange }: FooterProps) {
                 />
               </div>
               <div>
-                <h3 className="font-bold text-lg font-trajan">AMARANTH</h3>
+                <h3 className="font-regular text-lg font-trajan">AMARANTH</h3>
                 <p className="text-sm opacity-80">Visayas State University</p>
               </div>
             </div>

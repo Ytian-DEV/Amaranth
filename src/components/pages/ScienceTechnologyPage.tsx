@@ -193,11 +193,11 @@ function ArticleCard({ article, onClick }: ArticleCardProps) {
             {article.categories?.title || 'Uncategorized'}
           </Badge>
 
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-emerald-700 transition-colors flex-1">
+          <h3 className="font-semibold text-emerald-600 text-lg mb-2 line-clamp-2 group-hover:text-light-gray transition-colors flex-1">
             {article.title}
           </h3>
 
-          <p className="text-gray-600 text-sm mb-3 line-clamp-3">
+          <p className="text-light-gray text-sm mb-3 line-clamp-3">
             {article.excerpt}
           </p>
 

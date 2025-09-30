@@ -20,30 +20,30 @@ export function ArticlePage() {
     }
   }, [id]);
 
-    async function fetchArticle(articleId: string) {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('articles')
-          .select(`
-            *,
-            categories (title, slug, description)
-          `)
-          .eq('id', articleId)
-          .single();
+  async function fetchArticle(articleId: string) {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('articles')
+        .select(`
+          *,
+          categories (title, slug, description)
+        `)
+        .eq('id', articleId)
+        .single();
 
-        if (error) {
-          setError(error.message);
-          return;
-        }
-
-        setArticle(data);
-      } catch (err) {
-        setError('Failed to load article');
-      } finally {
-        setLoading(false);
+      if (error) {
+        setError(error.message);
+        return;
       }
+
+      setArticle(data);
+    } catch (err) {
+      setError('Failed to load article');
+    } finally {
+      setLoading(false);
     }
+  }
 
   // Format plain text content with proper paragraphs
   const formatArticleContent = (content: string) => {
@@ -55,7 +55,7 @@ export function ArticlePage() {
     return paragraphs
       .filter(paragraph => paragraph.trim().length > 0)
       .map((paragraph, index) => (
-        <p key={index} className="mb-6 leading-relaxed text-gray-700 text-justify">
+        <p key={index} className="mb-4 leading-relaxed text-gray-700 text-justify">
           {paragraph.trim()}
         </p>
       ));
@@ -93,56 +93,58 @@ export function ArticlePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-0">
-        {/* Back Button */}
+    <div className="min-h-screen bg-white max-w-3xl mx-auto px-4 sm:px-6 border border-emerald-200 rounded-lg shadow-lg">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6">
+        {/* Back Button - More compact */}
         <Button 
           variant="ghost" 
           onClick={() => navigate(-1)}
-          className="mb-4 ml-0"
+          className="mt-4 mb-2 -ml-2"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Articles
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Back to Article
         </Button>
 
         {/* Article Content */}
-        <Card>
-          <CardContent className="p-8">
-          <Badge variant="secondary" className="mb-2 self-start">
-            {article.categories?.title}
-          </Badge>
+        <Card className="border-0 shadow-none">
+          <CardContent className="p-0">
+            {/* Category Badge */}
+            <Badge variant="secondary" className="mb-3 text-xs">
+              {article.categories?.title}
+            </Badge>
 
-            {/* Title */}
-            <h1 className="text-4xl font-bold mb-3 text-emerald-600">{article.title}</h1>
+            {/* Title - More compact */}
+            <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900 leading-tight">
+              {article.title}
+            </h1>
 
-            {/* Meta Information */}
-            <div className="flex items-center justify-between text-sm text-gray-500 mb-8 pb-6 border-b">
-              <div className="flex items-center gap-4 font-bold text-emerald-700">
-                <span>By {article.author_name}</span>
+            {/* Meta Information - Single line, more compact */}
+            <div className="flex items-center justify-between text-sm text-gray-600 mb-6 pb-4 border-b">
+              <div className="flex items-center gap-4">
+                <span className="font-medium">By {article.author_name}</span>
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-3 h-3" />
                   <span>{formatDate(article.published_date)}</span>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
+              <Button variant="ghost" size="sm" className="h-8 px-2">
+                <Share2 className="w-3 h-3" /> Share
               </Button>
             </div>
 
-            {/* Article Image */}
+            {/* Article Image - Smaller height */}
             {article.image_url && (
-              <div className="mb-8">
+              <div className="mb-6">
                 <img 
                   src={article.image_url} 
                   alt={article.title}
-                  className="w-full h-96 object-cover rounded-lg"
+                  className="w-full h-full sm:h-56 object-cover rounded"
                 />
               </div>
             )}
 
-            {/* Article Content with proper formatting */}
-            <div className="text-base leading-relaxed space-y-4 mt-6">
+            {/* Article Content - More compact spacing */}
+            <div className="text-[#212121] leading-relaxed space-y-4 text-justify">
               {formatArticleContent(article.contents)}
             </div>
           </CardContent>
