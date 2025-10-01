@@ -1344,6 +1344,11 @@
     border-style: dashed;
   }
 
+  .border-facebook-700
+  {
+    border-color: var(--facebook-700);
+  }
+
   .border-blue-200 {
     border-color: var(--color-blue-200);
   }

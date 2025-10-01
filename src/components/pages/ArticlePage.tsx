@@ -114,7 +114,7 @@ export function ArticlePage() {
             </Badge>
 
             {/* Title - More compact */}
-            <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900 leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-3 text-emerald-700 leading-tight">
               {article.title}
             </h1>
 
