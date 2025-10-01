@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react"; // Note: use 'react' not 'next'
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { Header } from "./components/Header";
 import { Sidebar } from "./components/Sidebar";
@@ -126,6 +126,7 @@ function MainLayout() {
 
       <Footer onSectionChange={handleSectionChange} />
       <Toaster />
+      <Analytics /> {/* Add Analytics component here */}
     </div>
   );
 }
