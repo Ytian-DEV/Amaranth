@@ -43,7 +43,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your arti
   ];
 
   return (
-    <div className="rich-text-editor">
+    <div className="rich-text-editor admin-rich-text-editor">
       <ReactQuill
         ref={quillRef}
         value={value}
@@ -52,7 +52,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your arti
         formats={formats}
         placeholder={placeholder}
         theme="snow"
-        className="h-96 mb-8"
+        className="min-h-[28rem]"
       />
     </div>
   );

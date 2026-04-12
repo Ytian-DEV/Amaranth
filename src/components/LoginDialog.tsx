@@ -5,11 +5,17 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner@2.0.3";
+import type { DashboardUser } from "../types/database";
+import {
+  getDashboardUserFromSession,
+  isSupabaseConfigured,
+  supabase,
+} from "../lib/supabase";
 
 interface LoginDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginSuccess: (user: any) => void;
+  onLoginSuccess: (user: DashboardUser) => void;
 }
 
 export function LoginDialog({ isOpen, onClose, onLoginSuccess }: LoginDialogProps) {
@@ -24,13 +30,27 @@ export function LoginDialog({ isOpen, onClose, onLoginSuccess }: LoginDialogProp
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call to Joomla authentication
-    // Replace this with actual Joomla API integration
-    setTimeout(() => {
-      // Mock authentication - replace with actual Joomla API call
+    try {
+      if (isSupabaseConfigured) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: credentials.username.trim(),
+          password: credentials.password,
+        });
+
+        if (error || !data.user) {
+          throw error ?? new Error("Unable to sign in.");
+        }
+
+        const user = await getDashboardUserFromSession(data.user);
+        onLoginSuccess(user);
+        toast.success("Login successful! Welcome to the dashboard.");
+        onClose();
+        return;
+      }
+
       if (credentials.username === "admin" && credentials.password === "admin123") {
-        const user = {
-          id: 1,
+        const user: DashboardUser = {
+          id: "demo-admin",
           username: credentials.username,
           name: "Administrator",
           email: "admin@vsu.edu.ph",
@@ -45,9 +65,11 @@ export function LoginDialog({ isOpen, onClose, onLoginSuccess }: LoginDialogProp
       } else {
         toast.error("Invalid credentials. Please try again.");
       }
-      
+    } catch (error: any) {
+      toast.error(error?.message ?? "Unable to sign in.");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -62,13 +84,15 @@ export function LoginDialog({ isOpen, onClose, onLoginSuccess }: LoginDialogProp
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">{isSupabaseConfigured ? "Email" : "Username"}</Label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 id="username"
-                type="text"
-                placeholder="Enter your username"
+                type={isSupabaseConfigured ? "email" : "text"}
+                placeholder={
+                  isSupabaseConfigured ? "admin@yourdomain.com" : "Enter your username"
+                }
                 value={credentials.username}
                 onChange={(e) => setCredentials(prev => ({ ...prev, username: e.target.value }))}
                 className="pl-10"
@@ -102,13 +126,21 @@ export function LoginDialog({ isOpen, onClose, onLoginSuccess }: LoginDialogProp
             </div>
           </div>
 
-          <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
-            <p className="text-sm text-emerald-700">
-              <strong>Demo Credentials:</strong><br />
-              Username: admin<br />
-              Password: admin123
-            </p>
-          </div>
+          {!isSupabaseConfigured ? (
+            <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+              <p className="text-sm text-emerald-700">
+                <strong>Demo Credentials:</strong><br />
+                Username: admin<br />
+                Password: admin123
+              </p>
+            </div>
+          ) : (
+            <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-200">
+              <p className="text-sm text-emerald-700">
+                Sign in with a Supabase-authenticated admin account to access the CMS.
+              </p>
+            </div>
+          )}
 
           <div className="flex gap-3 pt-4">
             <Button

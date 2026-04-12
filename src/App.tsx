@@ -10,10 +10,17 @@ import { Button } from "./components/ui/button";
 import { Toaster } from "./components/ui/sonner";
 import { ArticlePage } from "./components/pages/ArticlePage";
 import { HomePage } from "./components/pages/HomePage";
+import type { DashboardUser } from "./types/database";
+import {
+  getDashboardUserFromSession,
+  isSupabaseConfigured,
+  supabase,
+} from "./lib/supabase";
 
 // Main Layout Component (for all pages including articles)
 function MainLayout() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<DashboardUser | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,26 +39,81 @@ function MainLayout() {
 
   // Check for existing login on component mount
   useEffect(() => {
-    const savedUser = localStorage.getItem("amaranth_user");
-    if (savedUser) {
-      try {
-        const userData = JSON.parse(savedUser);
-        setUser(userData);
-      } catch (error) {
-        localStorage.removeItem("amaranth_user");
+    let isActive = true;
+
+    if (!isSupabaseConfigured) {
+      const savedUser = localStorage.getItem("amaranth_user");
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser) as DashboardUser;
+          if (isActive) {
+            setUser(userData);
+          }
+        } catch (error) {
+          localStorage.removeItem("amaranth_user");
+        }
       }
+
+      setIsAuthLoading(false);
+      return () => {
+        isActive = false;
+      };
     }
+
+    const syncUserFromSession = async (sessionUser?: {
+      id: string;
+      email?: string | null;
+      user_metadata?: Record<string, any>;
+    } | null) => {
+      if (!isActive) return;
+
+      if (!sessionUser) {
+        setUser(null);
+        setIsAuthLoading(false);
+        return;
+      }
+
+      const dashboardUser = await getDashboardUserFromSession(sessionUser);
+      if (!isActive) return;
+
+      setUser(dashboardUser);
+      setIsAuthLoading(false);
+    };
+
+    void supabase.auth.getSession().then(({ data }) => syncUserFromSession(data.session?.user));
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      void syncUserFromSession(session?.user);
+    });
+
+    return () => {
+      isActive = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const handleLogin = (userData: any) => {
+  const handleLogin = (userData: DashboardUser) => {
     setUser(userData);
+    if (!isSupabaseConfigured) {
+      localStorage.setItem("amaranth_user", JSON.stringify(userData));
+    }
     navigate("/dashboard");
   };
 
   const handleLogout = () => {
     setUser(null);
-    localStorage.removeItem("amaranth_user");
-    navigate("/");
+    if (!isSupabaseConfigured) {
+      localStorage.removeItem("amaranth_user");
+      navigate("/");
+      return;
+    }
+
+    void supabase.auth
+      .signOut()
+      .catch(() => null)
+      .finally(() => navigate("/"));
   };
 
   const handleSectionChange = (section: string) => {
@@ -67,6 +129,24 @@ function MainLayout() {
   };
 
   // Show dashboard if on dashboard route
+  if (isDashboardPage && isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-offwhite">
+        <div className="max-w-7xl mx-auto px-4 py-16">
+          <div className="rounded-3xl border border-emerald-100 bg-white px-8 py-12 text-center shadow-sm">
+            <p className="text-sm uppercase tracking-[0.28em] text-emerald-700">Loading</p>
+            <h1 className="mt-3 text-2xl font-semibold text-emerald-950">
+              Restoring your editorial session
+            </h1>
+            <p className="mt-2 text-emerald-900/70">
+              Checking authentication before opening the dashboard.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (isDashboardPage && user) {
     return <Dashboard user={user} onLogout={handleLogout} />;
   }
