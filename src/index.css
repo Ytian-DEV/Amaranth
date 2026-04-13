@@ -3440,6 +3440,158 @@ html {
     linear-gradient(180deg, rgba(246, 250, 247, 0.75) 0%, rgba(255, 255, 255, 0.92) 100%);
 }
 
+.article-rich-content {
+  color: #173728;
+  font-family: var(--font-sans);
+  font-size: 0.84rem;
+  line-height: 1.72;
+  max-width: 44rem;
+  margin-inline: auto;
+}
+
+.article-rich-content.ql-editor {
+  padding: 0;
+}
+
+.article-rich-content > *:first-child {
+  margin-top: 0;
+}
+
+.article-rich-content > *:last-child {
+  margin-bottom: 0;
+}
+
+.article-rich-content p,
+.article-rich-content ul,
+.article-rich-content ol,
+.article-rich-content blockquote,
+.article-rich-content pre,
+.article-rich-content h1,
+.article-rich-content h2,
+.article-rich-content h3,
+.article-rich-content h4 {
+  margin-top: 0;
+  margin-bottom: 0.9rem;
+}
+
+.article-rich-content h1,
+.article-rich-content h2,
+.article-rich-content h3,
+.article-rich-content h4 {
+  color: #123726;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.article-rich-content h1 {
+  font-size: 2rem;
+}
+
+.article-rich-content h2 {
+  font-size: 1.6rem;
+}
+
+.article-rich-content h3 {
+  font-size: 1.3rem;
+}
+
+.article-rich-content ul,
+.article-rich-content ol {
+  padding-left: 1.4rem;
+}
+
+.article-rich-content li {
+  margin-bottom: 0.25rem;
+}
+
+.article-rich-content blockquote {
+  border-left: 4px solid rgba(54, 114, 78, 0.35);
+  background: rgba(241, 248, 243, 0.9);
+  border-radius: 1rem;
+  padding: 1rem 1.15rem;
+  color: rgba(23, 55, 40, 0.86);
+}
+
+.article-rich-content a {
+  color: #0f7a39;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.article-rich-content img {
+  max-width: 100%;
+  border-radius: 1.5rem;
+}
+
+.article-photo-credit {
+  width: fit-content;
+  max-width: min(100%, 31rem);
+  margin: 0.9rem auto 0;
+  padding: 0.6rem 1rem;
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #ffffff;
+  background: #1a472a;
+  border: 1px solid #1a472a;
+  border-radius: 2px;
+  box-shadow: 0 14px 28px -24px rgba(22, 77, 47, 0.35);
+}
+
+.article-rich-content .ql-align-center {
+  text-align: center;
+}
+
+.article-rich-content .ql-align-right {
+  text-align: right;
+}
+
+.article-rich-content .ql-align-justify {
+  text-align: justify;
+}
+
+.article-rich-content .ql-indent-1 {
+  padding-left: 2rem;
+}
+
+.article-rich-content .ql-indent-2 {
+  padding-left: 4rem;
+}
+
+.article-rich-content .ql-indent-3 {
+  padding-left: 6rem;
+}
+
+.article-rich-content .ql-indent-4 {
+  padding-left: 8rem;
+}
+
+.article-rich-content .ql-size-small {
+  font-size: 0.9rem;
+}
+
+.article-rich-content .ql-size-large {
+  font-size: 1.2rem;
+}
+
+.article-rich-content .ql-size-huge {
+  font-size: 1.45rem;
+}
+
+@media (max-width: 640px) {
+  .article-rich-content {
+    font-size: 0.8rem;
+    line-height: 1.66;
+  }
+
+  .article-rich-content .ql-indent-1,
+  .article-rich-content .ql-indent-2,
+  .article-rich-content .ql-indent-3,
+  .article-rich-content .ql-indent-4 {
+    padding-left: 1.25rem;
+  }
+}
+
 /* Final admin polish pass */
 .admin-dashboard {
   --admin-green-950: #0f261c;

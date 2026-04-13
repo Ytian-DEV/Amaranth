@@ -1,4 +1,5 @@
 import type {
+  CoverCredit,
   CmsArticleAuthorLink,
   CmsArticleEditorState,
   CmsArticleRecord,
@@ -67,17 +68,67 @@ export function getCategorySection(category: CmsCategory | null) {
 }
 
 export function getPrimaryAuthorLink(article: CmsArticleRecord) {
-  const links = article.article_authors ?? [];
+  const links = getSortedAuthorLinks(article);
   if (!links.length) return null;
 
-  return (
-    links.find((link) => link.is_primary) ??
-    [...links].sort((a, b) => a.display_order - b.display_order)[0]
-  );
+  return links.find((link) => link.is_primary) ?? links[0];
 }
 
 export function getContributorFromLink(link: CmsArticleAuthorLink | null) {
   return pickSingleRelation<CmsContributor>(link?.contributors);
+}
+
+export function getSortedAuthorLinks(article: CmsArticleRecord) {
+  return [...(article.article_authors ?? [])].sort(
+    (left, right) => left.display_order - right.display_order,
+  );
+}
+
+export function joinDisplayNames(names: string[]) {
+  const cleanNames = names.map((name) => name.trim()).filter(Boolean);
+  if (!cleanNames.length) return "";
+  if (cleanNames.length === 1) return cleanNames[0];
+  if (cleanNames.length === 2) return `${cleanNames[0]} and ${cleanNames[1]}`;
+  return `${cleanNames.slice(0, -1).join(", ")}, and ${cleanNames.at(-1)}`;
+}
+
+export function getArticleAuthorNames(article: CmsArticleRecord) {
+  const names = getSortedAuthorLinks(article)
+    .map((link) => getContributorFromLink(link)?.display_name ?? "")
+    .filter(Boolean);
+
+  return joinDisplayNames(names) || article.author_name;
+}
+
+export function normalizeCoverCredits(value: unknown): CoverCredit[] {
+  const credits = Array.isArray((value as Record<string, unknown> | null)?.coverCredits)
+    ? ((value as Record<string, unknown>).coverCredits as unknown[])
+    : Array.isArray(value)
+      ? (value as unknown[])
+      : [];
+
+  return credits
+    .map((entry) => {
+      if (typeof entry === "string") {
+        return { name: entry.trim(), role: "" };
+      }
+
+      if (!entry || typeof entry !== "object") return null;
+
+      const name = String((entry as Record<string, unknown>).name ?? "").trim();
+      const role = String((entry as Record<string, unknown>).role ?? "").trim();
+      if (!name) return null;
+
+      return { name, role };
+    })
+    .filter((entry): entry is CoverCredit => Boolean(entry));
+}
+
+export function formatCoverCredits(credits: CoverCredit[]) {
+  return credits
+    .filter((credit) => credit.name.trim())
+    .map((credit) => (credit.role.trim() ? `${credit.role.trim()}: ${credit.name.trim()}` : credit.name.trim()))
+    .join(" / ");
 }
 
 export function createEmptyEditorState(
@@ -96,6 +147,7 @@ export function createEmptyEditorState(
     bodyHtml: "",
     categoryId: defaultCategory,
     authorId: defaultAuthor,
+    authorIds: defaultAuthor ? [defaultAuthor] : [],
     status: "draft",
     publishedAt: "",
     scheduledFor: "",
@@ -104,6 +156,8 @@ export function createEmptyEditorState(
     imageAlt: "",
     imageUrl: "",
     coverAssetId: null,
+    coverCredits: [],
+    meta: {},
     selectedImageFile: null,
   };
 }
@@ -114,7 +168,9 @@ export function articleToEditorState(
   contributors: CmsContributor[],
 ) {
   const defaultState = createEmptyEditorState(categories, contributors);
+  const sortedAuthorLinks = getSortedAuthorLinks(article);
   const primaryAuthor = getContributorFromLink(getPrimaryAuthorLink(article));
+  const authorIds = sortedAuthorLinks.map((link) => link.contributor_id);
 
   return {
     ...defaultState,
@@ -126,6 +182,7 @@ export function articleToEditorState(
     bodyHtml: article.body_html ?? textToHtml(article.body_text),
     categoryId: article.category_id,
     authorId: primaryAuthor?.id ?? defaultState.authorId,
+    authorIds: authorIds.length ? authorIds : defaultState.authorIds,
     status: article.status,
     publishedAt: toDateTimeLocal(article.published_at),
     scheduledFor: toDateTimeLocal(article.scheduled_for),
@@ -134,6 +191,8 @@ export function articleToEditorState(
     imageAlt: article.featured_image_alt ?? "",
     imageUrl: article.image_url ?? "",
     coverAssetId: article.cover_asset_id,
+    coverCredits: normalizeCoverCredits(article.meta),
+    meta: article.meta ?? {},
     selectedImageFile: null,
   };
 }
