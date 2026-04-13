@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { LoadingScreen } from "../LoadingScreen";
 import { Trophy, Medal, Users, Calendar, Loader, FileText } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
@@ -114,12 +115,7 @@ export function SportsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <Loader className="h-8 w-8 animate-spin text-emerald-600" />
-        <span className="ml-2">Loading sports articles...</span>
-      </div>
-    );
+    return <LoadingScreen title="AMARANTH" subtitle="Loading sports coverage..." minHeightClassName="min-h-[20rem]" />;
   }
 
   if (error) {

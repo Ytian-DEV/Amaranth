@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { LoadingScreen } from "../LoadingScreen";
 import { supabase } from "../../lib/supabase";
 import { formatCoverCredits, joinDisplayNames, normalizeCoverCredits, textToHtml } from "../../lib/cms";
 import type { Article, ArticleComment, CmsArticleAuthorLink, CmsArticleMediaRecord, CmsContributor } from "../../types/database";
@@ -196,12 +197,7 @@ export function ArticlePage() {
     : null;
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader className="h-8 w-8 animate-spin text-emerald-600" />
-        <span className="ml-2">Loading article...</span>
-      </div>
-    );
+    return <LoadingScreen title="AMARANTH" subtitle="Loading article..." minHeightClassName="min-h-[28rem]" />;
   }
 
   if (error && !article) {

@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Calendar, Filter, Search, Loader, FileText } from "lucide-react";
-import { Input } from "../ui/input";
+import { LoadingScreen } from "../LoadingScreen";
+import { Calendar, Loader, FileText } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import type { Article, ArticleWithCategory } from "../../types/database";
 
@@ -14,11 +14,11 @@ interface FeaturesPageProps {
 
 const featureTypes = [
   { key: 'latest-feature', title: 'Latest Feature', category: null },
-  { key: 'campus-feature', title: 'Campus Feature', category: 'Feature - Campus Feature' },
-  { key: 'people-events', title: 'People & Events', category: 'Feature - People & Events' },
-  { key: 'experiences', title: 'Experiences', category: 'Feature - Experiences' },
-  { key: 'lifestyle', title: 'Lifestyle', category: 'Feature - Lifestyle' },
-  { key: 'entertainment', title: 'Entertainment', category: 'Feature - Entertainment' }
+  { key: 'campus-feature', title: 'Campus Feature', category: 'Campus Feature' },
+  { key: 'people-events', title: 'People & Events', category: 'People & Events' },
+  { key: 'experiences', title: 'Experiences', category: 'Experiences' },
+  { key: 'lifestyle', title: 'Lifestyle', category: 'Lifestyle' },
+  { key: 'entertainment', title: 'Entertainment', category: 'Entertainment' }
 ] as const;
 
 export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
@@ -49,7 +49,11 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
           categories!inner (
             title,
             slug,
-            description
+            description,
+            sections (
+              key,
+              name
+            )
           )
         `)
         .eq('publish', true);
@@ -68,9 +72,16 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
         return;
       }
 
-      const featuresArticles = (data || []).filter(article => 
-        article.categories?.title?.includes('Feature -')
-      );
+      const featuresArticles = (data || []).filter((article: any) => {
+        const category = Array.isArray(article.categories)
+          ? article.categories[0] ?? null
+          : article.categories ?? null;
+        const section = Array.isArray(category?.sections)
+          ? category.sections[0] ?? null
+          : category?.sections ?? null;
+
+        return section?.key === 'feature' || section?.name === 'Feature';
+      });
 
       setArticles(featuresArticles as ArticleWithCategory[]);
       
@@ -84,7 +95,7 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
 
   const getArticlesForType = (featuresType: typeof featureTypes[number]) => {
     if (featuresType.key === 'latest-feature') {
-      // Latest News: Show latest 3 articles from all news types
+      // Latest Feature: show the latest 3 feature stories
       return articles.slice(0, 3);
     }
     
@@ -94,12 +105,7 @@ export function FeaturesPage({ activeCategory }: FeaturesPageProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <Loader className="h-8 w-8 animate-spin text-emerald-600" />
-        <span className="ml-2">Loading articles...</span>
-      </div>
-    );
+    return <LoadingScreen title="AMARANTH" subtitle="Loading feature stories..." minHeightClassName="min-h-[20rem]" />;
   }
 
   if (error) {

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
+import { LoadingScreen } from "../LoadingScreen";
 import { Calendar, Loader, FileText, Trophy, Star, TrendingUp, Flame, ArrowRight, Badge } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import type { Article } from "../../types/database";
@@ -55,12 +56,7 @@ export function HomePage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <Loader className="h-8 w-8 animate-spin text-emerald-600" />
-        <span className="ml-2">Loading...</span>
-      </div>
-    );
+    return <LoadingScreen title="AMARANTH" subtitle="Loading the latest stories..." minHeightClassName="min-h-[20rem]" />;
   }
 
   // Component for big article + 3 small articles layout

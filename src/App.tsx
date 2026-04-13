@@ -6,6 +6,7 @@ import { Sidebar } from "./components/Sidebar";
 import { Footer } from "./components/Footer";
 import { SectionContent } from "./components/SectionContent";
 import { Dashboard } from "./components/Dashboard";
+import { LoadingScreen } from "./components/LoadingScreen";
 import { Button } from "./components/ui/button";
 import { Toaster } from "./components/ui/sonner";
 import { ArticlePage } from "./components/pages/ArticlePage";
@@ -131,19 +132,11 @@ function MainLayout() {
   // Show dashboard if on dashboard route
   if (isDashboardPage && isAuthLoading) {
     return (
-      <div className="min-h-screen bg-offwhite">
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="rounded-3xl border border-emerald-100 bg-white px-8 py-12 text-center shadow-sm">
-            <p className="text-sm uppercase tracking-[0.28em] text-emerald-700">Loading</p>
-            <h1 className="mt-3 text-2xl font-semibold text-emerald-950">
-              Restoring your editorial session
-            </h1>
-            <p className="mt-2 text-emerald-900/70">
-              Checking authentication before opening the dashboard.
-            </p>
-          </div>
-        </div>
-      </div>
+      <LoadingScreen
+        fullScreen
+        title="AMARANTH"
+        subtitle="Restoring your editorial session..."
+      />
     );
   }
 
