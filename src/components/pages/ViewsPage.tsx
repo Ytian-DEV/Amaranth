@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Calendar, Filter, Search, Loader, FileText } from "lucide-react";
-import { Input } from "../ui/input";
+import { LoadingScreen } from "../LoadingScreen";
+import { Calendar, Loader, FileText } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import type { Article, ArticleWithCategory } from "../../types/database";
 
@@ -15,9 +15,9 @@ interface viewsPageProps {
 // Define the views types we want to display in columns
 const viewsTypes = [
   { key: 'latest-views', title: 'Latest Views', category: null },
-  { key: 'editorial', title: 'Editorial', category: 'Views - Editorial' },
-  { key: 'opinion', title: 'Opinion', category: 'Views - Opinion' },
-  { key: 'vox-pop', title: 'Vox-Pop', category: 'Views - Vox Pop' }
+  { key: 'editorial', title: 'Editorial', category: 'Editorial' },
+  { key: 'opinion', title: 'Opinion', category: 'Opinion' },
+  { key: 'vox-pop', title: 'Vox-Pop', category: 'Vox Pop' }
 ] as const;
 
 export function ViewsPage({ activeCategory }: viewsPageProps) {
@@ -48,7 +48,11 @@ export function ViewsPage({ activeCategory }: viewsPageProps) {
           categories!inner (
             title,
             slug,
-            description
+            description,
+            sections (
+              key,
+              name
+            )
           )
         `)
         .eq('publish', true);
@@ -67,10 +71,16 @@ export function ViewsPage({ activeCategory }: viewsPageProps) {
         return;
       }
 
-      // Filter for views categories only using the joined category title
-      const viewsArticles = (data || []).filter(article => 
-        article.categories?.title?.includes('Views -')
-      );
+      const viewsArticles = (data || []).filter((article: any) => {
+        const category = Array.isArray(article.categories)
+          ? article.categories[0] ?? null
+          : article.categories ?? null;
+        const section = Array.isArray(category?.sections)
+          ? category.sections[0] ?? null
+          : category?.sections ?? null;
+
+        return section?.key === 'views' || section?.name === 'Views';
+      });
 
       setArticles(viewsArticles as ArticleWithCategory[]);
       
@@ -95,12 +105,7 @@ export function ViewsPage({ activeCategory }: viewsPageProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <Loader className="h-8 w-8 animate-spin text-emerald-600" />
-        <span className="ml-2">Loading articles...</span>
-      </div>
-    );
+    return <LoadingScreen title="AMARANTH" subtitle="Loading views and opinion pieces..." minHeightClassName="min-h-[20rem]" />;
   }
 
   if (error) {

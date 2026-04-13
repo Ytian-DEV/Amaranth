@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { LoadingScreen } from "../LoadingScreen";
 import { Calendar, Filter, Search, Loader, FileText } from "lucide-react";
 import { Input } from "../ui/input";
 import { supabase } from "../../lib/supabase";
@@ -89,12 +90,7 @@ export function StoriesPage({ activeCategory }: storiesPageProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <Loader className="h-8 w-8 animate-spin text-emerald-600" />
-        <span className="ml-2">Loading articles...</span>
-      </div>
-    );
+    return <LoadingScreen title="AMARANTH" subtitle="Loading story collection..." minHeightClassName="min-h-[20rem]" />;
   }
 
   if (error) {
