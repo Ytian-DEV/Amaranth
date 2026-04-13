@@ -30,17 +30,21 @@ import {
   categoryDisplayName,
   createEmptyEditorState,
   createSlug,
+  formatCoverCredits,
   fromDateTimeLocal,
   getCategorySection,
+  getArticleAuthorNames,
   getContributorFromLink,
   getPrimaryAuthorLink,
   htmlToPlainText,
+  joinDisplayNames,
   pickSingleRelation,
   statusBadgeVariant,
   statusLabel,
 } from "../lib/cms";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import type {
+  CoverCredit,
   CmsArticleEditorState,
   CmsArticleRecord,
   CmsArticleStatus,
@@ -182,6 +186,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
   const [coverPreview, setCoverPreview] = useState<string>("");
   const [loadError, setLoadError] = useState("");
   const [activeNav, setActiveNav] = useState<DashboardNavId>("overview");
+  const [pendingAuthorId, setPendingAuthorId] = useState("");
 
   const filteredArticles = articles.filter((article) => {
     const matchesStatus = statusFilter === "all" || article.status === statusFilter;
@@ -209,9 +214,12 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
 
   const selectedCategory =
     categories.find((category) => category.id === editorState.categoryId) ?? null;
-  const selectedAuthor =
-    contributors.find((contributor) => contributor.id === editorState.authorId) ?? null;
+  const selectedAuthors = contributors.filter((contributor) =>
+    editorState.authorIds.includes(contributor.id),
+  );
+  const selectedAuthorNames = selectedAuthors.map((contributor) => contributor.display_name);
   const coverImageSrc = coverPreview || editorState.imageUrl;
+  const coverCreditSummary = formatCoverCredits(editorState.coverCredits);
   const wordCount = articleWordCount(editorState.bodyHtml);
 
   const publishedCount = articles.filter((article) => article.status === "published").length;
@@ -312,7 +320,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
       supabase
         .from("articles")
         .select(
-          "id, title, slug, subtitle, excerpt, body_html, body_text, author_name, image_url, featured_image_alt, status, published_at, scheduled_for, updated_at, created_at, category_id, cover_asset_id, editorial_priority, allow_comments, categories(id, title, slug, description, sort_order, section_id, sections(id, key, name)), article_authors(contributor_id, display_order, is_primary, contributors(id, display_name, slug, email, contributor_type, is_active))",
+          "id, title, slug, subtitle, excerpt, body_html, body_text, author_name, image_url, featured_image_alt, status, published_at, scheduled_for, updated_at, created_at, category_id, cover_asset_id, editorial_priority, allow_comments, meta, categories(id, title, slug, description, sort_order, section_id, sections(id, key, name)), article_authors(contributor_id, credit_label, display_order, is_primary, contributors(id, display_name, slug, email, contributor_type, is_active))",
         )
         .order("updated_at", { ascending: false }),
     ]);
@@ -363,6 +371,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     setSelectedArticleId(null);
     setEditorState(createEmptyEditorState(categories, contributors));
     setSlugWasEdited(false);
+    setPendingAuthorId("");
   }
 
   function openCreatePage() {
@@ -374,6 +383,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     setSelectedArticleId(article.id);
     setEditorState(articleToEditorState(article, categories, contributors));
     setSlugWasEdited(true);
+    setPendingAuthorId("");
     setActiveNav("edit");
   }
 
@@ -382,6 +392,72 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     value: CmsArticleEditorState[Key],
   ) {
     setEditorState((current) => ({ ...current, [key]: value }));
+  }
+
+  function addAuthor(authorId: string) {
+    if (!authorId) return;
+
+    setEditorState((current) => {
+      if (current.authorIds.includes(authorId)) {
+        return {
+          ...current,
+          authorId,
+        };
+      }
+
+      return {
+        ...current,
+        authorId: current.authorId || authorId,
+        authorIds: [...current.authorIds, authorId],
+      };
+    });
+    setPendingAuthorId("");
+  }
+
+  function removeAuthor(authorId: string) {
+    setEditorState((current) => {
+      const nextAuthorIds = current.authorIds.filter((id) => id !== authorId);
+      const nextPrimary = current.authorId === authorId ? nextAuthorIds[0] ?? "" : current.authorId;
+
+      return {
+        ...current,
+        authorId: nextPrimary,
+        authorIds: nextAuthorIds,
+      };
+    });
+  }
+
+  function setPrimaryAuthor(authorId: string) {
+    setEditorState((current) => ({
+      ...current,
+      authorId,
+      authorIds: current.authorIds.includes(authorId)
+        ? current.authorIds
+        : [...current.authorIds, authorId],
+    }));
+  }
+
+  function addCoverCredit() {
+    setEditorState((current) => ({
+      ...current,
+      coverCredits: [...current.coverCredits, { name: "", role: "" }],
+    }));
+  }
+
+  function updateCoverCredit(index: number, key: keyof CoverCredit, value: string) {
+    setEditorState((current) => ({
+      ...current,
+      coverCredits: current.coverCredits.map((credit, creditIndex) =>
+        creditIndex === index ? { ...credit, [key]: value } : credit,
+      ),
+    }));
+  }
+
+  function removeCoverCredit(index: number) {
+    setEditorState((current) => ({
+      ...current,
+      coverCredits: current.coverCredits.filter((_, creditIndex) => creditIndex !== index),
+    }));
   }
 
   function handleTitleChange(value: string) {
@@ -463,11 +539,17 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
     const slug = createSlug(editorState.slug || trimmedTitle);
     const selectedCategoryRecord =
       categories.find((category) => category.id === editorState.categoryId) ?? null;
-    const selectedContributor =
-      contributors.find((contributor) => contributor.id === editorState.authorId) ?? null;
+    const selectedContributors = contributors.filter((contributor) =>
+      editorState.authorIds.includes(contributor.id),
+    );
+    const primaryContributor =
+      contributors.find((contributor) => contributor.id === editorState.authorId) ??
+      selectedContributors[0] ??
+      null;
     const bodyHtml = editorState.bodyHtml.trim();
     const bodyText = htmlToPlainText(bodyHtml);
     const excerpt = editorState.excerpt.trim() || bodyText.slice(0, 180);
+    const cleanCoverCredits = editorState.coverCredits.filter((credit) => credit.name.trim());
 
     if (!trimmedTitle) {
       toast.error("Article title is required.");
@@ -484,8 +566,8 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
       return;
     }
 
-    if (!selectedContributor) {
-      toast.error("Please select an author.");
+    if (!selectedContributors.length || !primaryContributor) {
+      toast.error("Please select at least one writer.");
       return;
     }
 
@@ -524,7 +606,9 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
         body_text: bodyText,
         category_id: selectedCategoryRecord.id,
         category: selectedCategoryRecord.title,
-        author_name: selectedContributor.display_name,
+        author_name: joinDisplayNames(
+          selectedContributors.map((contributor) => contributor.display_name),
+        ),
         image_url: uploadedCover.imageUrl || null,
         featured_image_alt: editorState.imageAlt.trim() || null,
         status: nextStatus,
@@ -533,6 +617,10 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
         scheduled_for: scheduledFor,
         published_at: publishedAt,
         cover_asset_id: uploadedCover.coverAssetId,
+        meta: {
+          ...editorState.meta,
+          coverCredits: cleanCoverCredits,
+        },
         updated_by: user.id,
       };
 
@@ -566,15 +654,31 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
 
       if (deleteAuthorError) throw deleteAuthorError;
 
-      const { error: authorLinkError } = await supabase.from("article_authors").insert({
-        article_id: savedArticleId,
-        contributor_id: selectedContributor.id,
-        credit_label: "Author",
-        display_order: 1,
-        is_primary: true,
-      });
+      const { error: authorLinkError } = await supabase.from("article_authors").insert(
+        selectedContributors.map((contributor, index) => ({
+          article_id: savedArticleId,
+          contributor_id: contributor.id,
+          credit_label: "Author",
+          display_order: index + 1,
+          is_primary: contributor.id === primaryContributor.id,
+        })),
+      );
 
       if (authorLinkError) throw authorLinkError;
+
+      await supabase.from("article_media").delete().eq("article_id", savedArticleId).eq("usage", "cover");
+
+      if (uploadedCover.coverAssetId) {
+        const { error: articleMediaError } = await supabase.from("article_media").insert({
+          article_id: savedArticleId,
+          asset_id: uploadedCover.coverAssetId,
+          usage: "cover",
+          sort_order: 1,
+          credit: formatCoverCredits(cleanCoverCredits) || null,
+        });
+
+        if (articleMediaError) throw articleMediaError;
+      }
 
       if (uploadedCover.coverAssetId) {
         await supabase
@@ -1143,10 +1247,12 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
                     </div>
                     <div className="admin-editor-stat">
                       <p className="text-xs uppercase tracking-[0.2em] text-emerald-700/70">
-                        Selected Author
+                        Writers
                       </p>
-                      <p className="mt-1 truncate font-semibold text-emerald-950">
-                        {selectedAuthor?.display_name ?? "Not set"}
+                      <p className="mt-1 font-semibold text-emerald-950">
+                        {selectedAuthorNames.length
+                          ? joinDisplayNames(selectedAuthorNames)
+                          : "Not set"}
                       </p>
                     </div>
                     <div className="admin-editor-stat">
@@ -1303,6 +1409,82 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
                           placeholder="Describe the image for accessibility"
                         />
                       </div>
+
+                      <div className="space-y-3 rounded-2xl border border-emerald-100 bg-white/90 p-4">
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-emerald-950">
+                              Photo and graphics credits
+                            </p>
+                            <p className="text-sm text-emerald-900/60">
+                              Add one or more names for photographers, graphic artists, layout artists,
+                              or other visual contributors.
+                            </p>
+                          </div>
+                          <Button type="button" variant="outline" onClick={addCoverCredit}>
+                            <Plus className="size-4" />
+                            Add credit
+                          </Button>
+                        </div>
+
+                        {editorState.coverCredits.length ? (
+                          <div className="space-y-3">
+                            {editorState.coverCredits.map((credit, index) => (
+                              <div
+                                key={`cover-credit-${index}`}
+                                className="grid gap-3 rounded-2xl border border-emerald-100 bg-stone-50/80 p-3 sm:grid-cols-[1.2fr_1fr_auto]"
+                              >
+                                <div className="space-y-2">
+                                  <Label htmlFor={`cover-credit-name-${index}`}>Contributor name</Label>
+                                  <Input
+                                    id={`cover-credit-name-${index}`}
+                                    value={credit.name}
+                                    onChange={(event) =>
+                                      updateCoverCredit(index, "name", event.target.value)
+                                    }
+                                    placeholder="e.g. Juan Dela Cruz"
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <Label htmlFor={`cover-credit-role-${index}`}>Role</Label>
+                                  <Input
+                                    id={`cover-credit-role-${index}`}
+                                    value={credit.role}
+                                    onChange={(event) =>
+                                      updateCoverCredit(index, "role", event.target.value)
+                                    }
+                                    placeholder="Photo, Graphics, Layout"
+                                  />
+                                </div>
+                                <div className="flex items-end">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    className="w-full text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+                                    onClick={() => removeCoverCredit(index)}
+                                  >
+                                    <Trash2 className="size-4" />
+                                    Remove
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/60 px-4 py-5 text-sm text-emerald-900/65">
+                            No visual credits added yet.
+                          </div>
+                        )}
+
+                        {coverCreditSummary ? (
+                          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700/70">
+                              Credit preview
+                            </p>
+                            <p className="mt-2 text-sm text-emerald-950">{coverCreditSummary}</p>
+                          </div>
+                        ) : null}
+                      </div>
                     </CardContent>
                   </Card>
 
@@ -1344,7 +1526,7 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
 
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-3">
-                          <Label htmlFor="article-author">Author</Label>
+                          <Label htmlFor="article-author">Writers</Label>
                           <Button
                             type="button"
                             variant="ghost"
@@ -1357,11 +1539,14 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
                           </Button>
                         </div>
                         <Select
-                          value={editorState.authorId}
-                          onValueChange={(value) => updateField("authorId", value)}
+                          value={pendingAuthorId}
+                          onValueChange={(value) => {
+                            setPendingAuthorId(value);
+                            addAuthor(value);
+                          }}
                         >
                           <SelectTrigger id="article-author">
-                            <SelectValue placeholder="Select an author" />
+                            <SelectValue placeholder="Add a writer" />
                           </SelectTrigger>
                           <SelectContent>
                             {contributors.map((contributor) => (
@@ -1371,6 +1556,57 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
                             ))}
                           </SelectContent>
                         </Select>
+
+                        {selectedAuthors.length ? (
+                          <div className="space-y-2 rounded-2xl border border-emerald-100 bg-white/90 p-3">
+                            {selectedAuthors.map((author) => {
+                              const isPrimary = editorState.authorId === author.id;
+
+                              return (
+                                <div
+                                  key={`author-pill-${author.id}`}
+                                  className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-100 bg-stone-50/80 px-3 py-3"
+                                >
+                                  <div>
+                                    <p className="font-medium text-emerald-950">
+                                      {author.display_name}
+                                    </p>
+                                    <p className="text-sm text-emerald-900/60">
+                                      {isPrimary ? "Primary byline" : "Supporting byline"}
+                                    </p>
+                                  </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    <Button
+                                      type="button"
+                                      variant={isPrimary ? "default" : "outline"}
+                                      className={
+                                        isPrimary
+                                          ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                                          : "border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                                      }
+                                      onClick={() => setPrimaryAuthor(author.id)}
+                                    >
+                                      {isPrimary ? "Primary writer" : "Set as primary"}
+                                    </Button>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      className="text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+                                      onClick={() => removeAuthor(author.id)}
+                                    >
+                                      <Trash2 className="size-4" />
+                                      Remove
+                                    </Button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/60 px-4 py-5 text-sm text-emerald-900/65">
+                            Select one or more writers for this article.
+                          </div>
+                        )}
                       </div>
 
                       <div className="grid gap-4 sm:grid-cols-2">
@@ -1532,7 +1768,9 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
                     Writer Credit
                   </p>
                   <p className="mt-2 text-sm text-emerald-950">
-                    {selectedAuthor?.display_name ?? "No author selected"}
+                    {selectedAuthorNames.length
+                      ? joinDisplayNames(selectedAuthorNames)
+                      : "No author selected"}
                   </p>
                 </div>
               </CardContent>
@@ -1893,7 +2131,14 @@ export function Dashboard({ user, onLogout }: DashboardProps) {
                 left.display_name.localeCompare(right.display_name),
               ),
             );
-            setEditorState((current) => ({ ...current, authorId: author.id }));
+            setEditorState((current) => ({
+              ...current,
+              authorId: author.id,
+              authorIds: current.authorIds.includes(author.id)
+                ? current.authorIds
+                : [...current.authorIds, author.id],
+            }));
+            setPendingAuthorId("");
             setIsAuthorDialogOpen(false);
           }}
         />

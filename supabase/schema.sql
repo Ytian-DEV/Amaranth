@@ -489,6 +489,20 @@ create table if not exists public.article_daily_metrics (
   primary key (article_id, metric_date)
 );
 
+create table if not exists public.article_comments (
+  id uuid primary key default gen_random_uuid(),
+  article_id uuid not null references public.articles (id) on delete cascade,
+  parent_id uuid references public.article_comments (id) on delete cascade,
+  author_name text not null,
+  author_email extensions.citext,
+  body text not null,
+  status text not null default 'approved' check (status in ('approved', 'pending', 'rejected', 'spam')),
+  approved_at timestamptz,
+  approved_by uuid references public.profiles (id) on delete set null,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
 create table if not exists public.contact_messages (
   id uuid primary key default gen_random_uuid(),
   name text not null,
@@ -762,6 +776,12 @@ before update on public.article_daily_metrics
 for each row
 execute function public.set_updated_at();
 
+drop trigger if exists article_comments_set_updated_at on public.article_comments;
+create trigger article_comments_set_updated_at
+before update on public.article_comments
+for each row
+execute function public.set_updated_at();
+
 drop trigger if exists contact_messages_set_updated_at on public.contact_messages;
 create trigger contact_messages_set_updated_at
 before update on public.contact_messages
@@ -855,6 +875,7 @@ create index if not exists articles_search_document_idx on public.articles using
 create index if not exists article_authors_contributor_idx on public.article_authors (contributor_id, display_order);
 create index if not exists article_media_article_usage_idx on public.article_media (article_id, usage, sort_order);
 create index if not exists article_daily_metrics_date_idx on public.article_daily_metrics (metric_date desc);
+create index if not exists article_comments_article_created_idx on public.article_comments (article_id, created_at desc);
 create index if not exists contact_messages_status_created_idx on public.contact_messages (status, created_at desc);
 create index if not exists article_submissions_status_created_idx on public.article_submissions (status, created_at desc);
 create index if not exists event_reports_status_created_idx on public.event_reports (status, created_at desc);
@@ -1162,6 +1183,7 @@ alter table public.article_authors enable row level security;
 alter table public.article_tags enable row level security;
 alter table public.article_media enable row level security;
 alter table public.article_daily_metrics enable row level security;
+alter table public.article_comments enable row level security;
 alter table public.contact_messages enable row level security;
 alter table public.article_submissions enable row level security;
 alter table public.submission_assets enable row level security;
@@ -1428,6 +1450,47 @@ using (true);
 drop policy if exists "article metrics editorial manage" on public.article_daily_metrics;
 create policy "article metrics editorial manage"
 on public.article_daily_metrics
+for all
+to authenticated
+using (public.can_manage_all_articles())
+with check (public.can_manage_all_articles());
+
+drop policy if exists "article comments public read approved" on public.article_comments;
+create policy "article comments public read approved"
+on public.article_comments
+for select
+to anon, authenticated
+using (
+  status = 'approved'
+  and exists (
+    select 1
+    from public.articles a
+    where a.id = article_comments.article_id
+      and a.status = 'published'
+      and coalesce(a.published_at, timezone('utc', now())) <= timezone('utc', now())
+  )
+);
+
+drop policy if exists "article comments public insert when enabled" on public.article_comments;
+create policy "article comments public insert when enabled"
+on public.article_comments
+for insert
+to anon, authenticated
+with check (
+  status in ('approved', 'pending')
+  and exists (
+    select 1
+    from public.articles a
+    where a.id = article_comments.article_id
+      and a.status = 'published'
+      and a.allow_comments
+      and coalesce(a.published_at, timezone('utc', now())) <= timezone('utc', now())
+  )
+);
+
+drop policy if exists "article comments editorial manage" on public.article_comments;
+create policy "article comments editorial manage"
+on public.article_comments
 for all
 to authenticated
 using (public.can_manage_all_articles())

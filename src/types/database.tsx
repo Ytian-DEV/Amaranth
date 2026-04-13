@@ -21,6 +21,13 @@ export interface Article {
   publish: boolean;
   created_at: string;
   updated_at: string;
+  subtitle?: string | null;
+  body_html?: string | null;
+  body_text?: string;
+  featured_image_alt?: string | null;
+  cover_asset_id?: string | null;
+  allow_comments?: boolean;
+  meta?: Record<string, any>;
 }
 
 export interface Category {
@@ -48,6 +55,11 @@ export interface ArticleWithCategory extends Article {
     slug: string;
     description: string;
   };
+}
+
+export interface CoverCredit {
+  name: string;
+  role: string;
 }
 
 export type CmsArticleStatus =
@@ -88,7 +100,26 @@ export interface CmsArticleAuthorLink {
   contributor_id: string;
   display_order: number;
   is_primary: boolean;
+  credit_label: string;
   contributors?: CmsContributor | CmsContributor[] | null;
+}
+
+export interface CmsArticleMediaRecord {
+  asset_id: string;
+  usage: string;
+  sort_order: number;
+  caption: string | null;
+  credit: string | null;
+}
+
+export interface ArticleComment {
+  id: string;
+  article_id: string;
+  author_name: string;
+  author_email: string | null;
+  body: string;
+  status: "approved" | "pending" | "rejected" | "spam";
+  created_at: string;
 }
 
 export interface CmsArticleRecord {
@@ -111,8 +142,10 @@ export interface CmsArticleRecord {
   cover_asset_id: string | null;
   editorial_priority: number;
   allow_comments: boolean;
+  meta?: Record<string, any>;
   categories?: CmsCategory | CmsCategory[] | null;
   article_authors?: CmsArticleAuthorLink[] | null;
+  article_media?: CmsArticleMediaRecord[] | null;
 }
 
 export interface CmsArticleEditorState {
@@ -124,6 +157,7 @@ export interface CmsArticleEditorState {
   bodyHtml: string;
   categoryId: string;
   authorId: string;
+  authorIds: string[];
   status: CmsArticleStatus;
   publishedAt: string;
   scheduledFor: string;
@@ -132,5 +166,7 @@ export interface CmsArticleEditorState {
   imageAlt: string;
   imageUrl: string;
   coverAssetId: string | null;
+  coverCredits: CoverCredit[];
+  meta: Record<string, any>;
   selectedImageFile: File | null;
 }
