@@ -39,7 +39,9 @@
 
 - `fix/server-esm-imports` (2026-10-18): production returned 500 MIDDLEWARE_INVOCATION_FAILED after the first merge to `main`. Vercel runs `middleware.ts` and `api/*` as plain Node ESM, so relative imports need `.js` (`./api/_lib/seo.js`). Fixed everywhere; `api/_lib/esm-imports.test.ts` guards it.
 
-**Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
+- B1 `feature/nav-more-menu` (2026-10-18): Header "More" opens a full-width mega menu (Figma 42:1077): a card per More section with icon, pitch and its newest story (fetched on first open), plus an "Also on Amaranth" strip. Esc and outside click close it; Esc returns focus to the button. 5 columns on desktop, 3 on tablet; phones keep the section chips.
+
+**Next:** B2 `feature/section-news` (the user asked for B1–B12 back to back).
 
 | # | Branch | Status |
 |---|---|---|
@@ -56,8 +58,18 @@
 | A11 | `feature/salingkusog-venues` | ✅ |
 | A12 | `feature/sports-landing` | ✅ |
 | A13 | `feature/salingkusog-social-cards` | ✅ |
-| B1 | `feature/nav-more-menu` | ⬜ |
-| B2–B12 | `feature/section-<slug>` (News, Feature, Literary, Blogs, Specials, Views, S&T, Investigative, Explainer, Bulletin, Stories) | ⬜ |
+| B1 | `feature/nav-more-menu` | ✅ |
+| B2 | `feature/section-news` | ⬜ |
+| B3 | `feature/section-feature` | ⬜ |
+| B4 | `feature/section-literary` | ⬜ |
+| B5 | `feature/section-blogs` | ⬜ |
+| B6 | `feature/section-specials` | ⬜ |
+| B7 | `feature/section-views` | ⬜ |
+| B8 | `feature/section-science-technology` | ⬜ |
+| B9 | `feature/section-investigative` | ⬜ |
+| B10 | `feature/section-explainer` | ⬜ |
+| B11 | `feature/section-bulletin` | ⬜ |
+| B12 | `feature/section-stories` | ⬜ |
 
 ## Decisions log
 - 2026-10-18 Statistics: keep Vercel Web Analytics (`@vercel/analytics`) alongside the first-party statistics (user's choice). The privacy page mentions it.

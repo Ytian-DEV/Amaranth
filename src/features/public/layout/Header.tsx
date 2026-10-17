@@ -6,6 +6,7 @@ import { LogoMark } from '@/components/ui/Logo';
 import { cn } from '@/lib/cn';
 import { formatLongDate } from '@/lib/format';
 import { publicationLinks, sectionPath, useNavSections, type NavSection } from '../nav';
+import { alsoLinks, menuMeta, useMenuLatest, type MenuLatest } from './moreMenu';
 
 function UtilityBar() {
   return (
@@ -72,21 +73,86 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     isActive ? 'border-lime text-lime' : 'border-transparent text-on-dark hover:border-on-dark-muted',
   );
 
+/** The "More" mega menu panel (Figma 42:1077): one card per section with its latest story. */
+export function MorePanel({ id, sections, latest, onNavigate }: { id?: string; sections: NavSection[]; latest?: MenuLatest; onNavigate?: () => void }) {
+  const { pathname } = useLocation();
+  return (
+    <div id={id} className="border-t border-green-900/10 bg-surface shadow-[0_16px_40px_rgb(10_46_31/0.18)]">
+      <ul className="container-page grid gap-4 py-7 md:grid-cols-3 lg:grid-cols-5 lg:gap-6 lg:py-9">
+        {sections.map((s, i) => {
+          const meta = menuMeta(s.slug, s.description);
+          const Icon = meta.icon;
+          const story = latest?.[s.slug];
+          const current = pathname === sectionPath(s.slug);
+          return (
+            <li key={s.slug} className={cn('group relative flex flex-col gap-2.5 rounded-xl p-[18px] transition-colors hover:bg-paper focus-within:bg-paper', current && 'bg-paper')}>
+              <span className={cn('grid size-11 place-items-center rounded-[10px] text-green-900', i % 2 ? 'bg-lime-soft' : 'bg-green-soft')} aria-hidden>
+                <Icon className="size-[22px]" />
+              </span>
+              <Link
+                to={sectionPath(s.slug)}
+                onClick={onNavigate}
+                aria-current={current ? 'page' : undefined}
+                className="font-serif text-[22px] font-semibold leading-tight text-ink after:absolute after:inset-0 after:rounded-xl group-hover:text-green-700"
+              >
+                {meta.label ?? s.name}
+                {meta.label && <span className="sr-only"> ({s.name})</span>}
+              </Link>
+              {meta.blurb && <p className="text-meta text-ink-muted">{meta.blurb}</p>}
+              {story && (
+                <div className="mt-auto flex flex-col gap-1 border-t border-line pt-2.5">
+                  <span className="text-kicker uppercase text-green-500-text">Latest</span>
+                  <Link to={`/article/${story.slug}`} onClick={onNavigate} className="relative z-10 text-button text-green-700 hover:underline">
+                    {story.title} <span aria-hidden>→</span>
+                  </Link>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      <div className="bg-green-soft">
+        <div className="container-page flex flex-wrap items-center gap-x-7 gap-y-2 py-4">
+          <p className="text-kicker uppercase text-green-700">Also on Amaranth</p>
+          <ul className="flex flex-wrap gap-x-7 gap-y-2">
+            {alsoLinks.map((l) => (
+              <li key={l.to}>
+                <Link to={l.to} onClick={onNavigate} className="text-button text-green-900 hover:text-green-700 hover:underline">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MoreMenu({ sections }: { sections: NavSection[] }) {
   const [open, setOpen] = useState(false);
+  const [opened, setOpened] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
   const menuId = useId();
   const location = useLocation();
   const active = sections.some((s) => location.pathname === sectionPath(s.slug));
+  const latest = useMenuLatest(
+    sections.map((s) => s.slug),
+    opened,
+  );
 
   useEffect(() => setOpen(false), [location.pathname]);
   useEffect(() => {
     if (!open) return;
+    setOpened(true);
     const onDown = (e: MouseEvent) => {
       if (!ref.current?.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key !== 'Escape') return;
+      setOpen(false);
+      button.current?.focus();
     };
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey);
@@ -98,32 +164,26 @@ function MoreMenu({ sections }: { sections: NavSection[] }) {
 
   if (!sections.length) return null;
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref}>
       <button
+        ref={button}
         type="button"
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((v) => !v)}
-        className={cn(navLinkClass({ isActive: active }), 'gap-1')}
+        onMouseEnter={() => setOpened(true)}
+        className={cn(navLinkClass({ isActive: active || open }), 'gap-1')}
       >
         More
         <ChevronDown className={cn('size-3.5 transition-transform', open && 'rotate-180')} aria-hidden />
       </button>
       {open && (
-        <ul id={menuId} className="absolute left-0 top-full z-30 min-w-56 rounded-b-lg border border-line bg-surface py-2 shadow-raised">
-          {sections.map((s) => (
-            <li key={s.slug}>
-              <NavLink
-                to={sectionPath(s.slug)}
-                className={({ isActive }) =>
-                  cn('block px-4 py-2 text-[14px] font-medium hover:bg-green-soft', isActive ? 'text-green-700' : 'text-ink')
-                }
-              >
-                {s.name}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+        <>
+          <div className="absolute inset-x-0 top-full z-20 h-[100dvh] bg-paper/50" aria-hidden onMouseDown={() => setOpen(false)} />
+          <div className="absolute inset-x-0 top-full z-30">
+            <MorePanel id={menuId} sections={sections} latest={latest.data} onNavigate={() => setOpen(false)} />
+          </div>
+        </>
       )}
     </div>
   );
@@ -133,7 +193,7 @@ function PrimaryNav() {
   const { primary, more } = useNavSections();
   const sectionActive = useSectionActive();
   return (
-    <nav aria-label="Sections" className="hidden bg-green-700 md:block">
+    <nav aria-label="Sections" className="relative hidden bg-green-700 md:block">
       <div className="container-page flex items-center justify-between">
         <ul className="flex gap-4 lg:gap-9">
           {primary.map((s) => (
