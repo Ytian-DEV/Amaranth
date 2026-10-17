@@ -1711,6 +1711,7 @@ begin
     select schemaname, tablename, policyname from pg_policies
     where schemaname = 'public'
       and tablename not like 'sk\_%' -- Salingkusog tables are owned by salingkusog.sql
+      and tablename not like 'stats\_%' and tablename <> 'staff_activity_daily' -- owned by stats.sql
   loop
     execute format('drop policy %I on %I.%I', r.policyname, r.schemaname, r.tablename);
   end loop;

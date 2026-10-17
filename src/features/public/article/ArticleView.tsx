@@ -109,7 +109,7 @@ export function ArticleView({
       )}
 
       <div className="container-page mt-8 max-w-[800px] md:mt-12">
-        <div className="prose-article" dangerouslySetInnerHTML={{ __html: html }} />
+        <div className="prose-article" data-track-body dangerouslySetInnerHTML={{ __html: html }} />
 
         {article.tags.length > 0 && (
           <ul aria-label="Tags" className="mt-10 flex flex-wrap gap-2">

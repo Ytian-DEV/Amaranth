@@ -1,6 +1,6 @@
-import { FileText, FolderInput, Images, LayoutDashboard, Megaphone, Settings, Trophy, Users, type LucideIcon } from 'lucide-react';
+import { BarChart3, FileText, FolderInput, Images, LayoutDashboard, Megaphone, Settings, Trophy, Users, type LucideIcon } from 'lucide-react';
 import type { AppRole } from '@/lib/database.types';
-import { canEditSk, isEditor } from '@/features/auth/permissions';
+import { canEditSk, canViewStats, isEditor } from '@/features/auth/permissions';
 
 export type NavContext = {
   /** on the Salingkusog team (sk_team) */
@@ -26,6 +26,7 @@ export const cmsNav: CmsNavItem[] = [
   { to: '/admin/events', label: 'Events', icon: Megaphone, allow: isEditor },
   { to: '/admin/media', label: 'Media Library', icon: Images, allow: everyone },
   { to: '/admin/salingkusog', label: 'Salingkusog', icon: Trophy, allow: (role, ctx) => canEditSk(role, ctx.skTeam) },
+  { to: '/admin/statistics', label: 'Statistics', icon: BarChart3, allow: canViewStats },
   { to: '/admin/staff', label: 'Staff', icon: Users, allow: isEditor },
   { to: '/admin/settings', label: 'Settings', icon: Settings, allow: isEditor },
 ];

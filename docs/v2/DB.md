@@ -8,6 +8,7 @@ The v1 schema is kept at `supabase/legacy/schema-v1.sql` for reference only; don
 |---|---|
 | `supabase/v2/schema.sql` | Types, tables, indexes, triggers, helpers (`app` schema), RPCs, RLS, storage buckets + policies |
 | `supabase/v2/salingkusog.sql` | Salingkusog (intramurals) add-on: editions, factions, venues, sports/events, athletes, matches, placements, awards, `sk_team`; medal-table / points / head-to-head / event views; RLS; Realtime on `sk_matches` |
+| `supabase/v2/stats.sql` | Statistics add-on (see `docs/v2/STATS.md`): pageview/share events, daily rollups, staff active time, `stats_*` read RPCs for Super admin / Executive Editor / Managing editor only, nightly pg_cron job |
 | `supabase/v2/seed.sql` | Reference data: 12 sections, categories, department contacts, home slots, site settings |
 | `supabase/v2/seed_board.sql` | Optional: the current editorial board from the v1 site (18 people, photos from `/public/images`) |
 | `supabase/tests/00_supabase_stub.sql` | Local stand-in for `auth`, `storage`, roles (never run on Supabase) |
@@ -30,6 +31,7 @@ The v1 schema is kept at `supabase/legacy/schema-v1.sql` for reference only; don
    (Empty or delete the old storage buckets from the Storage page if you don't need the files.)
 2. Paste **`supabase/v2/schema.sql`** → Run.
 3. Paste **`supabase/v2/salingkusog.sql`** → Run. (Base schema already deployed? Just paste this one; it only adds `sk_*` objects.)
+   Then paste **`supabase/v2/stats.sql`** → Run (statistics; also set `SUPABASE_SERVICE_ROLE_KEY` on Vercel, see `docs/v2/STATS.md`).
 4. Paste **`supabase/v2/seed.sql`** → Run.
    Optional: edit the term label/date at the top of **`supabase/v2/seed_board.sql`**, then paste → Run (fills the Editorial Board page).
 5. **Invite the first admin** (role comes only from this table; nobody can make themselves admin):
@@ -45,7 +47,7 @@ The v1 schema is kept at `supabase/legacy/schema-v1.sql` for reference only; don
    ```sql
    select cron.schedule('publish-due-articles', '*/5 * * * *', $$select app.publish_due_articles()$$);
    ```
-8. Re-running `schema.sql` / `salingkusog.sql` / `seed.sql` later is safe (no data changes besides re-asserting seed rows). `schema.sql` leaves the `sk_*` policies alone, so the order of re-runs doesn't matter.
+8. Re-running `schema.sql` / `salingkusog.sql` / `stats.sql` / `seed.sql` later is safe (no data changes besides re-asserting seed rows). `schema.sql` leaves the `sk_*`, `stats_*` and `staff_activity_daily` policies alone, so the order of re-runs doesn't matter.
 
 ## 3. Model summary
 - **Staff only have accounts.** `profiles.role` + `is_active`; `staff_invites` pre-authorises emails (with optional `section_slugs` for section editors → `profile_sections`).

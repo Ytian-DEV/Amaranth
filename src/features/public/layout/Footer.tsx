@@ -76,9 +76,14 @@ export function SiteFooter() {
 
         <div className="mt-6 flex items-center justify-between border-green-700 pt-0 text-meta text-on-dark-muted md:mt-12 md:border-t md:pt-6">
           <p>© {year} Amaranth · Visayas State University</p>
-          <Link to="/admin/login" className="hidden hover:text-on-dark md:inline">
-            Staff login
-          </Link>
+          <div className="flex gap-5">
+            <Link to="/privacy" className="hover:text-on-dark">
+              Privacy
+            </Link>
+            <Link to="/admin/login" className="hidden hover:text-on-dark md:inline">
+              Staff login
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

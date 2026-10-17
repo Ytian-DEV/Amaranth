@@ -10,6 +10,7 @@ import type { ProfileRow } from '@/lib/database.types';
 import { navFor } from '../nav';
 import { useOnSkTeam } from '../salingkusog/skApi';
 import { usePendingCount } from './usePendingCount';
+import { useStaffHeartbeat } from './useStaffHeartbeat';
 
 type ShellProfile = Pick<ProfileRow, 'display_name' | 'role' | 'avatar_url' | 'email'>;
 
@@ -90,6 +91,12 @@ function SidebarContent({ profile, pending, skTeam, onSignOut, onNavigate }: Nav
       <Link to="/" className="inline-flex items-center gap-2 text-meta text-on-dark-muted hover:text-on-dark">
         <ExternalLink className="size-4" aria-hidden /> View the site
       </Link>
+      <p className="text-[12px] leading-snug text-on-dark-muted">
+        Your active time in the newsroom is recorded for the editorial board.{' '}
+        <Link to="/privacy#staff" className="underline hover:text-on-dark" onClick={onNavigate}>
+          Privacy
+        </Link>
+      </p>
       <ProfileBlock profile={profile} onSignOut={onSignOut} />
     </div>
   );
@@ -174,6 +181,7 @@ export function AdminLayout() {
   const { profile, signOut } = useAuth();
   const pending = usePendingCount(isEditor(profile?.role));
   const skTeam = useOnSkTeam();
+  useStaffHeartbeat(Boolean(profile?.is_active));
   if (!profile) return null;
   return (
     <AdminShell profile={profile} pending={pending.data ?? 0} skTeam={skTeam.data ?? false} onSignOut={() => void signOut()}>

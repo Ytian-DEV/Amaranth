@@ -15,6 +15,7 @@ import { SubmitArticleForm, SubmitArticleLayout } from '@/features/public/intake
 import { SubmitEventForm, SubmitEventLayout } from '@/features/public/intake/SubmitEventPage';
 import { ContactForm, ContactLayout } from '@/features/public/intake/ContactPage';
 import { AboutPage } from '@/features/public/about/AboutPage';
+import { PrivacyPage } from '@/features/public/about/PrivacyPage';
 import { EditorialBoardView } from '@/features/public/about/EditorialBoardPage';
 import { defaultSections } from '@/features/public/nav';
 import { SalingkusogHeader } from '@/features/public/salingkusog/SalingkusogHeader';
@@ -103,6 +104,7 @@ export default function DevRoutes() {
         }
       />
       <Route path="about" element={<PublicShell><AboutPage /></PublicShell>} />
+      <Route path="privacy" element={<PublicShell><PrivacyPage /></PublicShell>} />
       <Route
         path="sports"
         element={

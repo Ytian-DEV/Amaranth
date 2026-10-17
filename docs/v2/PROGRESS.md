@@ -27,6 +27,14 @@
 - `feature/countdown-launch`: back to the first countdown design (the flat "official notice" redesign was reverted at the user's request). Clicking **Continue to Salingkusog** now plays a launch: cannon flash and screen shake, sparks from the button, a wall of fire rising, then a "Let the games begin" title card before the hub opens (~2.7 s). Click or Esc skips it, ctrl/cmd-click opens normally, and with reduced motion only the title card shows.
 - `fix/sk-more-categories`: sport categories **Combat sports**, **Pageant** and **Others** added (enum values, re-runnable). New events default to an individual bracket for combat sports and to judged for pageants. The user should re-paste `salingkusog.sql`, then re-file Arnis/Taekwondo, GMBM, Laro ng Lahi and On-the-Spot Painting in the newsroom.
 
+- `feature/statistics` (2026-10-18): first-party statistics, no third-party service. Docs: `docs/v2/STATS.md`.
+  - `/admin/statistics` for Super admin, Executive Editor and Managing editor only (enforced by `app.can_view_stats()` in RLS and every RPC): range picker, summary cards, SVG trend chart, top articles, authors, sections, sources, referrers, devices, browsers, share channels, staff active time (H:MM:SS).
+  - Tracker → Vercel route `/api/e` (bot filter, same-origin, no IP) → `stats_ingest` (service role only). Daily-rotating hashed ids, DNT/GPC counted without an id, staff and previews excluded.
+  - Retention: raw 13 months, daily totals forever, staff activity 24 months (nightly pg_cron job).
+  - Public `/privacy` page (footer link; `#staff` section linked from the newsroom sidebar).
+  - **The user must** paste `supabase/v2/stats.sql` (and re-paste `schema.sql` once), and add `SUPABASE_SERVICE_ROLE_KEY` on Vercel Production. Open question: keep or remove Vercel Web Analytics (`@vercel/analytics`).
+  - Fixtures: `/dev/admin/statistics`, `/dev/admin/statistics/empty`, `/dev/admin/statistics/loading`, `/dev/privacy`.
+
 **Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
 
 | # | Branch | Status |
