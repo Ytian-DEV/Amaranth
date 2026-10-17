@@ -417,7 +417,7 @@ export type DashboardStats = {
 
 // ---------------------------------------------------------------- Salingkusog (supabase/v2/salingkusog.sql)
 
-export type SkCategory = 'ball_games' | 'athletics' | 'racket_sports' | 'aquatics' | 'mind_games' | 'esports' | 'dance_cheer';
+export type SkCategory = 'ball_games' | 'athletics' | 'combat_sports' | 'racket_sports' | 'aquatics' | 'mind_games' | 'esports' | 'dance_cheer' | 'pageant' | 'others';
 export type SkDivision = 'men' | 'women' | 'mixed' | 'open';
 export type SkFormat = 'bracket' | 'round_robin' | 'timed' | 'judged';
 export type SkMatchStatus = 'upcoming' | 'live' | 'final' | 'postponed' | 'cancelled';

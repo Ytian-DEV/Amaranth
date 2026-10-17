@@ -3,11 +3,14 @@ import type { SkAwardKind, SkCategory, SkDivision, SkFormat } from '@/lib/databa
 export const categoryLabels: Record<SkCategory, string> = {
   ball_games: 'Ball games',
   athletics: 'Athletics',
+  combat_sports: 'Combat sports',
   racket_sports: 'Racket sports',
   aquatics: 'Aquatics',
   mind_games: 'Mind games',
   esports: 'Esports',
   dance_cheer: 'Dance & cheer',
+  pageant: 'Pageant',
+  others: 'Others',
 };
 
 export const divisionLabels: Record<SkDivision, string> = { men: 'Men', women: 'Women', mixed: 'Mixed', open: 'Open' };

@@ -23,6 +23,12 @@ do $$ begin
   create type public.sk_category as enum ('ball_games', 'athletics', 'racket_sports', 'aquatics', 'mind_games', 'esports', 'dance_cheer');
 exception when duplicate_object then null; end $$;
 
+-- categories added after the first release (re-runnable; nothing in this file uses them,
+-- so adding them inside the transaction is fine on PostgreSQL 12+)
+alter type public.sk_category add value if not exists 'combat_sports' after 'athletics';
+alter type public.sk_category add value if not exists 'pageant';
+alter type public.sk_category add value if not exists 'others';
+
 do $$ begin
   create type public.sk_division as enum ('men', 'women', 'mixed', 'open');
 exception when duplicate_object then null; end $$;

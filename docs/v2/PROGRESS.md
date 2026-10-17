@@ -25,6 +25,7 @@
   - Fixtures: `/dev/countdown` and `/dev/countdown/done`.
 
 - `feature/countdown-launch`: back to the first countdown design (the flat "official notice" redesign was reverted at the user's request). Clicking **Continue to Salingkusog** now plays a launch: cannon flash and screen shake, sparks from the button, a wall of fire rising, then a "Let the games begin" title card before the hub opens (~2.7 s). Click or Esc skips it, ctrl/cmd-click opens normally, and with reduced motion only the title card shows.
+- `fix/sk-more-categories`: sport categories **Combat sports**, **Pageant** and **Others** added (enum values, re-runnable). New events default to an individual bracket for combat sports and to judged for pageants. The user should re-paste `salingkusog.sql`, then re-file Arnis/Taekwondo, GMBM, Laro ng Lahi and On-the-Spot Painting in the newsroom.
 
 **Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
 
