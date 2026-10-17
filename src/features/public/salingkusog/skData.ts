@@ -157,3 +157,21 @@ export function useMatchExtras(matchId: string | undefined) {
     },
   });
 }
+
+/** Newest award with a quote, and its athlete (Sports landing spotlight). */
+export function useSpotlight(editionId: string | undefined) {
+  return useQuery({
+    queryKey: ['sk-public', 'spotlight', editionId],
+    enabled: !!editionId,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const award = unwrapMaybe(
+        await sb().from('sk_awards').select('*').eq('edition_id', editionId!).not('quote', 'is', null).order('day', { ascending: false }).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+      );
+      if (!award) return null;
+      const athlete = unwrapMaybe(await sb().from('sk_athletes').select('*').eq('id', award.athlete_id).maybeSingle());
+      const photo = athlete?.photo_asset_id ? unwrapMaybe(await sb().from('media_assets').select('*').eq('id', athlete.photo_asset_id).maybeSingle()) : null;
+      return athlete ? { award, athlete, photo } : null;
+    },
+  });
+}

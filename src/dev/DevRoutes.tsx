@@ -25,6 +25,7 @@ import { FactionView } from '@/features/public/salingkusog/FactionView';
 import { SportView } from '@/features/public/salingkusog/SportView';
 import { RecapView } from '@/features/public/salingkusog/RecapView';
 import { VenuesView } from '@/features/public/salingkusog/VenuesView';
+import { SportsLanding } from '@/features/public/section/SportsLanding';
 import { completedCount, winnerCards } from '@/features/public/salingkusog/winners';
 import type { SkCategory } from '@/lib/database.types';
 import type { ScheduleFilters } from '@/features/public/salingkusog/hub';
@@ -101,6 +102,20 @@ export default function DevRoutes() {
         }
       />
       <Route path="about" element={<PublicShell><AboutPage /></PublicShell>} />
+      <Route
+        path="sports"
+        element={
+          <PublicShell>
+            <SportsLanding
+              categories={[{ slug: 'basketball', name: 'Basketball' }, { slug: 'volleyball', name: 'Volleyball' }, { slug: 'athletics', name: 'Athletics' }, { slug: 'varsity', name: 'Varsity' }]}
+              items={fixtureSection.items}
+              hasMore
+              sk={{ edition: skFixture.edition, hub: skHub, table: skFixture.medalTable, phase: skPhase, spotlight: { award: skFixture.awards.find((a) => a.id === 'aw2')!, athlete: skFixture.athletes[1], photo: null } }}
+            />
+          </PublicShell>
+        }
+      />
+      <Route path="sports/no-salingkusog" element={<PublicShell><SportsLanding categories={[]} items={fixtureSection.items} hasMore={false} sk={null} /></PublicShell>} />
       <Route path="salingkusog/*" element={<PublicShell><FixtureSalingkusog /></PublicShell>} />
       <Route
         path="editorial-board"
@@ -169,6 +184,8 @@ const fakeSubmit = () => new Promise((resolve) => setTimeout(resolve, 700));
 const devScreens: { path: string; label: string }[] = [
   { path: 'components', label: 'Components' },
   { path: 'home', label: 'Home (Figma content)' },
+  { path: 'sports', label: 'Sports landing (with Salingkusog)' },
+  { path: 'sports/no-salingkusog', label: 'Sports landing (no edition)' },
   { path: 'salingkusog', label: 'Salingkusog — Medal Tally' },
   { path: 'salingkusog/schedule', label: 'Salingkusog — Schedule & Results (filters work)' },
   { path: 'salingkusog/winners', label: 'Salingkusog — Winners per game' },

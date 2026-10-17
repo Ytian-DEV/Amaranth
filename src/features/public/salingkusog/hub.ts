@@ -155,3 +155,20 @@ export function scheduleGroups<T extends Pick<SkMatchRow, 'status' | 'scheduled_
 /** "Thu, Oct 16" */
 export const dayLabel = (date: string, weekday = true) =>
   new Intl.DateTimeFormat('en-US', { ...(weekday ? { weekday: 'short' } : {}), month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
+
+/** Results strip: live games first, then the most recent finals. */
+export function latestResults<T extends Pick<SkMatchRow, 'status' | 'scheduled_at' | 'ended_at'>>(matches: T[], limit = 8) {
+  const live = matches.filter((m) => m.status === 'live');
+  const finals = matches
+    .filter((m) => m.status === 'final')
+    .sort((a, b) => (b.ended_at ?? b.scheduled_at).localeCompare(a.ended_at ?? a.scheduled_at));
+  return [...live, ...finals].slice(0, limit);
+}
+
+/** "Volleyball W": sport plus the division initial (or the event name when it is not a division). */
+export function shortEventLabel(sportName: string, event: { name: string; division: string }) {
+  const divisions: Record<string, string> = { men: 'M', women: 'W', mixed: 'X' };
+  const isDivisionName = /^(men|women|mixed|open)$/i.test(event.name.trim());
+  if (isDivisionName && divisions[event.division]) return `${sportName} ${divisions[event.division]}`;
+  return event.name.includes('·') ? event.name : `${sportName} · ${event.name}`;
+}
