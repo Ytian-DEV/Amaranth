@@ -14,6 +14,7 @@ import { autoExcerpt } from '@/lib/slug';
 import { getSupabase, unwrap } from '@/lib/supabase';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { uploadMediaImage } from '../../media/uploadMedia';
+import { MediaPickerDialog } from '../../media/MediaLibraryPage';
 import {
   emptyDraft,
   saveArticle,
@@ -72,6 +73,7 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
   const [save, setSave] = useState<SaveState>({ kind: 'idle' });
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [picking, setPicking] = useState(false);
   const [body, setBody] = useState({ key: 0, initial: initialDraft.bodyJson ?? initialDraft.bodyHtml });
   const lastSaved = useRef(snapshot(initialDraft));
   const saving = useRef(false);
@@ -320,6 +322,7 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
                 const asset = await uploadMediaImage(file, userId!);
                 patch({ cover: asset, coverAssetId: asset.id });
               }}
+              onChoose={() => setPicking(true)}
               onRemove={() => patch({ cover: null, coverAssetId: null })}
               onCaption={(coverCaption) => patch({ coverCaption })}
               onAlt={(alt) => setDraft((d) => (d.cover ? { ...d, cover: { ...d.cover, alt_text: alt } } : d))}
@@ -372,6 +375,7 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
           )}
         </aside>
       </div>
+      <MediaPickerDialog open={picking} onClose={() => setPicking(false)} onPick={(asset) => patch({ cover: asset, coverAssetId: asset.id })} />
     </div>
   );
 }

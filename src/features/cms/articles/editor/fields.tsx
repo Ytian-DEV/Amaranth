@@ -187,6 +187,7 @@ export function CoverField({
   caption,
   disabled,
   onUpload,
+  onChoose,
   onRemove,
   onCaption,
   onAlt,
@@ -195,6 +196,7 @@ export function CoverField({
   caption: string;
   disabled?: boolean;
   onUpload: (file: File) => Promise<void>;
+  onChoose?: () => void;
   onRemove: () => void;
   onCaption: (v: string) => void;
   onAlt: (v: string) => void;
@@ -249,6 +251,11 @@ export function CoverField({
           <ImagePlus className="size-6" aria-hidden />
           <span className="text-button">{busy ? 'Uploading…' : 'Upload cover photo'}</span>
         </button>
+      )}
+      {onChoose && (
+        <Button size="sm" variant="ghost" className="self-start" disabled={disabled} onClick={onChoose}>
+          Choose from library
+        </Button>
       )}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={captionId}>Caption</Label>

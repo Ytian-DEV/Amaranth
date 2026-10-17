@@ -18,6 +18,9 @@ import { RichText } from '@/features/cms/articles/editor/RichText';
 import { WorkflowPanel } from '@/features/cms/articles/editor/WorkflowPanel';
 import { ActivityPanel, RevisionsPanel } from '@/features/cms/articles/editor/HistoryPanels';
 import { ArticlesTable } from '@/features/cms/articles/ArticlesListPage';
+import { MediaGrid, MediaUploader } from '@/features/cms/media/MediaGrid';
+import { MediaDetails } from '@/features/cms/media/MediaDetails';
+import type { MediaAssetRow } from '@/lib/database.types';
 import { defaultSections } from '@/features/public/nav';
 import { fixtureEditor, fixtureQueue, fixtureRecent, fixtureStats, fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
 
@@ -150,11 +153,45 @@ export default function DevRoutes() {
           </AdminShell>
         }
       />
+      <Route
+        path="admin/media"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <div className="flex flex-col gap-6">
+              <MediaUploader onFiles={() => undefined} busy={false} />
+              <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+                <MediaGrid items={fixtureMedia} selectedId="m2" onSelect={() => undefined} />
+                <div className="rounded-[12px] border border-line bg-surface p-4">
+                  <MediaDetails asset={fixtureMedia[1]} usage={2} canDelete onSave={async () => undefined} onDelete={async () => undefined} />
+                </div>
+              </div>
+            </div>
+          </AdminShell>
+        }
+      />
       <Route path="auth/pending" element={<AccessPending />} />
       <Route path="auth/forbidden" element={<main id="main" className="container-page"><Forbidden /></main>} />
     </Routes>
   );
 }
+
+const fixtureMedia: MediaAssetRow[] = Array.from({ length: 8 }, (_, i) => ({
+  id: `m${i + 1}`,
+  bucket: 'media',
+  path: `/amaranth-logo.svg`,
+  kind: 'image',
+  mime_type: 'image/webp',
+  size_bytes: 120_000 + i * 9000,
+  width: 1600,
+  height: 1200,
+  alt_text: i === 2 ? '' : `Photo ${i + 1}`,
+  caption: null,
+  credit: null,
+  variants: [],
+  uploaded_by: null,
+  created_at: '2026-10-1' + (i % 9) + 'T08:00:00+08:00',
+  updated_at: '2026-10-10T08:00:00+08:00',
+}));
 
 const fakeSubmit = () => new Promise((resolve) => setTimeout(resolve, 700));
 
@@ -179,6 +216,7 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'admin/loading', label: 'CMS dashboard — loading' },
   { path: 'admin/articles', label: 'CMS articles table' },
   { path: 'admin/editor', label: 'CMS editor (body + workflow)' },
+  { path: 'admin/media', label: 'CMS media library' },
   { path: '/admin/login', label: 'Staff sign in' },
   { path: '/admin/forgot-password', label: 'Forgot password' },
   { path: '/admin/set-password', label: 'Set password (expired link state)' },

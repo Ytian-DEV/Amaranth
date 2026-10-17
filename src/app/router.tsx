@@ -12,7 +12,6 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
 const cmsPlaceholders: RouteObject[] = [
   ['submissions/*', 'Submissions', 'feature/cms-site-settings'],
   ['events/*', 'Events', 'feature/cms-site-settings'],
-  ['media/*', 'Media Library', 'feature/cms-media-library'],
   ['staff/*', 'Staff', 'feature/cms-people-board'],
   ['settings/*', 'Settings', 'feature/cms-site-settings'],
 ].map(([path, title, feature]) => ({
@@ -43,6 +42,7 @@ const adminRoutes: RouteObject[] = [
           { index: true, lazy: async () => ({ Component: (await import('@/features/cms/dashboard/DashboardPage')).DashboardPage }) },
           { path: 'articles', lazy: async () => ({ Component: (await import('@/features/cms/articles/ArticlesListPage')).ArticlesListPage }) },
           { path: 'articles/new', lazy: async () => ({ Component: (await import('@/features/cms/articles/editor/ArticleEditorPage')).ArticleEditorPage }) },
+          { path: 'media', lazy: async () => ({ Component: (await import('@/features/cms/media/MediaLibraryPage')).MediaLibraryPage }) },
           { path: 'articles/:id', lazy: async () => ({ Component: (await import('@/features/cms/articles/editor/ArticleEditorPage')).ArticleEditorPage }) },
           ...cmsPlaceholders,
         ],
