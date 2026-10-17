@@ -2,8 +2,8 @@
 // The browser sends batched events with navigator.sendBeacon. Here we drop bots and other sites,
 // reduce the user-agent to device/browser/OS families, classify the traffic source, and hand the
 // batch to public.stats_ingest() with the service role. The IP address is never forwarded.
-import { readEnv } from './_lib/supabaseRest';
-import { classifySource, classifyUa, isBot, refHost } from './_lib/traffic';
+import { readEnv } from './_lib/supabaseRest.js';
+import { classifySource, classifyUa, isBot, refHost } from './_lib/traffic.js';
 
 const MAX_BODY = 16_000;
 const MAX_EVENTS = 25;

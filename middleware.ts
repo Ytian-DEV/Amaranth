@@ -2,8 +2,8 @@
 // Facebook, Messenger, X and other crawlers don't run JavaScript, so for them we return
 // index.html with the article's (or section's) Open Graph tags already in <head>.
 // Everyone else gets the normal SPA untouched.
-import { CRAWLER_UA, injectMeta, SITE_DESCRIPTION, SITE_NAME, storageUrl, type PageMeta } from './api/_lib/seo';
-import { liveCardsQuery, readEnv, rest, type CardRow } from './api/_lib/supabaseRest';
+import { CRAWLER_UA, injectMeta, SITE_DESCRIPTION, SITE_NAME, storageUrl, type PageMeta } from './api/_lib/seo.js';
+import { liveCardsQuery, readEnv, rest, type CardRow } from './api/_lib/supabaseRest.js';
 
 export const config = {
   matcher: ['/article/:slug*', '/((?!api|assets|admin|dev|images|fonts|documents|.*\\..*).*)'],

@@ -1,5 +1,5 @@
-import { sitemapXml, type FeedItem } from './_lib/seo';
-import { liveCardsQuery, readEnv, rest, type CardRow } from './_lib/supabaseRest';
+import { sitemapXml, type FeedItem } from './_lib/seo.js';
+import { liveCardsQuery, readEnv, rest, type CardRow } from './_lib/supabaseRest.js';
 
 const STATIC_PATHS = ['/latest', '/salingkusog', '/salingkusog/schedule', '/salingkusog/winners', '/salingkusog/factions', '/salingkusog/sports', '/salingkusog/venues', '/about', '/privacy', '/editorial-board', '/archives', '/contact', '/submit', '/submit/event'];
 

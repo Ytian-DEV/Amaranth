@@ -37,6 +37,8 @@
 
 - `docs/pr-track-a` (2026-10-18): `docs/v2/PR.md` now covers Phase 1 + Track A + Statistics for the `develop` → `main` PR (the user opens it).
 
+- `fix/server-esm-imports` (2026-10-18): production returned 500 MIDDLEWARE_INVOCATION_FAILED after the first merge to `main`. Vercel runs `middleware.ts` and `api/*` as plain Node ESM, so relative imports need `.js` (`./api/_lib/seo.js`). Fixed everywhere; `api/_lib/esm-imports.test.ts` guards it.
+
 **Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
 
 | # | Branch | Status |

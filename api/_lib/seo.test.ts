@@ -1,4 +1,4 @@
-import { CRAWLER_UA, escapeHtml, injectMeta, rssXml, sitemapXml, storageUrl } from './seo';
+import { CRAWLER_UA, escapeHtml, injectMeta, rssXml, sitemapXml, storageUrl } from './seo.js';
 
 const shell = `<!doctype html><html><head><meta charset="UTF-8" /><meta name="description" content="old" /><title>Old</title></head><body><div id="root"></div></body></html>`;
 
