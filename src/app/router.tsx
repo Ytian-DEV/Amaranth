@@ -25,12 +25,39 @@ const adminRoutes: RouteObject[] = [
   },
 ];
 
+const legacy = async () => ({ Component: (await import('../legacy/App')).default });
+
+// v1 pages that haven't been rebuilt yet. Each feature removes its paths from here;
+// src/legacy is deleted in feature/v2-polish.
+const legacyRoutes: RouteObject[] = [
+  'about',
+  'editorial-board',
+  'archives',
+  'contact',
+  'submit-article',
+  'search',
+  'dashboard',
+  'article/:id',
+].map((path) => ({ path, lazy: legacy }));
+
+// Old v1 URLs → v2 URLs
+const redirects: RouteObject[] = [
+  ['home', '/'],
+  ['features', '/feature'],
+  ['blog', '/blogs'],
+  ['s&t', '/science-technology'],
+  ['submit', '/submit-article'],
+  ['submit/event', '/submit-article'],
+].map(([path, to]) => ({ path, element: <Navigate to={to} replace /> }));
+
 const publicRoutes: RouteObject[] = [
   {
     lazy: async () => ({ Component: (await import('@/features/public/layout/PublicLayout')).PublicLayout }),
     children: [
       { index: true, lazy: async () => ({ Component: (await import('@/features/public/home/HomePage')).HomePage }) },
-      { path: 'home', element: <Navigate to="/" replace /> },
+      { path: 'latest', lazy: async () => ({ Component: (await import('@/features/public/section/SectionPage')).LatestPage }) },
+      { path: ':section', lazy: async () => ({ Component: (await import('@/features/public/section/SectionPage')).SectionPage }) },
+      { path: '*', lazy: async () => ({ Component: (await import('@/features/public/NotFoundPage')).NotFoundPage }) },
     ],
   },
 ];
@@ -42,9 +69,9 @@ export const routes: RouteObject[] = [
     children: [
       ...devRoutes,
       ...adminRoutes,
+      ...legacyRoutes,
+      ...redirects,
       ...publicRoutes,
-      // v1 app for every route not rebuilt yet (removed in feature/v2-polish)
-      { path: '*', lazy: async () => ({ Component: (await import('../legacy/App')).default }) },
     ],
   },
 ];
