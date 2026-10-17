@@ -4,6 +4,7 @@ import { BlogsLanding } from './BlogsLanding';
 import { FeatureLanding } from './FeatureLanding';
 import { LiteraryLanding } from './LiteraryLanding';
 import { NewsLanding } from './NewsLanding';
+import { ScienceLanding } from './ScienceLanding';
 import { SpecialsLanding } from './SpecialsLanding';
 import { ViewsLanding } from './ViewsLanding';
 
@@ -15,4 +16,5 @@ export const sectionLandings: Record<string, ComponentType<LandingProps>> = {
   blogs: BlogsLanding,
   specials: SpecialsLanding,
   views: ViewsLanding,
+  'science-technology': ScienceLanding,
 };
