@@ -562,6 +562,8 @@ export type SkAwardRow = {
   created_at: string;
   updated_at: string;
 };
+/** One row for sk_set_placements (medal comes from the place). */
+export type SkPlacementInput = { place: number; faction_id: string; athlete_id?: string | null; result?: string | null; awarded_on?: string | null };
 export type SkTeamRow = { profile_id: string; added_by: string | null; created_at: string };
 
 export type SkMedalTableRow = {
@@ -706,6 +708,7 @@ export type Database = {
     };
     Functions: {
       record_article_view: { Args: { p_article_id: string }; Returns: undefined };
+      sk_set_placements: { Args: { p_event_id: string; p_rows: SkPlacementInput[] }; Returns: number };
       most_read_articles: { Args: { p_days?: number; p_limit?: number }; Returns: MostReadRow[] };
       archive_months: { Args: Record<string, never>; Returns: { month: string; articles: number }[] };
       search_articles: {

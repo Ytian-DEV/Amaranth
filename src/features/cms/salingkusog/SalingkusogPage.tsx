@@ -8,6 +8,11 @@ import type { SkEditionRow } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { CmsPageHeader } from '../ui';
+import { AwardsTab } from './awards/AwardsTab';
+import { ResultsEditor, ResultsTab } from './results/ResultsTab';
+import { Scorekeeper } from './scores/Scorekeeper';
+import { ScoresTab } from './scores/ScoresTab';
+import { AthletesTab } from './setup/AthletesTab';
 import { EditionTab } from './setup/EditionTab';
 import { FactionsTab } from './setup/FactionsTab';
 import { ImportTab } from './setup/ImportTab';
@@ -40,6 +45,10 @@ function useSelectedEdition(editions: SkEditionRow[] | undefined) {
 }
 
 const tabs = [
+  { to: 'scores', label: 'Scores' },
+  { to: 'results', label: 'Results & medals' },
+  { to: 'awards', label: 'Awards' },
+  { to: 'athletes', label: 'Athletes' },
   { to: 'edition', label: 'Edition' },
   { to: 'factions', label: 'Factions' },
   { to: 'sports', label: 'Sports & events' },
@@ -71,7 +80,7 @@ export function SalingkusogPage() {
     <div className="flex flex-col gap-6">
       <CmsPageHeader
         title="Salingkusog"
-        subtitle="VSU intramurals: set up the edition, factions, sports, venues and schedule."
+        subtitle="VSU intramurals: live scores, results, medals and awards, plus the edition setup."
         actions={
           editions.data && editions.data.length > 1 ? (
             <label className="flex items-center gap-2 text-[14px] font-semibold">
@@ -104,7 +113,13 @@ export function SalingkusogPage() {
         </ul>
       </nav>
       <Routes>
-        <Route index element={<Navigate to="edition" replace />} />
+        <Route index element={<Navigate to="scores" replace />} />
+        <Route path="scores" element={needsEdition((e) => <ScoresTab key={e.id} edition={e} />)} />
+        <Route path="scores/:matchId" element={needsEdition((e) => <Scorekeeper edition={e} />)} />
+        <Route path="results" element={needsEdition((e) => <ResultsTab key={e.id} edition={e} />)} />
+        <Route path="results/:eventId" element={needsEdition((e) => <ResultsEditor edition={e} />)} />
+        <Route path="awards" element={needsEdition((e) => <AwardsTab key={e.id} edition={e} />)} />
+        <Route path="athletes" element={needsEdition((e) => <AthletesTab key={e.id} editionId={e.id} />)} />
         <Route
           path="edition"
           element={

@@ -8,15 +8,21 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A3 `feature/salingkusog-cms-setup` merged — `/admin/salingkusog` tabs: **Edition** (dates, medal points, current/published, venue map), **Factions** (name, short name, slug, colour, logo, motto), **Sports & events** (category; division, format, team/individual, unit, main venue), **Venues** (map pin + position), **Schedule import** (CSV paste/upload → line-by-line check → insert `sk_matches`; duplicates skipped; times are UTC+8), **Team** (A2). Edition picker remembered per browser. Fixture `/dev/admin/salingkusog-setup`. Not done here: schedule PDF upload (the `archives` bucket only accepts publishers) — pick up in A6.
-**Next:** A4 `feature/salingkusog-scorekeeper` (awaiting go).
+**Last done:** A4 `feature/salingkusog-scorekeeper` merged. New tabs:
+- **Scores**: games by day (live first) and a phone scorekeeper at `/admin/salingkusog/scores/:id`. It has +1/+2/+3 for basketball and +1 elsewhere, start/finish/postpone/cancel/reopen, a live note, quarters/sets, and a box score (team stats plus player stats such as "PTS 24, REB 9"). Taps auto-save after 0.6 s and other scorekeepers' changes arrive over Realtime. You can also add or edit games by hand.
+- **Results & medals**: per event, with "Fill from games" suggesting the podium from the final, bronze game and semifinals. Saving calls the new `sk_set_placements` RPC.
+- **Awards**: MVP of the Day, Athlete of the Day and Finals MVP, with a stat line, game and quote.
+- **Athletes**.
+
+Fixtures: `/dev/admin/salingkusog-{scores,scorekeeper,results,awards}`. **The user must re-paste `supabase/v2/salingkusog.sql`** (it adds `sk_set_placements`; it is re-runnable).
+**Next:** A5 `feature/salingkusog-medal-tally` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
 | A1 | `feature/salingkusog-db` | ✅ |
 | A2 | `feature/salingkusog-team-access` | ✅ |
 | A3 | `feature/salingkusog-cms-setup` | ✅ |
-| A4 | `feature/salingkusog-scorekeeper` | ⬜ |
+| A4 | `feature/salingkusog-scorekeeper` | ✅ |
 | A5 | `feature/salingkusog-medal-tally` | ⬜ |
 | A6 | `feature/salingkusog-schedule` | ⬜ |
 | A7 | `feature/salingkusog-winners` | ⬜ |

@@ -153,6 +153,27 @@ update public.sk_matches set score_a = 0 where id = '00000000-0000-0000-0000-000
 select tests.expect_count('…and score updates change nothing',
   $$select 1 from public.sk_matches where id = '00000000-0000-0000-0000-0000000a0002' and score_a = 78$$, 1);
 
+-- ---------------------------------------------------------------- results in one step (sk_set_placements)
+select tests.login('me@test.local');
+select tests.expect_eq('set_placements replaces the 100m results',
+  (select public.sk_set_placements('00000000-0000-0000-0000-0000000e0a01', jsonb_build_array(
+     jsonb_build_object('place', 1, 'faction_id', '00000000-0000-0000-0000-00000000f001', 'result', '12.70s', 'awarded_on', '2026-10-14'),
+     jsonb_build_object('place', 2, 'faction_id', '00000000-0000-0000-0000-00000000f003', 'result', '12.84s', 'awarded_on', '2026-10-14'),
+     jsonb_build_object('place', 4, 'faction_id', '00000000-0000-0000-0000-00000000f002', 'result', ' ')))::text),
+  '3');
+select tests.expect_eq('medals follow the place; blank result is null',
+  (select string_agg(place || ':' || coalesce(medal::text, '-') || ':' || coalesce(result, '-'), ',' order by place) from public.sk_placements where event_id = '00000000-0000-0000-0000-0000000e0a01'),
+  '1:gold:12.70s,2:silver:12.84s,4:-:-');
+select tests.expect_error('set_placements rolls back on a bad row',
+  $$select public.sk_set_placements('00000000-0000-0000-0000-0000000e0a01', '[{"place": 1, "faction_id": "00000000-0000-0000-0000-00000000f001"}, {"place": 1, "faction_id": "00000000-0000-0000-0000-00000000f001"}]')$$);
+select tests.expect_count('…leaving the previous results', $$select 1 from public.sk_placements where event_id = '00000000-0000-0000-0000-0000000e0a01'$$, 3);
+select tests.login('writer@test.local');
+select tests.expect_error('set_placements needs Salingkusog access',
+  $$select public.sk_set_placements('00000000-0000-0000-0000-0000000e0a01', '[]')$$, '%Salingkusog team%');
+select tests.login(null);
+select tests.expect_error('readers cannot call set_placements',
+  $$select public.sk_set_placements('00000000-0000-0000-0000-0000000e0a01', '[]')$$);
+
 -- ---------------------------------------------------------------- one current edition
 select tests.login('me@test.local');
 select tests.expect_ok('a new current edition replaces the old one',

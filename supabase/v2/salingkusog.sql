@@ -490,6 +490,44 @@ where jsonb_typeof(k.value) = 'number'
 group by m.edition_id, m.event_id, s.athlete_id, k.key;
 
 -- -----------------------------------------------------------------------------
+-- RPC: replace an event's results in one step (newsroom "Results & medals").
+-- Medals follow the place (1 gold, 2 silver, 3 bronze); RLS still applies.
+-- p_rows: [{"place": 1, "faction_id": "…", "athlete_id": null, "result": "12.84s", "awarded_on": "2026-11-04"}]
+-- -----------------------------------------------------------------------------
+create or replace function public.sk_set_placements(p_event_id uuid, p_rows jsonb)
+returns integer
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  n integer;
+begin
+  if not app.can_edit_sk() then
+    raise exception 'Only the Salingkusog team can enter results.' using errcode = '42501';
+  end if;
+  if jsonb_typeof(p_rows) is distinct from 'array' then
+    raise exception 'Results must be a list.' using errcode = '22023';
+  end if;
+  delete from public.sk_placements where event_id = p_event_id;
+  insert into public.sk_placements (event_id, place, medal, faction_id, athlete_id, result, awarded_on)
+  select p_event_id,
+         (r ->> 'place')::smallint,
+         (case (r ->> 'place')::smallint when 1 then 'gold' when 2 then 'silver' when 3 then 'bronze' end)::public.sk_medal,
+         (r ->> 'faction_id')::uuid,
+         nullif(r ->> 'athlete_id', '')::uuid,
+         nullif(trim(r ->> 'result'), ''),
+         coalesce(nullif(r ->> 'awarded_on', '')::date, (now() at time zone 'Asia/Manila')::date)
+  from jsonb_array_elements(p_rows) as r;
+  get diagnostics n = row_count;
+  return n;
+end;
+$$;
+
+revoke execute on function public.sk_set_placements(uuid, jsonb) from public, anon;
+grant execute on function public.sk_set_placements(uuid, jsonb) to authenticated;
+
+-- -----------------------------------------------------------------------------
 -- RLS
 -- -----------------------------------------------------------------------------
 do $$
