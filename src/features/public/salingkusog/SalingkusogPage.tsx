@@ -10,6 +10,7 @@ import { ScheduleView } from './ScheduleView';
 import { FactionView } from './FactionView';
 import { SportView } from './SportView';
 import { RecapView } from './RecapView';
+import { VenuesView } from './VenuesView';
 import { useArticle } from '@/features/public/article/articleData';
 import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useArticleSlug, useEventLeaders, useMatchExtras, useMediaList, useResults, useStandings, type HubData } from './skData';
 import { completedCount, winnerCards } from './winners';
@@ -151,6 +152,12 @@ function RecapPage({ hub, editionId }: { hub: HubData; editionId: string }) {
   );
 }
 
+/** /salingkusog/venues — map pins and what's on at each venue. */
+function VenuesPage({ edition, hub }: { edition: SkEditionRow; hub: HubData }) {
+  const map = useMediaList([edition.map_asset_id]);
+  return <VenuesView hub={hub} map={map.data?.[0] ?? null} />;
+}
+
 /** /salingkusog/* — the intramurals hub. */
 export function SalingkusogPage() {
   const edition = useCurrentEdition();
@@ -208,9 +215,7 @@ export function SalingkusogPage() {
         <Route path="sports" element={<SportPage hub={hub.data} editionId={ed.id} />} />
         <Route path="sports/:slug" element={<SportPage hub={hub.data} editionId={ed.id} />} />
         <Route path="match/:id" element={<RecapPage hub={hub.data} editionId={ed.id} />} />
-        {hubTabs.slice(5).map((t) => (
-          <Route key={t.to} path={t.to.replace('/salingkusog/', '')} element={<ComingSoon title={t.label} />} />
-        ))}
+        <Route path="venues" element={<VenuesPage edition={ed} hub={hub.data} />} />
         <Route path="*" element={<ComingSoon title="This page" />} />
       </Routes>
     </>

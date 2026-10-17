@@ -11,6 +11,8 @@ import { bracketColumns, eventStatusLine, formatLine, leaderStat, roundRobinTabl
 import { SportView } from './SportView';
 import { eventRecord, sideTitle, statShares } from './recap';
 import { RecapView } from './RecapView';
+import { venueGuide } from './venues';
+import { VenuesView } from './VenuesView';
 import { fixtureArticle } from '@/dev/fixtures';
 import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
@@ -290,5 +292,33 @@ describe('Match recap', () => {
     expect(within(screen.getByRole('region', { name: 'Player stats' })).getAllByRole('row')).toHaveLength(3);
     expect(screen.getByRole('link', { name: 'Tiamat claim gold' })).toHaveAttribute('href', `/article/${fixtureArticle.slug}`);
     expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toHaveTextContent(/Schedule & Results \/\s*Basketball · Men \/\s*Final/);
+  });
+});
+
+describe('Venue guide', () => {
+  const now = new Date('2026-11-03T01:30:00Z'); // 9:30 AM on day 2
+
+  it('says what is on at each venue', () => {
+    const rows = venueGuide(hub, now);
+    expect(rows.map((r) => [r.venue.name, r.sports.join(', '), r.status.tone, r.status.text])).toEqual([
+      ['VSU Main Gymnasium', 'Basketball', 'live', 'Live now: Basketball · Men'],
+      ['University Oval', 'Athletics', 'none', 'No games scheduled yet'],
+      ['Annex Court', 'Volleyball', 'next', 'Next: Volleyball · Women  ·  2:30 PM'],
+    ]);
+    expect(rows.map((r) => r.pinned)).toEqual([true, true, false]);
+  });
+
+  it('pins venues with a map position and links them to the list', () => {
+    render(
+      <MemoryRouter>
+        <VenuesView hub={hub} map={null} now={now} />
+      </MemoryRouter>,
+    );
+    const pin = screen.getByRole('link', { name: 'VSU Main Gymnasium on the map' });
+    expect(pin).toHaveAttribute('href', '#venue-main-gym');
+    expect(pin).toHaveStyle({ left: '42%', top: '35%' });
+    expect(screen.queryByRole('link', { name: 'Annex Court on the map' })).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Annex Court' })).toBeInTheDocument();
+    expect(screen.getByText('Pin positions only; the campus map will be added soon.')).toBeInTheDocument();
   });
 });
