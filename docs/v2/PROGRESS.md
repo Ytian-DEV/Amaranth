@@ -43,7 +43,9 @@
 
 - B2 `feature/section-news` (2026-10-18): `/news` page 1 follows Figma 30:108: intro with category chips, lead story + campus briefs (times in Manila), top stories, more news feed, most read (this month, this section) and a tip box. Shared `section/landing/` toolkit (data hook, picker, blocks, registry) for B3–B12; `?view=all` (and any filter or page 2+) keeps the paginated list. Fixtures `/dev/section/:slug` and `/dev/section/:slug/empty`.
 
-**Next:** B3 `feature/section-feature`.
+- B3 `feature/section-feature` (2026-10-18): `/feature` follows Figma 31:252: full-bleed photo hero (newest story with a photo), category chips, two alternating long reads (6+ min), Profiles from People & Events (photo circle, name, dek as quote), an "In pictures" band when three more photo stories exist, then more features. Photo essays need a gallery model, so the band uses story photos for now.
+
+**Next:** B4 `feature/section-literary`.
 
 | # | Branch | Status |
 |---|---|---|
@@ -62,7 +64,7 @@
 | A13 | `feature/salingkusog-social-cards` | ✅ |
 | B1 | `feature/nav-more-menu` | ✅ |
 | B2 | `feature/section-news` | ✅ |
-| B3 | `feature/section-feature` | ⬜ |
+| B3 | `feature/section-feature` | ✅ |
 | B4 | `feature/section-literary` | ⬜ |
 | B5 | `feature/section-blogs` | ⬜ |
 | B6 | `feature/section-specials` | ⬜ |
