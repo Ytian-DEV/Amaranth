@@ -119,6 +119,24 @@ const samples: Record<string, Sample> = {
       ['opinion', 'Org fees should come with receipts', 'Transparency is not an attack on student leaders. It protects them.', 'A business administration student'],
     ],
   },
+  'science-technology': {
+    section: { slug: 'science-technology', name: 'Science & Technology', description: 'Research from VSU’s labs and fields, and the technology changing how we study, farm and live.', nav_placement: 'more' },
+    categories: [{ slug: 'science-technology', name: 'Science & Technology' }],
+    stories: [
+      ['science-technology', 'Can a fungus save Leyte’s abaca? VSU scientists think so', 'A native soil fungus showed promise against bunchy-top virus in a two-season field trial.', 'Science Desk'],
+      ['science-technology', 'Whether a native soil fungus can protect abaca plants'],
+      ['science-technology', 'Treated plants showed far fewer symptoms in field trials'],
+      ['science-technology', 'Abaca is a major income source for upland farmers'],
+      ['science-technology', 'A larger trial with partner farms is planned for 2027'],
+      ['science-technology', 'Purple yam variety bred for typhoon season'],
+      ['science-technology', 'Seagrass beds off Baybay are recovering'],
+      ['science-technology', 'Students build a Waray-English translation app'],
+      ['science-technology', 'Native chicken feed made from farm waste'],
+      ['science-technology', 'What is a large language model?', 'How chatbots predict the next word, and why they sometimes make things up.'],
+      ['science-technology', 'How does campus Wi-Fi actually work?', 'Access points, bandwidth and why the library is always slow at 3 p.m.'],
+      ['science-technology', 'What are drones doing over the farm?', 'Mapping crop health from the sky with special cameras.'],
+    ],
+  },
 };
 
 function build(sample: Sample): StoryItem[] {

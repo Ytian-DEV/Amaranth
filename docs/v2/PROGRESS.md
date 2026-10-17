@@ -53,7 +53,9 @@
 
 - B7 `feature/section-views` (2026-10-18): `/views` follows Figma 36:507: editorial hero (newest Editorial, else newest piece) with italic dek and cartoon frame when it has an image, Our columnists (newest three Column pieces), latest opinion list with italic deks, then Most read and a Letters to the editor box linking to Contact. The weekly poll and published letters need their own data; left out until then.
 
-**Next:** B8 `feature/section-science-technology`.
+- B8 `feature/section-science-technology` (2026-10-18): `/science-technology` follows Figma 39:579: intro with chips, lead story with an "Also in S&T" panel in the study-at-a-glance slot, From VSU labs cards (tinted photo, dot + category), and a dark numbered "Explained" band linking to /explainer. Study-at-a-glance facts and the innovation tracker need data the schema lacks.
+
+**Next:** B9 `feature/section-investigative`.
 
 | # | Branch | Status |
 |---|---|---|
@@ -77,7 +79,7 @@
 | B5 | `feature/section-blogs` | ✅ |
 | B6 | `feature/section-specials` | ✅ |
 | B7 | `feature/section-views` | ✅ |
-| B8 | `feature/section-science-technology` | ⬜ |
+| B8 | `feature/section-science-technology` | ✅ |
 | B9 | `feature/section-investigative` | ⬜ |
 | B10 | `feature/section-explainer` | ⬜ |
 | B11 | `feature/section-bulletin` | ⬜ |
