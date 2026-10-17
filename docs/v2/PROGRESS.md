@@ -47,7 +47,9 @@
 
 - B4 `feature/section-literary` (2026-10-18): `/literary` follows Figma 33:366: folio hero (newest work, drawn cover art on tablet and up), genre tab bar, Poem of the week (newest Poetry piece, dek as verse), "From the Folio" tiles in white / dark / lime, and the call-for-submissions band. A real Folio issue (title, semester, PDF) would need an issue type; for now the hero features the newest work.
 
-**Next:** B5 `feature/section-blogs`.
+- B5 `feature/section-blogs` (2026-10-18): `/blogs` follows Figma 34:349: intro, Featured bloggers (the four most recent writers by byline, with post counts and initials avatars), latest posts with byline, category tag and thumbnail, a Topics panel when the section has several categories, and the "Pitch a blog" box. Named blog columns, avatars, likes and comment counts need data the schema lacks.
+
+**Next:** B6 `feature/section-specials`.
 
 | # | Branch | Status |
 |---|---|---|
@@ -68,7 +70,7 @@
 | B2 | `feature/section-news` | ✅ |
 | B3 | `feature/section-feature` | ✅ |
 | B4 | `feature/section-literary` | ✅ |
-| B5 | `feature/section-blogs` | ⬜ |
+| B5 | `feature/section-blogs` | ✅ |
 | B6 | `feature/section-specials` | ⬜ |
 | B7 | `feature/section-views` | ⬜ |
 | B8 | `feature/section-science-technology` | ⬜ |
