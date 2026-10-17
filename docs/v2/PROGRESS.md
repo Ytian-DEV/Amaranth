@@ -2,21 +2,29 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/tooling-design-system`)
-**Last done:** `feature/db-v2-schema` merged into `develop` — fresh schema + seed + local test harness (95 checks).
-**Next step:** feature 1b `feature/tooling-design-system`.
+**Current branch:** `develop` (next: create `feature/auth-staff`)
+**Last done:** `feature/tooling-design-system` merged — tokens, fonts, Figma components, typed Supabase client, router with legacy fallback, `/dev/components`.
+**Next step:** `feature/auth-staff` (staff sign-in with PKCE, reset password, role guards under `/admin`).
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
 - 2026-10-17 Pre-v2 uncommitted Dashboard/index.css saved as WIP commit on `feature/edit-article-restructure` (not merged).
 - Branch order: DB first (user priority), then tooling.
 
+## Conventions (read before building)
+- v2 code: `src/app` (router, layouts), `src/components/ui` (atoms), `src/components/story` (Figma story components), `src/lib` (supabase, types, format, media), `src/dev` (fixtures + `/dev/*`, dev builds only), feature folders `src/features/<area>`.
+- `src/legacy` = v1 app, mounted by the router's `*` route until every page is rebuilt; excluded from lint/typecheck. Delete in `feature/v2-polish`.
+- Tokens: `src/styles/tokens.css` (`@theme static`) → utilities like `bg-paper text-ink font-serif text-headline-m text-kicker`. No hex in components (lint rule). `npm run check:contrast`.
+- Types: `src/lib/database.types.ts` is hand-written; update it with any schema change.
+- Gate before each feature's last commit: `npm run lint && npm run typecheck && npm test && npm run build` (+ `npm run db:test` for DB changes).
+- UI checks: `scripts/dom-check.js` at 375/768/1024/1440 on the `/dev/<screen>` fixture route. Claude's preview server: `.claude/launch.json` → port 5174 (the user may have their own dev server on 3000; leave it alone).
+
 ## Features
 | # | Branch | Status | Next step |
 |---|---|---|---|
 | 0 | — planning | ✅ | — |
 | 2 | `feature/db-v2-schema` | ✅ merged | Types are hand-written in tooling branch (no Supabase CLI/Docker locally) |
-| 1 | `feature/tooling-design-system` | ⬜ | ESLint, typecheck, Vitest, Tailwind v4 + tokens.css, fonts, UI components, `/dev/components`, fix `.gitignore` conflict markers |
+| 1 | `feature/tooling-design-system` | ✅ merged | — |
 | 3 | `feature/auth-staff` | ⬜ | |
 | 4 | `feature/public-shell-home` | ⬜ | |
 | 5 | `feature/section-pages` | ⬜ | |

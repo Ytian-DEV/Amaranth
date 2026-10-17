@@ -1,0 +1,213 @@
+// @ts-nocheck — legacy v1 code, removed in feature/v2-polish
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent } from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { LoadingScreen } from "../LoadingScreen";
+import { Calendar, Filter, Search, Loader, FileText } from "lucide-react";
+import { Input } from "../ui/input";
+import { supabase } from "../../lib/supabase";
+import type { Article, ArticleWithCategory } from "../../types/database";
+
+interface investigativePageProps {
+  activeCategory?: string;
+}
+
+// Define the investigative types we want to display in columns
+const investigativeTypes = [
+  { key: 'latest-investigative', title: 'Latest Investigative', category: null },
+  { key: 'investigative', title: 'Investigative', category: 'Investigative' }
+] as const;
+
+export function InvestigativePage({ activeCategory }: investigativePageProps) {
+  const [articles, setArticles] = useState<ArticleWithCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleArticleClick = (articleId: string) => {
+    navigate(`/article/${articleId}`);
+  };
+
+  useEffect(() => {
+    fetchArticles();
+  }, [activeCategory, searchQuery]);
+
+  async function fetchArticles() {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Build the base query with JOIN
+      let query = supabase
+        .from('articles')
+        .select(`
+          *,
+          categories!inner (
+            title,
+            slug,
+            description
+          )
+        `)
+        .eq('publish', true);
+
+      // Apply search filter if needed
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,contents.ilike.%${searchQuery}%,excerpt.ilike.%${searchQuery}%`);
+      }
+
+      // Add ordering and execute
+      const { data, error } = await query.order('published_date', { ascending: false });
+
+      if (error) {
+        console.error('Supabase error:', error);
+        setError(error.message);
+        return;
+      }
+
+      // Filter for investigative categories only using the joined category title
+      const investigativeArticles = (data || []).filter(article => 
+        article.categories?.title?.includes('Investigative')
+      );
+
+      setArticles(investigativeArticles as ArticleWithCategory[]);
+      
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError('Failed to load articles');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Filter articles for each investigative type
+  const getArticlesForType = (investigativeType: typeof investigativeTypes[number]) => {
+    if (investigativeType.key === 'latest-investigative') {
+      // Latest investigative: Show latest 3 articles from all investigative types
+      return articles.slice(0, 3);
+    }
+    
+    return articles.filter(article => 
+      article.categories?.title === investigativeType.category
+    );
+  };
+
+  if (loading) {
+    return <LoadingScreen title="AMARANTH" subtitle="Loading investigative reports..." minHeightClassName="min-h-[20rem]" />;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-red-600 mb-4">Error: {error}</div>
+        <Button onClick={fetchArticles} variant="outline">
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+
+      {/* investigative Columns */}
+      {investigativeTypes.map((investigativeType) => {
+        const typeArticles = getArticlesForType(investigativeType);
+        
+        if (typeArticles.length === 0) return null;
+
+        return (
+          <section key={investigativeType.key} className="space-y-4">
+            <div className="border-b border-gray-200 pb-2">
+              <h2 className="text-2xl font-bold text-gray-900">{investigativeType.title}</h2>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {typeArticles.map((article) => (
+                <ArticleCard 
+                  key={article.id} 
+                  article={article} 
+                  onClick={() => handleArticleClick(article.id)}
+                />
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      {articles.length === 0 && (
+        <Card>
+          <CardContent className="text-center py-12">
+            <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No investigative articles found</h3>
+            <p className="text-gray-600">
+              {searchQuery 
+                ? `No investigative articles match your search for "${searchQuery}"`
+                : 'No investigative articles have been published yet'
+              }
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// Individual Article Card Component
+interface ArticleCardProps {
+  article: ArticleWithCategory;
+  onClick: () => void;
+}
+
+function ArticleCard({ article, onClick }: ArticleCardProps) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <Card 
+      className="h-full hover:shadow-lg transition-shadow duration-200 cursor-pointer group"
+      onClick={onClick}
+    >
+      <CardContent className="p-0 h-full flex flex-col">
+        {article.image_url && (
+          <div className="aspect-video overflow-hidden">
+            <img 
+              src={article.image_url} 
+              alt={article.title}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </div>
+        )}
+        
+        <div className="p-4 flex-1 flex flex-col">
+          <Badge variant="secondary" className="mb-2 self-start">
+            {article.categories?.title || 'Uncategorized'}
+          </Badge>
+
+          <h3 className="font-semibold text-emerald-600 text-lg mb-2 line-clamp-2 group-hover:text-light-gray transition-colors flex-1">
+            {article.title}
+          </h3>
+
+          <p className="text-light-gray text-sm mb-3 line-clamp-3">
+            {article.excerpt}
+          </p>
+
+          <div className="flex items-center justify-between text-xs text-gray-500 mt-auto">
+            <span>By {article.author_name}</span>
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>{formatDate(article.published_date)}</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
