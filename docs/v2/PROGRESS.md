@@ -8,14 +8,16 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A4 `feature/salingkusog-scorekeeper` merged. New tabs:
-- **Scores**: games by day (live first) and a phone scorekeeper at `/admin/salingkusog/scores/:id`. It has +1/+2/+3 for basketball and +1 elsewhere, start/finish/postpone/cancel/reopen, a live note, quarters/sets, and a box score (team stats plus player stats such as "PTS 24, REB 9"). Taps auto-save after 0.6 s and other scorekeepers' changes arrive over Realtime. You can also add or edit games by hand.
-- **Results & medals**: per event, with "Fill from games" suggesting the podium from the final, bronze game and semifinals. Saving calls the new `sk_set_placements` RPC.
-- **Awards**: MVP of the Day, Athlete of the Day and Finals MVP, with a stat line, game and quote.
-- **Athletes**.
+**Last done:** A5 `feature/salingkusog-medal-tally` merged: the public page `/salingkusog` (Figma 13:123 / 22:2139).
+- Hub header: mark, edition, live count, "Day x of y", tabs and a faction stripe.
+- Podium.
+- Medal table: a table on desktop, cards on phones.
+- SVG points race with a hidden data table.
+- Medal breakdown.
+- Live & up next.
 
-Fixtures: `/dev/admin/salingkusog-{scores,scorekeeper,results,awards}`. **The user must re-paste `supabase/v2/salingkusog.sql`** (it adds `sk_set_placements`; it is re-runnable).
-**Next:** A5 `feature/salingkusog-medal-tally` (awaiting go).
+The page refreshes every 60 s and over Realtime on game changes. Other hub tabs show "coming soon" until A6–A11. New tokens: night, night-2, gold, silver, bronze, bronze-deep. Medal chips use ink text on gold and silver and white on bronze-deep, for AA contrast; the design has white on all three. Sports in the site menu is highlighted on /salingkusog, and the page is in the sitemap. Fixture: `/dev/salingkusog`.
+**Next:** A6 `feature/salingkusog-schedule` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
@@ -23,7 +25,7 @@ Fixtures: `/dev/admin/salingkusog-{scores,scorekeeper,results,awards}`. **The us
 | A2 | `feature/salingkusog-team-access` | ✅ |
 | A3 | `feature/salingkusog-cms-setup` | ✅ |
 | A4 | `feature/salingkusog-scorekeeper` | ✅ |
-| A5 | `feature/salingkusog-medal-tally` | ⬜ |
+| A5 | `feature/salingkusog-medal-tally` | ✅ |
 | A6 | `feature/salingkusog-schedule` | ⬜ |
 | A7 | `feature/salingkusog-winners` | ⬜ |
 | A8 | `feature/salingkusog-factions` | ⬜ |

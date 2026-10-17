@@ -16,6 +16,9 @@ import { ContactForm, ContactLayout } from '@/features/public/intake/ContactPage
 import { AboutPage } from '@/features/public/about/AboutPage';
 import { EditorialBoardView } from '@/features/public/about/EditorialBoardPage';
 import { defaultSections } from '@/features/public/nav';
+import { SalingkusogHeader } from '@/features/public/salingkusog/SalingkusogHeader';
+import { MedalTallyView } from '@/features/public/salingkusog/MedalTallyView';
+import { skFixture } from './skFixtures';
 import { fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
 
 /** /dev/* — fixture screens for checking UI without production data (dev builds only). */
@@ -88,6 +91,7 @@ export default function DevRoutes() {
         }
       />
       <Route path="about" element={<PublicShell><AboutPage /></PublicShell>} />
+      <Route path="salingkusog/*" element={<PublicShell><FixtureSalingkusog /></PublicShell>} />
       <Route
         path="editorial-board"
         element={
@@ -116,6 +120,18 @@ export default function DevRoutes() {
 }
 
 
+const skHub = { factions: skFixture.factions, sports: skFixture.sports, events: skFixture.events, venues: skFixture.venues, logos: [], matches: skFixture.matches };
+const skPhase = { kind: 'during', day: 4, of: 6 } as const;
+
+function FixtureSalingkusog() {
+  return (
+    <>
+      <SalingkusogHeader edition={skFixture.edition} factions={skFixture.factions} sportsCount={18} liveCount={1} phase={skPhase} />
+      <MedalTallyView edition={skFixture.edition} hub={skHub} table={skFixture.medalTable} race={skFixture.pointsByDay} phase={skPhase} now={new Date('2026-11-03T01:30:00Z')} />
+    </>
+  );
+}
+
 // CMS fixtures pull in the editor (TipTap); keep them out of the public fixture chunk.
 const AdminFixtures = lazy(() => import('./AdminFixtures'));
 
@@ -124,6 +140,7 @@ const fakeSubmit = () => new Promise((resolve) => setTimeout(resolve, 700));
 const devScreens: { path: string; label: string }[] = [
   { path: 'components', label: 'Components' },
   { path: 'home', label: 'Home (Figma content)' },
+  { path: 'salingkusog', label: 'Salingkusog — Medal Tally' },
   { path: 'home/empty', label: 'Home — empty' },
   { path: 'home/loading', label: 'Home — loading' },
   { path: 'section', label: 'Section page' },

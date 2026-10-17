@@ -9,6 +9,8 @@
  * Added for WCAG AA (small text ≥ 4.5:1 on paper, surface, green-soft, lime-soft):
  *   --color-green-500-text  #1b7943  (Figma green-500 #1f8a4c is 4.12:1 on paper)
  *   --color-lime-dark-text  #58720c  (Figma lime-dark #6e8f0f is 3.53:1 on paper)
+ *   medal chips: Figma draws white numbers on gold/silver/bronze (1.9–3.6:1), so chips
+ *   use ink on gold and silver and white on --color-bronze-deep #8a5526.
  * Run `npm run check:contrast` after changing colours.
  */
 @theme static {
@@ -37,6 +39,14 @@
   --color-scrim: rgb(10 46 31 / 0.55);
   --color-transparent: transparent;
   --color-current: currentColor;
+
+  /* Salingkusog (dark hub header, medals) */
+  --color-night: #0e1512;
+  --color-night-2: #1c2622;
+  --color-gold: #d4a017;
+  --color-silver: #9aa3ad;
+  --color-bronze: #b87333;
+  --color-bronze-deep: #8a5526;
 
   /* CMS status pills */
   --color-status-review: #7a5200;

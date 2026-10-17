@@ -60,6 +60,12 @@ function Masthead() {
   );
 }
 
+/** Salingkusog pages live under Sports. */
+const useSectionActive = () => {
+  const { pathname } = useLocation();
+  return (slug: string, isActive: boolean) => isActive || (slug === 'sports' && pathname.startsWith('/salingkusog'));
+};
+
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
     'flex h-[52px] items-center border-b-[3px] text-nav uppercase transition-colors',
@@ -125,13 +131,14 @@ function MoreMenu({ sections }: { sections: NavSection[] }) {
 
 function PrimaryNav() {
   const { primary, more } = useNavSections();
+  const sectionActive = useSectionActive();
   return (
     <nav aria-label="Sections" className="hidden bg-green-700 md:block">
       <div className="container-page flex items-center justify-between">
         <ul className="flex gap-4 lg:gap-9">
           {primary.map((s) => (
             <li key={s.slug}>
-              <NavLink to={sectionPath(s.slug)} className={navLinkClass}>
+              <NavLink to={sectionPath(s.slug)} className={({ isActive }) => navLinkClass({ isActive: sectionActive(s.slug, isActive) })}>
                 {s.name}
               </NavLink>
             </li>
@@ -216,6 +223,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
 
 function SectionChips() {
   const { primary, more } = useNavSections();
+  const sectionActive = useSectionActive();
   return (
     <nav aria-label="Sections" className="bg-green-700 md:hidden">
       <ul data-scroll-x className="no-scrollbar flex gap-2 overflow-x-auto px-4 py-2.5">
@@ -226,7 +234,7 @@ function SectionChips() {
               className={({ isActive }) =>
                 cn(
                   'inline-flex h-8 items-center rounded-full border px-3.5 text-nav uppercase',
-                  isActive ? 'border-lime bg-lime text-green-900' : 'border-green-500 text-on-dark',
+                  sectionActive(s.slug, isActive) ? 'border-lime bg-lime text-green-900' : 'border-green-500 text-on-dark',
                 )
               }
             >

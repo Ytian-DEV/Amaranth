@@ -72,6 +72,7 @@ const publicRoutes: RouteObject[] = [
       { path: 'search', lazy: async () => ({ Component: (await import('@/features/public/search/SearchPage')).SearchPage }) },
       { path: 'archives', lazy: async () => ({ Component: (await import('@/features/public/archives/ArchivesPage')).ArchivesPage }) },
       { path: 'archives/:month', lazy: async () => ({ Component: (await import('@/features/public/archives/ArchivesPage')).ArchiveMonthPage }) },
+      { path: 'salingkusog/*', lazy: async () => ({ Component: (await import('@/features/public/salingkusog/SalingkusogPage')).SalingkusogPage }) },
       { path: 'latest', lazy: async () => ({ Component: (await import('@/features/public/section/SectionPage')).LatestPage }) },
       { path: ':section', lazy: async () => ({ Component: (await import('@/features/public/section/SectionPage')).SectionPage }) },
       { path: '*', lazy: async () => ({ Component: (await import('@/features/public/NotFoundPage')).NotFoundPage }) },
