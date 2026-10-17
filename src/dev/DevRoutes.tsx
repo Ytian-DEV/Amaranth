@@ -1,5 +1,6 @@
 import { Link, Route, Routes } from 'react-router-dom';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import { AccessPending, Forbidden } from '@/features/auth/guards';
 import { ComponentsPreview } from './ComponentsPreview';
 
 /** /dev/* — fixture screens for checking UI without production data (dev builds only). */
@@ -8,11 +9,20 @@ export default function DevRoutes() {
     <Routes>
       <Route index element={<DevIndex />} />
       <Route path="components" element={<ComponentsPreview />} />
+      <Route path="auth/pending" element={<AccessPending />} />
+      <Route path="auth/forbidden" element={<main id="main" className="container-page"><Forbidden /></main>} />
     </Routes>
   );
 }
 
-const devScreens: { path: string; label: string }[] = [{ path: 'components', label: 'Components' }];
+const devScreens: { path: string; label: string }[] = [
+  { path: 'components', label: 'Components' },
+  { path: '/admin/login', label: 'Staff sign in' },
+  { path: '/admin/forgot-password', label: 'Forgot password' },
+  { path: '/admin/set-password', label: 'Set password (expired link state)' },
+  { path: 'auth/pending', label: 'Access pending' },
+  { path: 'auth/forbidden', label: 'Forbidden' },
+];
 
 function DevIndex() {
   useDocumentTitle('Dev screens');

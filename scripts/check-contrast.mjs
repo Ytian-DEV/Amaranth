@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // WCAG contrast check for the colour tokens in src/styles/tokens.css.
 // Fails (exit 1) when a pair used for text drops below its required ratio.
 import { readFileSync } from 'node:fs';

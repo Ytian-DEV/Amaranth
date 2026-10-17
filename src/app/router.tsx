@@ -8,12 +8,30 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
   ? [{ path: 'dev/*', lazy: async () => ({ Component: (await import('../dev/DevRoutes')).default }) }]
   : [];
 
+const adminRoutes: RouteObject[] = [
+  { path: 'admin/login', lazy: async () => ({ Component: (await import('@/features/auth/LoginPage')).LoginPage }) },
+  {
+    path: 'admin/forgot-password',
+    lazy: async () => ({ Component: (await import('@/features/auth/ForgotPasswordPage')).ForgotPasswordPage }),
+  },
+  {
+    path: 'admin/set-password',
+    lazy: async () => ({ Component: (await import('@/features/auth/SetPasswordPage')).SetPasswordPage }),
+  },
+  {
+    path: 'admin',
+    lazy: async () => ({ Component: (await import('@/features/auth/guards')).RequireStaff }),
+    children: [{ index: true, lazy: async () => ({ Component: (await import('@/features/cms/AdminHome')).AdminHome }) }],
+  },
+];
+
 export const routes: RouteObject[] = [
   {
     element: <RootLayout />,
     errorElement: <RouteError />,
     children: [
       ...devRoutes,
+      ...adminRoutes,
       // v1 app for every route not rebuilt yet (removed in feature/v2-polish)
       { path: '*', lazy: async () => ({ Component: (await import('../legacy/App')).default }) },
     ],

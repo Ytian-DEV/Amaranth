@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/auth-staff`)
-**Last done:** `feature/tooling-design-system` merged — tokens, fonts, Figma components, typed Supabase client, router with legacy fallback, `/dev/components`.
-**Next step:** `feature/auth-staff` (staff sign-in with PKCE, reset password, role guards under `/admin`).
+**Current branch:** `develop` (next: create `feature/public-shell-home`)
+**Last done:** `feature/auth-staff` merged — `/admin/login`, `/admin/forgot-password`, `/admin/set-password` (invite + recovery), `RequireStaff`/`RequireRole` guards, `permissions.ts` mirroring DB rules, temporary `/admin` landing.
+**Next step:** `feature/public-shell-home` — utility bar, masthead, nav (+More, mobile chips/drawer), ticker, footer, home page per Figma 4:2 / 7:64; replace legacy `/` route.
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -17,7 +17,7 @@
 - Tokens: `src/styles/tokens.css` (`@theme static`) → utilities like `bg-paper text-ink font-serif text-headline-m text-kicker`. No hex in components (lint rule). `npm run check:contrast`.
 - Types: `src/lib/database.types.ts` is hand-written; update it with any schema change.
 - Gate before each feature's last commit: `npm run lint && npm run typecheck && npm test && npm run build` (+ `npm run db:test` for DB changes).
-- UI checks: `scripts/dom-check.js` at 375/768/1024/1440 on the `/dev/<screen>` fixture route. Claude's preview server: `.claude/launch.json` → port 5174 (the user may have their own dev server on 3000; leave it alone).
+- UI checks: run `window.__domCheck()` (dev builds, `src/dev/domCheck.ts`) at 375/768/1024/1440 on the `/dev/<screen>` fixture route. Claude's preview server: `.claude/launch.json` → port 5174 (the user may have their own dev server on 3000; leave it alone).
 
 ## Features
 | # | Branch | Status | Next step |
@@ -25,7 +25,7 @@
 | 0 | — planning | ✅ | — |
 | 2 | `feature/db-v2-schema` | ✅ merged | Types are hand-written in tooling branch (no Supabase CLI/Docker locally) |
 | 1 | `feature/tooling-design-system` | ✅ merged | — |
-| 3 | `feature/auth-staff` | ⬜ | |
+| 3 | `feature/auth-staff` | ✅ merged | Login not exercised against a live v2 project yet (needs schema pasted + invited user) |
 | 4 | `feature/public-shell-home` | ⬜ | |
 | 5 | `feature/section-pages` | ⬜ | |
 | 6 | `feature/article-page` | ⬜ | |
