@@ -12,8 +12,10 @@ import { SearchView } from '@/features/public/search/SearchView';
 import { SubmitArticleForm, SubmitArticleLayout } from '@/features/public/intake/SubmitArticlePage';
 import { SubmitEventForm, SubmitEventLayout } from '@/features/public/intake/SubmitEventPage';
 import { ContactForm, ContactLayout } from '@/features/public/intake/ContactPage';
+import { AdminShell } from '@/features/cms/layout/AdminLayout';
+import { DashboardView } from '@/features/cms/dashboard/DashboardView';
 import { defaultSections } from '@/features/public/nav';
-import { fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
+import { fixtureEditor, fixtureQueue, fixtureRecent, fixtureStats, fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
 
 /** /dev/* — fixture screens for checking UI without production data (dev builds only). */
 export default function DevRoutes() {
@@ -84,6 +86,30 @@ export default function DevRoutes() {
           </PublicShell>
         }
       />
+      <Route
+        path="admin"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <DashboardView name="Editor" canReview stats={fixtureStats} recent={fixtureRecent} queue={fixtureQueue} onDecline={() => undefined} db={{ ok: true, latencyMs: 84, fetchedAt: new Date(Date.now() - 120_000) }} />
+          </AdminShell>
+        }
+      />
+      <Route
+        path="admin/writer"
+        element={
+          <AdminShell profile={{ ...fixtureEditor, display_name: 'Wes Writer', role: 'staff_writer' }} pending={0} onSignOut={() => undefined}>
+            <DashboardView name="Wes Writer" canReview={false} stats={{ ...fixtureStats, pending_submissions: null }} recent={fixtureRecent.slice(2)} />
+          </AdminShell>
+        }
+      />
+      <Route
+        path="admin/loading"
+        element={
+          <AdminShell profile={fixtureEditor} pending={0} onSignOut={() => undefined}>
+            <DashboardView name="Editor" canReview />
+          </AdminShell>
+        }
+      />
       <Route path="auth/pending" element={<AccessPending />} />
       <Route path="auth/forbidden" element={<main id="main" className="container-page"><Forbidden /></main>} />
     </Routes>
@@ -108,6 +134,9 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'submit', label: 'Submit a story' },
   { path: 'submit/event', label: 'Report an event' },
   { path: 'contact', label: 'Contact' },
+  { path: 'admin', label: 'CMS dashboard (editor)' },
+  { path: 'admin/writer', label: 'CMS dashboard (writer)' },
+  { path: 'admin/loading', label: 'CMS dashboard — loading' },
   { path: '/admin/login', label: 'Staff sign in' },
   { path: '/admin/forgot-password', label: 'Forgot password' },
   { path: '/admin/set-password', label: 'Set password (expired link state)' },

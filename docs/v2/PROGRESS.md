@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/cms-shell-dashboard`)
-**Last done:** `feature/submissions-contact` merged — `/submit` (+ guidelines `#guidelines`), `/submit/event`, `/contact`; uploads to private `intake` bucket (images compressed client-side, `src/lib/images.ts`), honeypot, validation with focus on first error.
-**Next step:** `feature/cms-shell-dashboard` — `/admin` layout per Figma 8:101 (sidebar Overview/Articles/Submissions/Events/Media Library/Staff/Settings, mobile top bar + drawer), dashboard (stats via `dashboard_stats()`, recent articles table → stacked cards on mobile, submission queue, DB status); redirect `/dashboard` → `/admin`; remove legacy `dashboard` route.
+**Current branch:** `develop` (next: create `feature/cms-article-editor`)
+**Last done:** `feature/cms-shell-dashboard` merged — `/admin` shell per Figma (sidebar with role-filtered nav + pending badge, mobile top bar + drawer), dashboard (stats, recent articles table/cards, submission queue with decline, DB status). Other CMS screens are `ComingSoon` placeholders (`cmsPlaceholders` in router.tsx).
+**Next step:** `feature/cms-article-editor` — `/admin/articles` list (search `?q=`, status/section filters, pagination) and `/admin/articles/new|:id` editor: TipTap, autosave revisions, cover from media/upload, authors (contributors), tags, category, SEO fields, preview link.
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -31,7 +31,7 @@
 | 6 | `feature/article-page` | ✅ merged | Tag links go to `/search?tag=` (handled in feature 7) |
 | 7 | `feature/search-archives` | ✅ merged | Schema gained `archive_months()` (in schema.sql) |
 | 8 | `feature/submissions-contact` | ✅ merged | Legacy still serves `/about`, `/editorial-board` |
-| 9 | `feature/cms-shell-dashboard` | ⬜ | |
+| 9 | `feature/cms-shell-dashboard` | ✅ merged | Legacy v1 Dashboard is no longer routed (`/dashboard` → `/admin`) |
 | 10 | `feature/cms-article-editor` | ⬜ | |
 | 11 | `feature/cms-editorial-workflow` | ⬜ | |
 | 12 | `feature/cms-media-library` | ⬜ | |

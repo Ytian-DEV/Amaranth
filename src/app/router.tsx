@@ -8,6 +8,22 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
   ? [{ path: 'dev/*', lazy: async () => ({ Component: (await import('../dev/DevRoutes')).default }) }]
   : [];
 
+// CMS screens still to be built (each later feature replaces its entry).
+const cmsPlaceholders: RouteObject[] = [
+  ['articles/*', 'Articles', 'feature/cms-article-editor'],
+  ['submissions/*', 'Submissions', 'feature/cms-site-settings'],
+  ['events/*', 'Events', 'feature/cms-site-settings'],
+  ['media/*', 'Media Library', 'feature/cms-media-library'],
+  ['staff/*', 'Staff', 'feature/cms-people-board'],
+  ['settings/*', 'Settings', 'feature/cms-site-settings'],
+].map(([path, title, feature]) => ({
+  path,
+  lazy: async () => {
+    const { ComingSoon } = await import('@/features/cms/ComingSoon');
+    return { Component: () => <ComingSoon title={title} feature={feature} /> };
+  },
+}));
+
 const adminRoutes: RouteObject[] = [
   { path: 'admin/login', lazy: async () => ({ Component: (await import('@/features/auth/LoginPage')).LoginPage }) },
   {
@@ -21,7 +37,15 @@ const adminRoutes: RouteObject[] = [
   {
     path: 'admin',
     lazy: async () => ({ Component: (await import('@/features/auth/guards')).RequireStaff }),
-    children: [{ index: true, lazy: async () => ({ Component: (await import('@/features/cms/AdminHome')).AdminHome }) }],
+    children: [
+      {
+        lazy: async () => ({ Component: (await import('@/features/cms/layout/AdminLayout')).AdminLayout }),
+        children: [
+          { index: true, lazy: async () => ({ Component: (await import('@/features/cms/dashboard/DashboardPage')).DashboardPage }) },
+          ...cmsPlaceholders,
+        ],
+      },
+    ],
   },
 ];
 
@@ -32,7 +56,6 @@ const legacy = async () => ({ Component: (await import('../legacy/App')).default
 const legacyRoutes: RouteObject[] = [
   'about',
   'editorial-board',
-  'dashboard',
 ].map((path) => ({ path, lazy: legacy }));
 
 // Old v1 URLs → v2 URLs
@@ -42,6 +65,7 @@ const redirects: RouteObject[] = [
   ['blog', '/blogs'],
   ['s&t', '/science-technology'],
   ['submit-article', '/submit'],
+  ['dashboard', '/admin'],
 ].map(([path, to]) => ({ path, element: <Navigate to={to} replace /> }));
 
 const publicRoutes: RouteObject[] = [
