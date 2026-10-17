@@ -1,88 +1,55 @@
+# Amaranth
 
+The website and newsroom CMS of **Amaranth**, the official student publication of Visayas State University, Baybay City, Leyte.
 
-  # Amaranth Website
+- **Public site:** front page, section pages, articles with comments, search, archives (print issues + by month), About, Editorial Board, story and event submissions, contact.
+- **Newsroom (`/admin`):** dashboard, article editor (autosave, revisions, media, SEO), editorial workflow (draft → review → scheduled/published), media library, staff and contributors, editorial board, submission review, comment moderation, inbox, front-page curation and site settings.
 
-  ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
-  ![License](https://img.shields.io/github/license/Ytian-DEV/Amaranth)
+Built with Vite, React 18, TypeScript, Tailwind CSS v4, TanStack Query, TipTap and Supabase (Postgres, Auth, Storage). Deployed on Vercel.
 
-  ## What the project does
+## Getting started
 
-  **Amaranth** is the official digital publication platform for Visayas State University. It provides a modern, responsive web application for publishing news, features, literary works, blogs, bulletins, and more. The platform supports editorial workflows, user authentication, and dynamic content management, serving both the university community and the public.
+```bash
+npm install
+cp .env.example .env   # add your Supabase URL and anon key
+npm run dev            # http://localhost:3000
+```
 
-  ## Why the project is useful
+Without data you can still look at every screen: open **`/dev`** for fixture pages (dev builds only).
 
-  - **Comprehensive News Portal:** Centralizes all AMARANTH content (news, features, sports, literary, blogs, specials, views, and more).
-  - **Responsive Design:** Mobile-friendly and accessible on all devices.
-  - **User Authentication:** Secure login for editorial staff and contributors.
-  - **Admin Dashboard:** Manage articles, users, and site content efficiently.
-  - **Search & Navigation:** Fast, intuitive search and section-based navigation.
-  - **Integration Ready:** Easily extendable for future features (e.g., Joomla integration, analytics).
+## Scripts
 
-  ## How users can get started
+| Command | What it does |
+|---|---|
+| `npm run dev` | Dev server |
+| `npm run check` | Lint, typecheck, unit tests and production build — run before committing |
+| `npm run test` | Vitest unit/component tests |
+| `npm run db:test` | Applies `supabase/v2` twice to a throwaway local PostgreSQL and runs the RLS/trigger/RPC tests (needs PostgreSQL 16+ binaries) |
+| `npm run check:contrast` | WCAG contrast check of the colour tokens |
 
-  ### Prerequisites
-  - [Node.js](https://nodejs.org/) (v18 or later recommended)
-  - [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+## Project layout
 
-  ### Installation
+```
+src/
+  app/            router, root layout, error screen
+  components/     ui/ (design-system atoms), story/ (Figma story components)
+  features/
+    auth/         staff sign-in, guards, permissions
+    public/       header/footer, home, sections, article, search, archives, intake forms, about
+    cms/          newsroom: dashboard, articles + editor, media, people, intake, settings
+  lib/            Supabase client + types, formatting, media, sanitising
+  styles/         tokens.css (design tokens from Figma) and app.css
+  dev/            fixtures and /dev screens (excluded from production)
+api/              Vercel functions: sitemap.xml, rss.xml, robots.txt
+middleware.ts     Open Graph tags for link previews (Facebook, Messenger, X…)
+supabase/v2/      database schema + seed (paste into Supabase); tests in supabase/tests
+docs/v2/          plan, progress log and database deploy guide
+```
 
-  Clone the repository:
+## Database
 
-  ```sh
-  git clone https://github.com/Ytian-DEV/Amaranth.git
-  cd Amaranth
-  ```
+See [`docs/v2/DB.md`](docs/v2/DB.md) for the deploy-day steps (paste `schema.sql`, then `seed.sql`, invite the first admin, auth settings).
 
-  Install dependencies:
+## Design
 
-  ```sh
-  npm install
-  # or
-  yarn install
-  ```
-
-  ### Running the Development Server
-
-  ```sh
-  npm run dev
-  # or
-  yarn dev
-  ```
-
-  Visit [http://localhost:5173](http://localhost:5173) in your browser.
-
-  ### Building for Production
-
-  ```sh
-  npm run build
-  # or
-  yarn build
-  ```
-
-  ### Project Structure
-
-  - `src/` — Main source code (components, pages, styles, services)
-  - `public/` — Static assets (images, fonts, documents)
-  - `Amaranth/` — Legacy or Katalon Studio test project (QA automation)
-
-  ### Usage Example
-
-  To add a new article, log in as an admin, navigate to the Dashboard, and use the article submission form.
-
-  ## Where users can get help
-
-  - [JOOMLA_INTEGRATION_GUIDE.md](src/JOOMLA_INTEGRATION_GUIDE.md)
-  - [Guidelines](src/guidelines/Guidelines.md)
-  - [Attributions](src/Attributions.md)
-  - For issues, open a ticket in the [GitHub Issues](../../issues) section.
-
-  ## Who maintains and contributes
-
-  - **Maintainer:** [Ytian-DEV](https://github.com/Ytian-DEV)
-  - **Contributions:** See [`CONTRIBUTING.md`](docs/CONTRIBUTING.md) for guidelines.
-  - **License:** See [`LICENSE`](LICENSE) for license details.
-
-  ---
-
-  _This project is open source and welcomes contributions from the community!_
-  
+Design tokens and components follow the Figma file “Amaranth Redesign — RTSPC 2027”. Colours live in `src/styles/tokens.css`; components never hard-code hex values (enforced by ESLint).

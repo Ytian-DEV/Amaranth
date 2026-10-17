@@ -1,60 +1,35 @@
-// src/lib/supabase.js
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from './database.types';
+import { env, isSupabaseConfigured } from './env';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+export type Supabase = SupabaseClient<Database>;
 
-const isConfigured = supabaseUrl && supabaseAnonKey
+let client: Supabase | null = null;
 
-export const supabase = isConfigured 
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : createDummyClient()
-
-export const isSupabaseConfigured = isConfigured
-
-function createDummyClient() {
-  if (import.meta.env.DEV) {
-    console.warn('⚠️ Supabase environment variables are missing. Using dummy client.')
+/**
+ * The typed Supabase client. Throws a clear error when the project isn't
+ * configured, so screens show an error state instead of silently empty data.
+ */
+export function getSupabase(): Supabase {
+  if (!isSupabaseConfigured) {
+    throw new Error('Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.');
   }
+  client ??= createClient<Database>(env.supabaseUrl!, env.supabaseAnonKey!, {
+    auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+  });
+  return client;
+}
 
-  return {
-    auth: {
-      onAuthStateChange: (callback) => {
-        console.warn('Supabase not configured - auth state changes disabled')
-        return { data: { subscription: { unsubscribe: () => {} } } }
-      },
-      getSession: async () => {
-        console.warn('Supabase not configured - returning empty session')
-        return { data: { session: null }, error: new Error('Supabase not configured') }
-      },
-      signOut: async () => {
-        console.warn('Supabase not configured - signOut disabled')
-        return { error: new Error('Supabase not configured') }
-      }
-    },
-    from: (table) => ({
-      select: (query) => {
-        console.warn(`Supabase not configured - select from ${table} disabled`)
-        return Promise.resolve({ data: null, error: new Error('Supabase not configured') })
-      },
-      insert: (data) => {
-        console.warn(`Supabase not configured - insert into ${table} disabled`)
-        return Promise.resolve({ data: null, error: new Error('Supabase not configured') })
-      },
-      update: (data) => {
-        console.warn(`Supabase not configured - update ${table} disabled`)
-        return Promise.resolve({ data: null, error: new Error('Supabase not configured') })
-      },
-      delete: () => {
-        console.warn(`Supabase not configured - delete from ${table} disabled`)
-        return Promise.resolve({ data: null, error: new Error('Supabase not configured') })
-      }
-    }),
-    channel: (name) => ({
-      on: (event, callback) => {
-        console.warn('Supabase not configured - realtime channel disabled')
-        return { subscribe: () => {} }
-      }
-    })
-  }
+type Response = { data: unknown; error: unknown };
+
+/** Unwraps a Supabase list/RPC response, throwing its error (data is never null on success). */
+export function unwrap<R extends Response>(result: R): NonNullable<R['data']> {
+  if (result.error) throw result.error;
+  return result.data as NonNullable<R['data']>;
+}
+
+/** Unwraps a `.maybeSingle()` response: the row or null. */
+export function unwrapMaybe<R extends Response>(result: R): NonNullable<R['data']> | null {
+  if (result.error) throw result.error;
+  return (result.data ?? null) as NonNullable<R['data']> | null;
 }
