@@ -38,6 +38,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "dompurify": "^3.2.7",
     "embla-carousel-react": "^8.6.0",
     "hono": "^4.9.8",
     "input-otp": "^1.4.2",

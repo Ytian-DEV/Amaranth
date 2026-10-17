@@ -5,7 +5,9 @@ import { PublicShell } from '@/features/public/layout/PublicLayout';
 import { HomeSkeleton, HomeView } from '@/features/public/home/HomeView';
 import { ComponentsPreview } from './ComponentsPreview';
 import { SectionSkeleton, SectionView } from '@/features/public/section/SectionView';
-import { fixtureHome, fixtureHomeEmpty, fixtureSection } from './fixtures';
+import { ArticleSkeleton, ArticleView } from '@/features/public/article/ArticleView';
+import { Comments } from '@/features/public/article/Comments';
+import { fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureSection } from './fixtures';
 
 /** /dev/* — fixture screens for checking UI without production data (dev builds only). */
 export default function DevRoutes() {
@@ -19,6 +21,28 @@ export default function DevRoutes() {
       <Route path="section" element={<PublicShell><SectionView {...fixtureSection} activeCategory={null} categoryHref={(s) => (s ? `/dev/section?category=${s}` : '/dev/section')} /></PublicShell>} />
       <Route path="section/empty" element={<PublicShell><SectionView {...fixtureSection} items={[]} total={0} pageCount={1} activeCategory="environment" categoryHref={() => '/dev/section'} /></PublicShell>} />
       <Route path="section/loading" element={<PublicShell><SectionSkeleton /></PublicShell>} />
+      <Route
+        path="article"
+        element={
+          <PublicShell>
+            <ArticleView
+              article={fixtureArticle}
+              url="https://amaranth.example/article/demo"
+              related={fixtureHome.latest}
+              comments={<Comments comments={fixtureComments} open onSubmit={() => new Promise((r) => setTimeout(r, 600))} />}
+            />
+          </PublicShell>
+        }
+      />
+      <Route
+        path="article/preview"
+        element={
+          <PublicShell>
+            <ArticleView article={{ ...fixtureArticle, status: 'in_review', isLive: false }} url="/" related={[]} />
+          </PublicShell>
+        }
+      />
+      <Route path="article/loading" element={<PublicShell><ArticleSkeleton /></PublicShell>} />
       <Route path="auth/pending" element={<AccessPending />} />
       <Route path="auth/forbidden" element={<main id="main" className="container-page"><Forbidden /></main>} />
     </Routes>
@@ -33,6 +57,9 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'section', label: 'Section page' },
   { path: 'section/empty', label: 'Section — empty category' },
   { path: 'section/loading', label: 'Section — loading' },
+  { path: 'article', label: 'Article' },
+  { path: 'article/preview', label: 'Article — staff preview' },
+  { path: 'article/loading', label: 'Article — loading' },
   { path: '/admin/login', label: 'Staff sign in' },
   { path: '/admin/forgot-password', label: 'Forgot password' },
   { path: '/admin/set-password', label: 'Set password (expired link state)' },
