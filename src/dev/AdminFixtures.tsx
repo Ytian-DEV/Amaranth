@@ -10,8 +10,13 @@ import { MediaDetails } from '@/features/cms/media/MediaDetails';
 import { MediaGrid, MediaUploader } from '@/features/cms/media/MediaGrid';
 import { buildTeam, type SkStaff } from '@/features/cms/salingkusog/skApi';
 import { TeamView } from '@/features/cms/salingkusog/TeamTab';
+import { EditionTab } from '@/features/cms/salingkusog/setup/EditionTab';
+import { FactionsView } from '@/features/cms/salingkusog/setup/FactionsTab';
+import { ImportView } from '@/features/cms/salingkusog/setup/ImportTab';
+import { SportsView } from '@/features/cms/salingkusog/setup/SportsTab';
 import type { MediaAssetRow } from '@/lib/database.types';
 import { fixtureArticle, fixtureEditor, fixtureQueue, fixtureRecent, fixtureStats } from './fixtures';
+import { skFixture } from './skFixtures';
 
 const fixtureMedia: MediaAssetRow[] = Array.from({ length: 8 }, (_, i) => ({
   id: `m${i + 1}`,
@@ -145,6 +150,28 @@ export default function AdminFixtures() {
             <div className="flex flex-col gap-6">
               <h1 className="font-serif text-headline-l text-ink">Salingkusog</h1>
               <TeamView {...fixtureSkTeam} canManage={false} onAdd={() => undefined} onRemove={() => undefined} />
+            </div>
+          </AdminShell>
+        }
+      />
+      <Route
+        path="salingkusog-setup"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <div className="flex flex-col gap-8">
+              <h1 className="font-serif text-headline-l text-ink">Salingkusog setup</h1>
+              <section className="flex flex-col gap-3" aria-label="Edition">
+                <EditionTab edition={skFixture.edition} onSelect={() => undefined} />
+              </section>
+              <section className="flex flex-col gap-3" aria-label="Factions">
+                <FactionsView factions={skFixture.factions} logos={[]} onAdd={() => undefined} onEdit={() => undefined} onDelete={() => undefined} />
+              </section>
+              <section className="flex flex-col gap-3" aria-label="Sports and events">
+                <SportsView sports={skFixture.sports} events={skFixture.events} venues={skFixture.venues} onAddSport={() => undefined} onEditSport={() => undefined} onDeleteSport={() => undefined} onAddEvent={() => undefined} onEditEvent={() => undefined} onDeleteEvent={() => undefined} />
+              </section>
+              <section className="flex flex-col gap-3" aria-label="Schedule import">
+                <ImportView setup={{ ...skFixture, existing: [] }} onImport={() => undefined} />
+              </section>
             </div>
           </AdminShell>
         }

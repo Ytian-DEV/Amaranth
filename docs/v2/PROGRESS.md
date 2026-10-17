@@ -8,14 +8,14 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A2 `feature/salingkusog-team-access` merged — `editor_in_chief` shows as "Executive Editor"; newsroom sidebar item **Salingkusog** (managing roles + team members); `/admin/salingkusog/team` to add/remove members (managing roles only, read-only for members). Fixtures `/dev/admin/salingkusog-team` and `-member`. Needs `salingkusog.sql` pasted (A1); before that the team page shows an error and the sidebar item only shows for the managing roles.
-**Next:** A3 `feature/salingkusog-cms-setup` (awaiting go).
+**Last done:** A3 `feature/salingkusog-cms-setup` merged — `/admin/salingkusog` tabs: **Edition** (dates, medal points, current/published, venue map), **Factions** (name, short name, slug, colour, logo, motto), **Sports & events** (category; division, format, team/individual, unit, main venue), **Venues** (map pin + position), **Schedule import** (CSV paste/upload → line-by-line check → insert `sk_matches`; duplicates skipped; times are UTC+8), **Team** (A2). Edition picker remembered per browser. Fixture `/dev/admin/salingkusog-setup`. Not done here: schedule PDF upload (the `archives` bucket only accepts publishers) — pick up in A6.
+**Next:** A4 `feature/salingkusog-scorekeeper` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
 | A1 | `feature/salingkusog-db` | ✅ |
 | A2 | `feature/salingkusog-team-access` | ✅ |
-| A3 | `feature/salingkusog-cms-setup` | ⬜ |
+| A3 | `feature/salingkusog-cms-setup` | ✅ |
 | A4 | `feature/salingkusog-scorekeeper` | ⬜ |
 | A5 | `feature/salingkusog-medal-tally` | ⬜ |
 | A6 | `feature/salingkusog-schedule` | ⬜ |
