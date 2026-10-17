@@ -42,6 +42,7 @@ export default defineConfig({
           if (/[\\/]node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom)[\\/]/.test(id)) return 'react';
           if (id.includes('@supabase')) return 'supabase';
           if (id.includes('@tanstack')) return 'query';
+          if (/[\\/]node_modules[\\/](@tiptap|prosemirror-|orderedmap|rope-sequence|w3c-keyname|linkifyjs)/.test(id)) return 'editor';
           return undefined;
         },
       },

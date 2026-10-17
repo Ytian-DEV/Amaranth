@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/perf-pass`)
-**Last done:** `feature/v2-polish` merged — removed `src/legacy`, old fonts, nested `Amaranth/` gitlink (folder kept on disk, now gitignored), 38 unused dependencies; v1 schema moved to `supabase/legacy/`; DOMPurify ≥3.4.17 (XSS advisory); a11y/responsive sweep of all 29 /dev screens at 375/768/1024/1440 is clean (`window.__startSweep()`); new README.
-**Next step:** `feature/perf-pass` — Lighthouse (mobile/desktop) on `vite preview` before/after; vendor chunk for TipTap; React Query persisted? (no — keep simple); compress `/public/images` board photos (2048px JPEG → 800px WebP/JPEG); preconnect to Supabase; report table in `docs/v2/PERF.md`.
+**Current branch:** `develop` — **v2 build complete.** PR text for `develop` → `main`: `docs/v2/PR.md` (not opened).
+**Last done:** `feature/perf-pass` merged — Lighthouse before/after in `docs/v2/PERF.md` (v1 `/` mobile 56 / desktop 83 → v2 79 / 99, a11y 91 → 100, 1.6 MB → 246 KB), eager public shell, CLS 0, editor vendor chunk, board photos 6.1 → 1.4 MB, Supabase preconnect.
+**Next step (user):** paste `supabase/v2/schema.sql` + `seed.sql` into the new project, set env vars on Vercel, deploy a preview, run the manual checklist in `docs/v2/PR.md`, then open the PR. Open questions: Katalon tests in `Amaranth/`, v1 content export, TipTap 3 / Vite 7 upgrades.
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -41,4 +41,4 @@
 | 15 | `feature/seo-sharing` | ✅ merged | Verify on a Vercel preview (OG debugger, /sitemap.xml, /rss.xml) |
 | 16 | `feature/content-migration` | ⏭ skipped | Fresh DB chosen. If production v1 has articles to keep, build an export/import script (ask user) |
 | 17 | `feature/v2-polish` | ✅ merged | Follow-ups: TipTap 2→3 (moderate advisory), Vite 6→7 (dev-server advisory) |
-| 18 | `feature/perf-pass` | ⬜ | |
+| 18 | `feature/perf-pass` | ✅ merged | See docs/v2/PERF.md |

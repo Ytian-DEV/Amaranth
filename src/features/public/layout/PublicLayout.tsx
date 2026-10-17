@@ -10,7 +10,8 @@ export function PublicShell({ children }: { children?: ReactNode }) {
     <div className="flex min-h-dvh flex-col bg-paper">
       <SkipLink />
       <SiteHeader />
-      <main id="main" className="flex-1">
+      {/* min height keeps the footer below the fold while content loads (no layout shift) */}
+      <main id="main" className="min-h-[85vh] flex-1">
         {children ?? <Outlet />}
       </main>
       <SiteFooter />
