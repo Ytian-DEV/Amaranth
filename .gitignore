@@ -23,3 +23,4 @@ Thumbs.db
 
 # Old clone + Katalon test project (kept on disk, not part of this repo)
 Amaranth/
+dist-perf/

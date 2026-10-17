@@ -1,10 +1,13 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-dom';
+import { HomePage } from '@/features/public/home/HomePage';
+import { PublicLayout } from '@/features/public/layout/PublicLayout';
 import { RootLayout } from './RootLayout';
 import { RouteError } from './RouteError';
 
 // Dev-only fixture screens. `import.meta.env.DEV` is false in production builds,
-// so this branch and its dynamic import are removed from the bundle.
-const devRoutes: RouteObject[] = import.meta.env.DEV
+// so this branch and its dynamic import are removed from the bundle. A perf-test
+// build can keep them with VITE_ENABLE_FIXTURES=true (never set this on Vercel).
+const devRoutes: RouteObject[] = import.meta.env.DEV || import.meta.env.VITE_ENABLE_FIXTURES === 'true'
   ? [{ path: 'dev/*', lazy: async () => ({ Component: (await import('../dev/DevRoutes')).default }) }]
   : [];
 
@@ -55,9 +58,10 @@ const redirects: RouteObject[] = [
 
 const publicRoutes: RouteObject[] = [
   {
-    lazy: async () => ({ Component: (await import('@/features/public/layout/PublicLayout')).PublicLayout }),
+    // eager: the public shell and front page are the first thing most visitors see
+    Component: PublicLayout,
     children: [
-      { index: true, lazy: async () => ({ Component: (await import('@/features/public/home/HomePage')).HomePage }) },
+      { index: true, Component: HomePage },
       { path: 'article/:slug', lazy: async () => ({ Component: (await import('@/features/public/article/ArticlePage')).ArticlePage }) },
       { path: 'submit', lazy: async () => ({ Component: (await import('@/features/public/intake/SubmitArticlePage')).SubmitArticlePage }) },
       { path: 'submit/event', lazy: async () => ({ Component: (await import('@/features/public/intake/SubmitEventPage')).SubmitEventPage }) },
