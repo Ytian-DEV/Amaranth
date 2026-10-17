@@ -35,6 +35,8 @@
   - **The user must** paste `supabase/v2/stats.sql` (and re-paste `schema.sql` once), and add `SUPABASE_SERVICE_ROLE_KEY` on Vercel Production.
   - Fixtures: `/dev/admin/statistics`, `/dev/admin/statistics/empty`, `/dev/admin/statistics/loading`, `/dev/privacy`.
 
+- `docs/pr-track-a` (2026-10-18): `docs/v2/PR.md` now covers Phase 1 + Track A + Statistics for the `develop` → `main` PR (the user opens it).
+
 **Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
 
 | # | Branch | Status |
