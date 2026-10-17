@@ -37,7 +37,6 @@ const legacyRoutes: RouteObject[] = [
   'submit-article',
   'search',
   'dashboard',
-  'article/:id',
 ].map((path) => ({ path, lazy: legacy }));
 
 // Old v1 URLs → v2 URLs
@@ -55,6 +54,7 @@ const publicRoutes: RouteObject[] = [
     lazy: async () => ({ Component: (await import('@/features/public/layout/PublicLayout')).PublicLayout }),
     children: [
       { index: true, lazy: async () => ({ Component: (await import('@/features/public/home/HomePage')).HomePage }) },
+      { path: 'article/:slug', lazy: async () => ({ Component: (await import('@/features/public/article/ArticlePage')).ArticlePage }) },
       { path: 'latest', lazy: async () => ({ Component: (await import('@/features/public/section/SectionPage')).LatestPage }) },
       { path: ':section', lazy: async () => ({ Component: (await import('@/features/public/section/SectionPage')).SectionPage }) },
       { path: '*', lazy: async () => ({ Component: (await import('@/features/public/NotFoundPage')).NotFoundPage }) },

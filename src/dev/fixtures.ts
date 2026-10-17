@@ -1,6 +1,7 @@
 // Sample content for /dev/* screens (copy from the Figma file). Dev builds only.
 import type { StoryItem } from '@/components/story/types';
 import type { HomeData } from '@/features/public/home/homeData';
+import type { ArticleComment, ArticleDetail } from '@/features/public/article/articleData';
 
 const day = (d: number) => `2026-10-${String(d).padStart(2, '0')}T08:00:00+08:00`;
 
@@ -162,3 +163,48 @@ export const fixtureSection = {
   pageCount: 7,
   total: 80,
 };
+
+export const fixtureArticle: ArticleDetail = {
+  id: 'f1',
+  slug: fixtureStories[0].slug,
+  title: fixtureStories[0].title,
+  dek: 'Student researchers, forest rangers and upland communities explain what is at stake for the mountain that gives VSU its water, its wildlife and much of its identity.',
+  excerpt: fixtureStories[0].excerpt ?? '',
+  label: 'News · Environment',
+  sectionSlug: 'news',
+  sectionName: 'News',
+  status: 'published',
+  isLive: true,
+  publishedAt: day(15),
+  updatedAt: day(15),
+  readingMinutes: 8,
+  byline: 'Maria Santos, Paolo Reyes',
+  bodyHtml: `<p>At dawn the ridge of Mt. Pangasugan is hidden behind cloud, and the only sign of the forest is the sound: hornbills, water and the occasional chainsaw far down the slope.</p>
+<p>For the students of Visayas State University the mountain is not scenery. It is <a href="https://example.org/watershed">the watershed</a> that fills the campus taps, a living laboratory for forestry majors, and a line on the horizon that has meant home for generations.</p>
+<h2>A forest under pressure</h2>
+<p>Researchers from the Department of Forest Science have tracked canopy loss along the lower slopes for six years. Their data shows small clearings spreading upward each dry season.</p>
+<blockquote><p>“We are not fighting the farmers. We are trying to give them a reason to keep the trees standing.”</p></blockquote>
+<p>Upland communities say the problem is economic. Abaca and coconut pay; standing forest does not.</p>
+<ul><li>Six years of canopy monitoring</li><li>Three barangays in the buffer zone</li><li>One shared water supply</li></ul>
+<h3>What comes next</h3>
+<p>The university's environmental council will present a co-management proposal to the provincial board in November.</p>`,
+  cover: null,
+  coverCaption: 'The ridge of Mt. Pangasugan seen from the upper campus.',
+  allowComments: true,
+  seoTitle: null,
+  seoDescription: null,
+  authors: [
+    { id: 'a1', name: 'Maria Santos', slug: 'maria-santos', credit: 'Author', position: 'News Editor', bio: 'Maria covers the environment and campus governance. She is a BS Forestry senior.', avatar: null },
+    { id: 'a2', name: 'Paolo Reyes', slug: 'paolo-reyes', credit: 'Photos', position: 'Staff Photojournalist', bio: null, avatar: null },
+  ],
+  tags: [
+    { slug: 'environment', name: 'environment' },
+    { slug: 'mt-pangasugan', name: 'Mt. Pangasugan' },
+    { slug: 'research', name: 'research' },
+  ],
+};
+
+export const fixtureComments: ArticleComment[] = [
+  { id: 'c1', parentId: null, authorName: 'Ana', body: 'Thank you for covering this. My family farms near Brgy. Gabas and the water has changed in ten years.', createdAt: '2026-10-15T10:00:00+08:00' },
+  { id: 'c2', parentId: 'c1', authorName: 'Rico', body: 'Same in our sitio. Would love a follow-up on the co-management plan.', createdAt: '2026-10-15T12:30:00+08:00' },
+];
