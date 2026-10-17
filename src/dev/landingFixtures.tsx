@@ -137,6 +137,16 @@ const samples: Record<string, Sample> = {
       ['science-technology', 'What are drones doing over the farm?', 'Mapping crop health from the sky with special cameras.'],
     ],
   },
+  investigative: {
+    section: { slug: 'investigative', name: 'Investigative', description: 'Investigative reports and accountability journalism.', nav_placement: 'more' },
+    categories: [{ slug: 'investigative', name: 'Investigative' }],
+    stories: [
+      ['investigative', 'Where did the lab equipment fund go?', 'Amaranth reviewed procurement records, budget memos and inventory lists to trace a lab equipment budget across three school years.', 'the Investigations Desk'],
+      ['investigative', 'The dorm fire exits that didn’t open'],
+      ['investigative', 'Who pays for org fees nobody voted on?'],
+      ['investigative', 'The scholarship delays nobody explained'],
+    ],
+  },
 };
 
 function build(sample: Sample): StoryItem[] {
