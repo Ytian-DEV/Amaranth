@@ -1,10 +1,12 @@
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback';
 import { usePageMeta } from '@/lib/usePageMeta';
-import { hubPhase, hubTabs } from './hub';
+import type { SkEditionRow } from '@/lib/database.types';
+import { hubPhase, hubTabs, scheduleDay, type ScheduleFilters, type ScheduleShow } from './hub';
 import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
-import { useCurrentEdition, useHubData, useLiveGames, useStandings } from './skData';
+import { ScheduleView } from './ScheduleView';
+import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useStandings, type HubData } from './skData';
 
 function HubSkeleton() {
   return (
@@ -28,6 +30,44 @@ function ComingSoon({ title }: { title: string }) {
   );
 }
 
+const showValues: ScheduleShow[] = ['all', 'live', 'upcoming', 'results'];
+
+/** /salingkusog/schedule — day and filters live in the URL (?day=&sport=&faction=&venue=&show=). */
+function SchedulePage({ edition, hub }: { edition: SkEditionRow; hub: HubData }) {
+  const [params, setParams] = useSearchParams();
+  const pdf = useMediaAsset(edition.schedule_pdf_asset_id);
+  const show = params.get('show') as ScheduleShow | null;
+  const filters: ScheduleFilters = {
+    sport: params.get('sport') ?? undefined,
+    faction: params.get('faction') ?? undefined,
+    venue: params.get('venue') ?? undefined,
+    show: show && showValues.includes(show) ? show : 'all',
+  };
+  const update = (patch: Record<string, string | undefined>) =>
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        for (const [k, v] of Object.entries(patch)) {
+          if (v && !(k === 'show' && v === 'all')) next.set(k, v);
+          else next.delete(k);
+        }
+        return next;
+      },
+      { replace: true, preventScrollReset: true },
+    );
+  return (
+    <ScheduleView
+      edition={edition}
+      hub={hub}
+      pdf={pdf.data ?? null}
+      day={scheduleDay(edition, params.get('day'))}
+      filters={filters}
+      onDay={(day) => update({ day })}
+      onFilters={(f) => update({ sport: f.sport, faction: f.faction, venue: f.venue, show: f.show })}
+    />
+  );
+}
+
 /** /salingkusog/* — the intramurals hub. */
 export function SalingkusogPage() {
   const edition = useCurrentEdition();
@@ -35,10 +75,17 @@ export function SalingkusogPage() {
   const hub = useHubData(ed?.id);
   const standings = useStandings(ed?.id);
   useLiveGames(ed?.id);
+  // one place sets the meta for every hub tab (a child's effect would run first and be overwritten)
+  const { pathname } = useLocation();
+  const tab = hubTabs.find((t) => t.to === pathname.replace(/\/$/, '')) ?? hubTabs[0];
   usePageMeta({
-    title: ed ? `${ed.title} Medal Tally` : edition.data === null ? 'Salingkusog' : undefined,
-    description: ed ? `Live medal tally, standings and scores from ${ed.title}${ed.subtitle ? `, ${ed.subtitle}` : ''}.` : undefined,
-    path: '/salingkusog',
+    title: ed ? `${ed.title} ${tab.label}` : edition.data === null ? 'Salingkusog' : undefined,
+    description: ed
+      ? tab.to === '/salingkusog/schedule'
+        ? `Game times, live scores and results from ${ed.title}.`
+        : `Live medal tally, standings and scores from ${ed.title}${ed.subtitle ? `, ${ed.subtitle}` : ''}.`
+      : undefined,
+    path: tab.to,
   });
 
   if (edition.error || hub.error || standings.error) {
@@ -65,7 +112,8 @@ export function SalingkusogPage() {
       <SalingkusogHeader edition={ed} factions={hub.data.factions} sportsCount={hub.data.sports.length} liveCount={hub.data.matches.filter((m) => m.status === 'live').length} phase={phase} />
       <Routes>
         <Route index element={<MedalTallyView edition={ed} hub={hub.data} table={standings.data.table} race={standings.data.race} phase={phase} />} />
-        {hubTabs.slice(1).map((t) => (
+        <Route path="schedule" element={<SchedulePage edition={ed} hub={hub.data} />} />
+        {hubTabs.slice(2).map((t) => (
           <Route key={t.to} path={t.to.replace('/salingkusog/', '')} element={<ComingSoon title={t.label} />} />
         ))}
         <Route path="*" element={<ComingSoon title="This page" />} />

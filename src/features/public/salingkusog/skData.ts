@@ -84,3 +84,13 @@ export function useLiveGames(editionId: string | undefined) {
     };
   }, [editionId, client]);
 }
+
+/** One media asset (the edition's schedule PDF). */
+export function useMediaAsset(id: string | null | undefined) {
+  return useQuery({
+    queryKey: ['sk-public', 'asset', id],
+    enabled: !!id,
+    staleTime: 10 * 60_000,
+    queryFn: async () => unwrapMaybe(await sb().from('media_assets').select('bucket, path').eq('id', id!).maybeSingle()),
+  });
+}

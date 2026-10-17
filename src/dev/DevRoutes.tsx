@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
+import { useState } from 'react';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { AccessPending, Forbidden } from '@/features/auth/guards';
 import { PublicShell } from '@/features/public/layout/PublicLayout';
@@ -18,6 +19,8 @@ import { EditorialBoardView } from '@/features/public/about/EditorialBoardPage';
 import { defaultSections } from '@/features/public/nav';
 import { SalingkusogHeader } from '@/features/public/salingkusog/SalingkusogHeader';
 import { MedalTallyView } from '@/features/public/salingkusog/MedalTallyView';
+import { ScheduleView } from '@/features/public/salingkusog/ScheduleView';
+import type { ScheduleFilters } from '@/features/public/salingkusog/hub';
 import { skFixture } from './skFixtures';
 import { fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
 
@@ -127,9 +130,18 @@ function FixtureSalingkusog() {
   return (
     <>
       <SalingkusogHeader edition={skFixture.edition} factions={skFixture.factions} sportsCount={18} liveCount={1} phase={skPhase} />
-      <MedalTallyView edition={skFixture.edition} hub={skHub} table={skFixture.medalTable} race={skFixture.pointsByDay} phase={skPhase} now={new Date('2026-11-03T01:30:00Z')} />
+      <Routes>
+        <Route index element={<MedalTallyView edition={skFixture.edition} hub={skHub} table={skFixture.medalTable} race={skFixture.pointsByDay} phase={skPhase} now={new Date('2026-11-03T01:30:00Z')} />} />
+        <Route path="schedule" element={<FixtureSchedule />} />
+      </Routes>
     </>
   );
+}
+
+function FixtureSchedule() {
+  const [day, setDay] = useState('2026-11-03');
+  const [filters, setFilters] = useState<ScheduleFilters>({ show: 'all' });
+  return <ScheduleView edition={skFixture.edition} hub={skHub} pdf={{ bucket: 'archives', path: '/documents/sample.pdf' }} day={day} filters={filters} onDay={setDay} onFilters={setFilters} today="2026-11-03" />;
 }
 
 // CMS fixtures pull in the editor (TipTap); keep them out of the public fixture chunk.
@@ -141,6 +153,7 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'components', label: 'Components' },
   { path: 'home', label: 'Home (Figma content)' },
   { path: 'salingkusog', label: 'Salingkusog — Medal Tally' },
+  { path: 'salingkusog/schedule', label: 'Salingkusog — Schedule & Results (filters work)' },
   { path: 'home/empty', label: 'Home — empty' },
   { path: 'home/loading', label: 'Home — loading' },
   { path: 'section', label: 'Section page' },

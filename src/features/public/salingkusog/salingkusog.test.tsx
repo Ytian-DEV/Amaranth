@@ -1,7 +1,8 @@
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { skFixture } from '@/dev/skFixtures';
-import { dateSpan, hubPhase, liveAndNext, phasePill, podiumOrder, raceSeries, readableOn, standingsHeadline, whenLabel } from './hub';
+import { dateSpan, hubPhase, liveAndNext, phasePill, podiumOrder, raceSeries, readableOn, scheduleDay, scheduleGroups, standingsHeadline, whenLabel } from './hub';
+import { ScheduleView } from './ScheduleView';
 import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
 
@@ -31,7 +32,7 @@ describe('hub helpers', () => {
 
   it('live games first, then the next ones', () => {
     const list = liveAndNext(skFixture.matches, new Date('2026-11-03T01:30:00Z'));
-    expect(list.map((m) => m.id)).toEqual(['m2', 'm3', 'm4']);
+    expect(list.map((m) => m.id)).toEqual(['m2', 'm3', 'm6']);
   });
 
   it('points race stops at the current day', () => {
@@ -81,5 +82,50 @@ describe('Medal Tally', () => {
     expect(first).toHaveTextContent('90');
     expect(screen.getByRole('article', { name: /Basketball · Men: Centicore Vanguard vs Mystic Moirai/ })).toHaveTextContent('Live');
     expect(screen.getByRole('link', { name: /Full schedule/ })).toHaveAttribute('href', '/salingkusog/schedule');
+  });
+});
+
+describe('Schedule & Results', () => {
+  const sportOf = (eventId: string) => skFixture.events.find((e) => e.id === eventId)?.sport_id;
+
+  it('opens on today during the games, else the first or last day', () => {
+    expect(scheduleDay(edition, null, '2026-11-03')).toBe('2026-11-03');
+    expect(scheduleDay(edition, '2026-11-05', '2026-11-03')).toBe('2026-11-05');
+    expect(scheduleDay(edition, '2026-12-25', '2026-10-01')).toBe('2026-11-02');
+    expect(scheduleDay(edition, null, '2027-01-01')).toBe('2026-11-07');
+  });
+
+  it('groups a day into live, later, completed and postponed', () => {
+    const groups = scheduleGroups(skFixture.matches, '2026-11-03', { show: 'all' }, sportOf, '2026-11-03');
+    expect(groups.map((g) => [g.title, g.matches.map((m) => m.id)])).toEqual([
+      ['Live now', ['m2']],
+      ['Later today', ['m3', 'm6']],
+      ['Completed today', ['m1', 'm5']],
+      ['Postponed or cancelled', ['m7']],
+    ]);
+    expect(scheduleGroups(skFixture.matches, '2026-11-03', { show: 'results' }, sportOf, '2026-11-03').map((g) => g.key)).toEqual(['completed']);
+    expect(scheduleGroups(skFixture.matches, '2026-11-03', { show: 'all', sport: 'vb' }, sportOf, '2026-11-03').flatMap((g) => g.matches.map((m) => m.id))).toEqual(['m3', 'm6', 'm7']);
+    expect(scheduleGroups(skFixture.matches, '2026-11-03', { show: 'all', faction: 'mm' }, sportOf, '2026-11-03').flatMap((g) => g.matches.map((m) => m.id))).toEqual(['m2', 'm6', 'm7']);
+    expect(scheduleGroups(skFixture.matches, '2026-11-04', { show: 'all' }, sportOf, '2026-11-03')[0].title).toBe('Scheduled');
+  });
+
+  it('day tabs, filters and the PDF button', () => {
+    const onDay = vi.fn();
+    const onFilters = vi.fn();
+    render(
+      <MemoryRouter>
+        <ScheduleView edition={skFixture.edition} hub={hub} pdf={{ bucket: 'archives', path: 'salingkusog/2026/schedule.pdf' }} day="2026-11-03" filters={{ show: 'all' }} onDay={onDay} onFilters={onFilters} today="2026-11-03" />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('button', { name: /Day 2/ })).toHaveAttribute('aria-current', 'date');
+    fireEvent.click(screen.getByRole('button', { name: /Day 3/ }));
+    expect(onDay).toHaveBeenCalledWith('2026-11-04');
+    fireEvent.click(screen.getByRole('button', { name: 'Results' }));
+    expect(onFilters).toHaveBeenCalledWith({ show: 'results' });
+    fireEvent.change(screen.getByLabelText('Faction'), { target: { value: 'pt' } });
+    expect(onFilters).toHaveBeenLastCalledWith({ show: 'all', faction: 'pt' });
+    expect(screen.getByRole('link', { name: /Download PDF schedule/ }).getAttribute('href')).toMatch(/archives\/salingkusog\/2026\/schedule\.pdf$/);
+    expect(screen.getByRole('heading', { name: /Live now/ })).toBeInTheDocument();
+    expect(screen.getAllByRole('article')).toHaveLength(6);
   });
 });

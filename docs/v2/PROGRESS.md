@@ -8,16 +8,15 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A5 `feature/salingkusog-medal-tally` merged: the public page `/salingkusog` (Figma 13:123 / 22:2139).
-- Hub header: mark, edition, live count, "Day x of y", tabs and a faction stripe.
-- Podium.
-- Medal table: a table on desktop, cards on phones.
-- SVG points race with a hidden data table.
-- Medal breakdown.
-- Live & up next.
+**Last done:** A6 `feature/salingkusog-schedule` merged: `/salingkusog/schedule` (Figma 14:474 / 22:2404).
+- Day tabs; opens on today during the games.
+- Sport, faction and venue filters, plus All / Live / Upcoming / Results.
+- Groups: Live now, Later today, Completed today, Postponed or cancelled.
+- A "Download PDF schedule" button.
+- State lives in the URL (`?day=&sport=&faction=&venue=&show=`). Live updates come from the hub's Realtime subscription.
 
-The page refreshes every 60 s and over Realtime on game changes. Other hub tabs show "coming soon" until A6–A11. New tokens: night, night-2, gold, silver, bronze, bronze-deep. Medal chips use ink text on gold and silver and white on bronze-deep, for AA contrast; the design has white on all three. Sports in the site menu is highlighted on /salingkusog, and the page is in the sitemap. Fixture: `/dev/salingkusog`.
-**Next:** A6 `feature/salingkusog-schedule` (awaiting go).
+CMS: an Edition form "Schedule PDF" upload goes to the `archives` bucket; only the three managing roles can upload. Phones keep the three filter dropdowns, made compact; the design leaves them out. Hub meta is set per tab from one place. Fixture: `/dev/salingkusog/schedule`.
+**Next:** A7 `feature/salingkusog-winners` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
@@ -26,7 +25,7 @@ The page refreshes every 60 s and over Realtime on game changes. Other hub tabs 
 | A3 | `feature/salingkusog-cms-setup` | ✅ |
 | A4 | `feature/salingkusog-scorekeeper` | ✅ |
 | A5 | `feature/salingkusog-medal-tally` | ✅ |
-| A6 | `feature/salingkusog-schedule` | ⬜ |
+| A6 | `feature/salingkusog-schedule` | ✅ |
 | A7 | `feature/salingkusog-winners` | ⬜ |
 | A8 | `feature/salingkusog-factions` | ⬜ |
 | A9 | `feature/salingkusog-sports-bracket` | ⬜ |

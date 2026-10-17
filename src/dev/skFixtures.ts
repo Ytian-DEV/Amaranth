@@ -100,6 +100,9 @@ const matches: SkMatchRow[] = [
   match('m2', { round: 'Semifinal 2', round_order: 1, bracket_slot: 2, side_a_id: 'cv', side_b_id: 'mm', status: 'live', score_a: 54, score_b: 58, live_note: 'Q3 · 4:12', scheduled_at: '2026-11-03T02:00:00Z', periods: [{ label: 'Q1', a: 19, b: 22 }, { label: 'Q2', a: 21, b: 20 }, { label: 'Q3', a: 14, b: 16 }] }),
   match('m3', { event_id: 'vb-w', venue_id: 'annex', side_a_id: 'sd', side_b_id: 'cv', scheduled_at: '2026-11-03T06:30:00Z', round: 'Group A' }),
   match('m4', { event_id: 'bb-w', side_a_id: null, side_b_id: null, scheduled_at: '2026-11-04T00:00:00Z', round: 'Final', round_order: 2 }),
+  match('m5', { event_id: 'bb-w', side_a_id: 'sd', side_b_id: 'pt', status: 'final', score_a: 64, score_b: 58, winner_side: 'a', scheduled_at: '2026-11-02T23:30:00Z', round: 'Semifinal 1' }),
+  match('m6', { event_id: 'vb-w', venue_id: 'annex', side_a_id: 'mm', side_b_id: 'pt', scheduled_at: '2026-11-03T09:00:00Z', round: 'Group A' }),
+  match('m7', { event_id: 'vb-w', venue_id: 'annex', side_a_id: 'cv', side_b_id: 'mm', status: 'postponed', scheduled_at: '2026-11-03T04:00:00Z', round: 'Group A' }),
 ];
 
 const placements: SkPlacementRow[] = [

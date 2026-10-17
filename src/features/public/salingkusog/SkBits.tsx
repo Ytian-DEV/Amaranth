@@ -2,7 +2,8 @@ import { Clock, MapPin } from 'lucide-react';
 import { Img } from '@/components/ui/Img';
 import type { MediaAssetRow, SkFactionRow, SkMatchRow, SkMedal } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
-import { readableOn, whenLabel } from './hub';
+import { clockLabel, dayLabel, readableOn, whenLabel } from './hub';
+import { manilaDate } from '@/lib/manila';
 import type { HubData } from './skData';
 
 type Faction = Pick<SkFactionRow, 'name' | 'short_name' | 'color' | 'logo_asset_id'>;
@@ -76,7 +77,8 @@ function StatusTag({ match }: { match: SkMatchRow }) {
 }
 
 /** Game card (Figma "Match Card"). */
-export function MatchCard({ match, hub, className }: { match: SkMatchRow; hub: HubData; className?: string }) {
+/** `dated`: the schedule shows "Oct 16 · 3:00 PM" on wide screens and just the time on phones. */
+export function MatchCard({ match, hub, dated, className }: { match: SkMatchRow; hub: HubData; dated?: boolean; className?: string }) {
   const event = hub.events.find((e) => e.id === match.event_id);
   const sport = hub.sports.find((s) => s.id === event?.sport_id);
   const venue = hub.venues.find((v) => v.id === match.venue_id);
@@ -107,7 +109,8 @@ export function MatchCard({ match, hub, className }: { match: SkMatchRow; hub: H
       <div className="flex flex-wrap items-center gap-x-[18px] gap-y-1 text-meta text-ink-muted">
         <span className="inline-flex items-center gap-1.5">
           <Clock className="size-3.5" aria-hidden />
-          {match.status === 'live' ? `${match.live_note ? `${match.live_note} · ` : ''}Now` : whenLabel(match.scheduled_at)}
+          {dated && <span className="hidden md:inline">{dayLabel(manilaDate(match.scheduled_at), false)} · </span>}
+          {match.status === 'live' ? `${match.live_note ? `${match.live_note} · ` : ''}Now` : dated ? clockLabel(match.scheduled_at) : whenLabel(match.scheduled_at)}
         </span>
         {venue && (
           <span className="inline-flex min-w-0 items-center gap-1.5">

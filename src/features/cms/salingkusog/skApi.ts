@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { canManageSkTeam } from '@/features/auth/permissions';
 import type { Database, ProfileRow, SkMatchRow, SkPlacementInput, SkTeamRow } from '@/lib/database.types';
 import { errorText } from '@/lib/errors';
+import { safeFileName } from '@/lib/images';
 import { getSupabase, unwrap, unwrapMaybe } from '@/lib/supabase';
 
 const sb = () => getSupabase();
@@ -290,4 +291,20 @@ export function useSkAwards(editionId: string | undefined) {
     enabled: !!editionId,
     queryFn: async () => unwrap(await sb().from('sk_awards').select('*').eq('edition_id', editionId!).order('day', { ascending: false })),
   });
+}
+
+/** Upload the printable schedule to the public "archives" bucket (publishers only, like print issues). */
+export async function uploadSchedulePdf(file: File, uploadedBy: string, year: number) {
+  if (file.type !== 'application/pdf') throw new Error('Choose a PDF file.');
+  if (file.size > 60 * 1024 * 1024) throw new Error('The PDF is larger than 60 MB.');
+  const path = `salingkusog/${year}/schedule-${crypto.randomUUID().slice(0, 8)}-${safeFileName(file.name)}`;
+  const up = await sb().storage.from('archives').upload(path, file, { contentType: 'application/pdf', cacheControl: '3600' });
+  if (up.error) throw new Error(`Upload failed: ${up.error.message}`);
+  return unwrap(
+    await sb()
+      .from('media_assets')
+      .insert({ bucket: 'archives', path, kind: 'document', mime_type: 'application/pdf', size_bytes: file.size, alt_text: `Salingkusog ${year} schedule`, caption: file.name, uploaded_by: uploadedBy })
+      .select('*')
+      .single(),
+  );
 }

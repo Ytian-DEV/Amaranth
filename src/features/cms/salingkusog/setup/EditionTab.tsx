@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { FileText, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Checkbox, Field, Input } from '@/components/ui/Field';
@@ -7,12 +7,57 @@ import { Img } from '@/components/ui/Img';
 import { Modal } from '@/components/ui/Modal';
 import { Pill } from '@/components/ui/StatusPill';
 import type { MediaAssetRow, SkEditionRow } from '@/lib/database.types';
+import { useAuth } from '@/features/auth/AuthProvider';
 import { formatDate } from '@/lib/format';
+import { publicUrl } from '@/lib/media';
 import { Card, CardHeader } from '../../ui';
-import { skErrorText, useMediaByIds, useSaveSkRow } from '../skApi';
+import { skErrorText, uploadSchedulePdf, useMediaByIds, useSaveSkRow } from '../skApi';
 import { ImagePick, SetupNote } from './shared';
 
-function EditionModal({ edition, map, onClose, onSaved }: { edition: SkEditionRow | null; map: MediaAssetRow | null; onClose: () => void; onSaved: (id: string) => void }) {
+/** Printable schedule (PDF). Only publishers may write the archives bucket, so only the managing roles see this. */
+function SchedulePdfField({ year, pdf, onChange }: { year: number; pdf: MediaAssetRow | null; onChange: (a: MediaAssetRow | null) => void }) {
+  const { profile } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  async function pick(file: File | undefined) {
+    if (!file || !profile) return;
+    setBusy(true);
+    setError(null);
+    try {
+      onChange(await uploadSchedulePdf(file, profile.id, year));
+    } catch (err) {
+      setError(skErrorText(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[14px] font-semibold">Schedule PDF</span>
+      {error && <Alert tone="error">{error}</Alert>}
+      <div className="flex flex-wrap items-center gap-3">
+        {pdf && (
+          <a href={publicUrl(pdf.bucket, pdf.path)} target="_blank" rel="noopener" className="inline-flex min-w-0 items-center gap-1.5 text-button text-green-700 underline">
+            <FileText className="size-4 shrink-0" aria-hidden />
+            <span className="truncate">{pdf.caption ?? 'Current schedule'}</span>
+          </a>
+        )}
+        <label className="inline-flex h-8 cursor-pointer items-center rounded-[8px] border-[1.5px] border-green-700 px-3 text-[13px] font-semibold text-green-700 hover:bg-green-soft">
+          {busy ? 'Uploading…' : pdf ? 'Replace' : 'Upload PDF'}
+          <input type="file" accept="application/pdf" className="sr-only" disabled={busy} onChange={(e) => void pick(e.target.files?.[0])} />
+        </label>
+        {pdf && (
+          <Button size="sm" variant="ghost" onClick={() => onChange(null)}>
+            Remove
+          </Button>
+        )}
+      </div>
+      <SetupNote>Readers get a “Download PDF schedule” button on the Schedule page.</SetupNote>
+    </div>
+  );
+}
+
+function EditionModal({ edition, map, pdf, canUploadPdf, onClose, onSaved }: { edition: SkEditionRow | null; map: MediaAssetRow | null; pdf: MediaAssetRow | null; canUploadPdf: boolean; onClose: () => void; onSaved: (id: string) => void }) {
   const save = useSaveSkRow('sk_editions');
   const year = new Date().getFullYear();
   const [f, setF] = useState({
@@ -28,6 +73,7 @@ function EditionModal({ edition, map, onClose, onSaved }: { edition: SkEditionRo
     is_published: edition?.is_published ?? false,
   });
   const [mapAsset, setMapAsset] = useState<MediaAssetRow | null>(map);
+  const [pdfAsset, setPdfAsset] = useState<MediaAssetRow | null>(pdf);
   const [error, setError] = useState<string | null>(null);
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((x) => ({ ...x, [k]: v }));
 
@@ -35,7 +81,7 @@ function EditionModal({ edition, map, onClose, onSaved }: { edition: SkEditionRo
     if (!f.title.trim() || !f.starts_on || !f.ends_on) return setError('Title, first day and last day are required.');
     if (f.ends_on < f.starts_on) return setError('The last day can’t be before the first day.');
     try {
-      const row = await save.mutateAsync({ id: edition?.id, ...f, title: f.title.trim(), subtitle: f.subtitle.trim() || null, map_asset_id: mapAsset?.id ?? null });
+      const row = await save.mutateAsync({ id: edition?.id, ...f, title: f.title.trim(), subtitle: f.subtitle.trim() || null, map_asset_id: mapAsset?.id ?? null, schedule_pdf_asset_id: pdfAsset?.id ?? null });
       onSaved(row.id);
       onClose();
     } catch (err) {
@@ -78,6 +124,7 @@ function EditionModal({ edition, map, onClose, onSaved }: { edition: SkEditionRo
           <SetupNote>The medal table and points race are worked out from results with these values.</SetupNote>
         </fieldset>
         <ImagePick label="Venue map" asset={mapAsset} onChange={setMapAsset} />
+        {canUploadPdf ? <SchedulePdfField year={f.year} pdf={pdfAsset} onChange={setPdfAsset} /> : pdfAsset && <SetupNote>Schedule PDF: {pdfAsset.caption ?? 'uploaded'} (only the managing roles can change it).</SetupNote>}
         <Checkbox label="Current edition (the one the site shows)" checked={f.is_current} onChange={(e) => set('is_current', e.target.checked)} />
         <Checkbox label="Published — readers can see it" checked={f.is_published} onChange={(e) => set('is_published', e.target.checked)} />
       </div>
@@ -85,10 +132,11 @@ function EditionModal({ edition, map, onClose, onSaved }: { edition: SkEditionRo
   );
 }
 
-export function EditionTab({ edition, onSelect }: { edition: SkEditionRow | null; onSelect: (id: string) => void }) {
+export function EditionTab({ edition, canUploadPdf = false, onSelect }: { edition: SkEditionRow | null; canUploadPdf?: boolean; onSelect: (id: string) => void }) {
   const [modal, setModal] = useState<'edit' | 'new' | null>(null);
-  const media = useMediaByIds([edition?.map_asset_id]);
+  const media = useMediaByIds([edition?.map_asset_id, edition?.schedule_pdf_asset_id]);
   const map = media.data?.find((m) => m.id === edition?.map_asset_id) ?? null;
+  const pdf = media.data?.find((m) => m.id === edition?.schedule_pdf_asset_id) ?? null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -127,6 +175,16 @@ export function EditionTab({ edition, onSelect }: { edition: SkEditionRow | null
             </div>
           </dl>
           {edition.subtitle && <p className="border-t border-line px-5 py-3 text-meta text-ink-muted">{edition.subtitle}</p>}
+          <p className="flex flex-wrap items-center gap-2 border-t border-line px-5 py-3 text-meta text-ink-muted">
+            Schedule PDF:
+            {pdf ? (
+              <a href={publicUrl(pdf.bucket, pdf.path)} target="_blank" rel="noopener" className="inline-flex items-center gap-1 font-semibold text-green-700 underline">
+                <FileText className="size-3.5" aria-hidden /> {pdf.caption ?? 'Download'}
+              </a>
+            ) : (
+              <span>not uploaded</span>
+            )}
+          </p>
         </Card>
       ) : (
         <EmptyState title="No Salingkusog edition yet">Create one for this year’s intramurals to start adding factions, sports and the schedule.</EmptyState>
@@ -134,7 +192,7 @@ export function EditionTab({ edition, onSelect }: { edition: SkEditionRow | null
       <Button variant={edition ? 'outline' : 'primary'} icon={<Plus className="size-4" aria-hidden />} className="self-start" onClick={() => setModal('new')}>
         New edition
       </Button>
-      {modal && <EditionModal edition={modal === 'edit' ? edition : null} map={modal === 'edit' ? map : null} onClose={() => setModal(null)} onSaved={onSelect} />}
+      {modal && <EditionModal edition={modal === 'edit' ? edition : null} map={modal === 'edit' ? map : null} pdf={modal === 'edit' ? pdf : null} canUploadPdf={canUploadPdf} onClose={() => setModal(null)} onSaved={onSelect} />}
     </div>
   );
 }

@@ -17,7 +17,7 @@ describe('ScoresView', () => {
     const onDay = vi.fn();
     inRouter(<ScoresView edition={skFixture.edition} matches={skFixture.matches} lookups={lookups} day="2026-11-03" onDay={onDay} sportId="" onSport={noop} onAdd={noop} />);
     const rows = within(screen.getByRole('list', { name: /Games on/ })).getAllByRole('link');
-    expect(rows.map((r) => r.getAttribute('href'))).toEqual(['/admin/salingkusog/scores/m2', '/admin/salingkusog/scores/m3', '/admin/salingkusog/scores/m1']);
+    expect(rows.map((r) => r.getAttribute('href'))).toEqual(['m2', 'm3', 'm6', 'm7', 'm5', 'm1'].map((id) => `/admin/salingkusog/scores/${id}`));
     expect(rows[0]).toHaveTextContent('Live');
     expect(screen.getByText('1 live now')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: /Day 3/ }));
