@@ -7,7 +7,7 @@ import { liveCards } from '../articles';
 export const PAGE_SIZE = 12;
 
 export type SectionInfo = {
-  section: Pick<SectionRow, 'id' | 'slug' | 'name' | 'description'>;
+  section: Pick<SectionRow, 'id' | 'slug' | 'name' | 'description' | 'nav_placement'>;
   categories: Pick<CategoryRow, 'id' | 'slug' | 'name'>[];
 };
 
@@ -20,7 +20,7 @@ export function useSectionInfo(slug: string) {
     queryFn: async (): Promise<SectionInfo | null> => {
       const supabase = getSupabase();
       const section = unwrapMaybe(
-        await supabase.from('sections').select('id, slug, name, description').eq('slug', slug).maybeSingle(),
+        await supabase.from('sections').select('id, slug, name, description, nav_placement').eq('slug', slug).maybeSingle(),
       );
       if (!section) return null;
       const categories = unwrap(
@@ -37,9 +37,10 @@ export function useSectionInfo(slug: string) {
 }
 
 /** One page of live articles, newest first; `section` null = every section. */
-export function useArticlePage({ section, category, page }: { section: string | null; category?: string | null; page: number }) {
+export function useArticlePage({ section, category, page, enabled = true }: { section: string | null; category?: string | null; page: number; enabled?: boolean }) {
   return useQuery({
     queryKey: ['article-page', section, category ?? null, page],
+    enabled,
     placeholderData: keepPreviousData,
     queryFn: async (): Promise<ArticlePage> => {
       const from = (page - 1) * PAGE_SIZE;

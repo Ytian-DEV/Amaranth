@@ -46,6 +46,8 @@ export default function DevRoutes() {
       <Route path="section" element={<PublicShell><SectionView {...fixtureSection} activeCategory={null} categoryHref={(s) => (s ? `/dev/section?category=${s}` : '/dev/section')} /></PublicShell>} />
       <Route path="section/empty" element={<PublicShell><SectionView {...fixtureSection} items={[]} total={0} pageCount={1} activeCategory="environment" categoryHref={() => '/dev/section'} /></PublicShell>} />
       <Route path="section/loading" element={<PublicShell><SectionSkeleton /></PublicShell>} />
+      <Route path="section/:slug" element={<PublicShell><Suspense fallback={null}><FixtureLanding /></Suspense></PublicShell>} />
+      <Route path="section/:slug/empty" element={<PublicShell><Suspense fallback={null}><FixtureLanding empty /></Suspense></PublicShell>} />
       <Route
         path="article"
         element={
@@ -183,6 +185,7 @@ function FixtureSchedule() {
 
 // CMS fixtures pull in the editor (TipTap); keep them out of the public fixture chunk.
 const AdminFixtures = lazy(() => import('./AdminFixtures'));
+const FixtureLanding = lazy(() => import('./landingFixtures'));
 
 const fakeSubmit = () => new Promise((resolve) => setTimeout(resolve, 700));
 

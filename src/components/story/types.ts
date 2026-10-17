@@ -14,6 +14,9 @@ export type StoryItem = {
   publishedAt?: string | null;
   readingMinutes?: number | null;
   image?: ImageSource | null;
+  /** category slug and name, for section layouts */
+  category?: string;
+  categoryName?: string;
 };
 
 export const articlePath = (slug: string) => `/article/${slug}`;
@@ -33,6 +36,8 @@ export function toStoryItem(row: ArticleCardRow): StoryItem {
     byline: row.byline,
     publishedAt: row.published_at,
     readingMinutes: row.reading_minutes,
+    category: row.category_slug,
+    categoryName: row.category_name,
     image: row.cover_path
       ? {
           bucket: row.cover_bucket,
