@@ -21,12 +21,13 @@ describe('router', () => {
     ['/home', '/'],
   ])('redirects old URL %s to %s', async (from, to) => {
     const router = go(from);
-    await waitFor(() => expect(router.state.location.pathname).toBe(to));
+    // first render pays for cold lazy route imports
+    await waitFor(() => expect(router.state.location.pathname).toBe(to), { timeout: 5000 });
   });
 
   it('sends unknown deep paths to the public 404', async () => {
     const router = go('/no/such/page');
-    await waitFor(() => expect(document.title).toMatch(/Page not found/));
+    await waitFor(() => expect(document.title).toMatch(/Page not found/), { timeout: 5000 });
     expect(router.state.location.pathname).toBe('/no/such/page');
   });
 });
