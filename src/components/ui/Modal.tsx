@@ -30,7 +30,9 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      onClose={onClose}
+      // React passes a nested <dialog>'s close event up the tree (e.g. the media picker inside a form);
+      // only react to this dialog closing, or the form closes and loses its changes
+      onClose={(e) => e.target === e.currentTarget && onClose()}
       aria-labelledby={titleId}
       className={cn(
         'm-auto max-w-none rounded-[14px] bg-paper p-0 shadow-raised backdrop:bg-scrim',

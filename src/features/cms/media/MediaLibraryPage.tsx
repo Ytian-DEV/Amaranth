@@ -148,7 +148,11 @@ export function MediaPickerDialog({ open, onClose, onPick }: { open: boolean; on
   return (
     <dialog
       ref={ref}
-      onClose={onClose}
+      onClose={(e) => {
+        // the picker often sits inside another dialog (a form): don't close that one too
+        e.stopPropagation();
+        onClose();
+      }}
       aria-labelledby="media-picker-title"
       className="m-auto w-[min(960px,calc(100vw-24px))] max-w-none rounded-[14px] bg-paper p-0 shadow-raised backdrop:bg-scrim"
     >

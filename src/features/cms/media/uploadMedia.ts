@@ -8,6 +8,8 @@ const VARIANT_WIDTHS = [640, 1280];
 
 export function mediaProblem(file: File) {
   if (!file.type.startsWith('image/')) return `${file.name} is not an image.`;
+  // dropped files skip the picker's accept list; the media bucket only stores these types
+  if (!MEDIA_ACCEPT.split(',').includes(file.type)) return `${file.name} can’t be used (${file.type.replace('image/', '').toUpperCase()}). Save it as PNG, JPG or WebP first.`;
   if (file.size > 40 * 1024 * 1024) return `${file.name} is too large (max 40 MB before compression).`;
   return null;
 }
