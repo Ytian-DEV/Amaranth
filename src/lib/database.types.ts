@@ -506,6 +506,7 @@ export type Database = {
     Functions: {
       record_article_view: { Args: { p_article_id: string }; Returns: undefined };
       most_read_articles: { Args: { p_days?: number; p_limit?: number }; Returns: MostReadRow[] };
+      archive_months: { Args: Record<string, never>; Returns: { month: string; articles: number }[] };
       search_articles: {
         Args: {
           p_query: string;

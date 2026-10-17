@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/search-archives`)
-**Last done:** `feature/article-page` merged — `/article/:slug` (sanitised body via DOMPurify, authors, tags, related, share incl. Messenger, one view per session, staff preview banner, threaded moderated comments with honeypot).
-**Next step:** `feature/search-archives` — `/search` (full-text via `search_articles`, section/date filters, `?tag=`), `/archives` (publication issues + by month); remove `search`, `archives` from `legacyRoutes`.
+**Current branch:** `develop` (next: create `feature/submissions-contact`)
+**Last done:** `feature/search-archives` merged — `/search` (debounced full-text, section/date filters, `?tag=`), `/archives` (print issues + months via new `archive_months()` RPC), `/archives/:yyyy-mm`.
+**Next step:** `feature/submissions-contact` — `/submit` (article), `/submit/event`, `/contact` forms with uploads to the `intake` bucket, honeypot, RPCs; About + Editorial Board pages may follow in `feature/cms-people-board`. Remove `submit-article`, `contact` from legacy routes and the `/submit` redirects.
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -29,7 +29,7 @@
 | 4 | `feature/public-shell-home` | ✅ merged | Header links to `/submit`, `/search`, `/about` … still served by legacy until their features land |
 | 5 | `feature/section-pages` | ✅ merged | Legacy pages still routed: see `legacyRoutes` in router.tsx |
 | 6 | `feature/article-page` | ✅ merged | Tag links go to `/search?tag=` (handled in feature 7) |
-| 7 | `feature/search-archives` | ⬜ | |
+| 7 | `feature/search-archives` | ✅ merged | Schema gained `archive_months()` (in schema.sql) |
 | 8 | `feature/submissions-contact` | ⬜ | |
 | 9 | `feature/cms-shell-dashboard` | ⬜ | |
 | 10 | `feature/cms-article-editor` | ⬜ | |

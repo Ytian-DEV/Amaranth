@@ -32,10 +32,8 @@ const legacy = async () => ({ Component: (await import('../legacy/App')).default
 const legacyRoutes: RouteObject[] = [
   'about',
   'editorial-board',
-  'archives',
   'contact',
   'submit-article',
-  'search',
   'dashboard',
 ].map((path) => ({ path, lazy: legacy }));
 
@@ -55,6 +53,9 @@ const publicRoutes: RouteObject[] = [
     children: [
       { index: true, lazy: async () => ({ Component: (await import('@/features/public/home/HomePage')).HomePage }) },
       { path: 'article/:slug', lazy: async () => ({ Component: (await import('@/features/public/article/ArticlePage')).ArticlePage }) },
+      { path: 'search', lazy: async () => ({ Component: (await import('@/features/public/search/SearchPage')).SearchPage }) },
+      { path: 'archives', lazy: async () => ({ Component: (await import('@/features/public/archives/ArchivesPage')).ArchivesPage }) },
+      { path: 'archives/:month', lazy: async () => ({ Component: (await import('@/features/public/archives/ArchivesPage')).ArchiveMonthPage }) },
       { path: 'latest', lazy: async () => ({ Component: (await import('@/features/public/section/SectionPage')).LatestPage }) },
       { path: ':section', lazy: async () => ({ Component: (await import('@/features/public/section/SectionPage')).SectionPage }) },
       { path: '*', lazy: async () => ({ Component: (await import('@/features/public/NotFoundPage')).NotFoundPage }) },
