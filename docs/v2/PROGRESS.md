@@ -6,6 +6,28 @@
 **Last done:** `feature/perf-pass` merged — Lighthouse before/after in `docs/v2/PERF.md` (v1 `/` mobile 56 / desktop 83 → v2 79 / 99, a11y 91 → 100, 1.6 MB → 246 KB), eager public shell, CLS 0, editor vendor chunk, board photos 6.1 → 1.4 MB, Supabase preconnect.
 **Next step (user):** paste `supabase/v2/schema.sql` + `seed.sql` into the new project, set env vars on Vercel, deploy a preview, run the manual checklist in `docs/v2/PR.md`, then open the PR. Open questions: Katalon tests in `Amaranth/`, v1 content export. (TipTap 3 / Vite 7 upgrades done.)
 
+## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
+**Rule:** one feature at a time; wait for the user's go before starting the next.
+**Next:** A1 `feature/salingkusog-db` (awaiting go).
+
+| # | Branch | Status |
+|---|---|---|
+| A1 | `feature/salingkusog-db` | ⬜ |
+| A2 | `feature/salingkusog-team-access` | ⬜ |
+| A3 | `feature/salingkusog-cms-setup` | ⬜ |
+| A4 | `feature/salingkusog-scorekeeper` | ⬜ |
+| A5 | `feature/salingkusog-medal-tally` | ⬜ |
+| A6 | `feature/salingkusog-schedule` | ⬜ |
+| A7 | `feature/salingkusog-winners` | ⬜ |
+| A8 | `feature/salingkusog-factions` | ⬜ |
+| A9 | `feature/salingkusog-sports-bracket` | ⬜ |
+| A10 | `feature/salingkusog-match-recap` | ⬜ |
+| A11 | `feature/salingkusog-venues` | ⬜ |
+| A12 | `feature/sports-landing` | ⬜ |
+| A13 | `feature/salingkusog-social-cards` | ⬜ |
+| B1 | `feature/nav-more-menu` | ⬜ |
+| B2–B12 | `feature/section-<slug>` (News, Feature, Literary, Blogs, Specials, Views, S&T, Investigative, Explainer, Bulletin, Stories) | ⬜ |
+
 ## Decisions log
 - 2026-10-17 Upgrades: TipTap 3 and Vite 7. Vitest went to 5 (not 4): npm 11.2 crashes (`edgesOut`) resolving Vitest 4's optional peers; Vitest 5 installs cleanly and `npm ci` from the lockfile was verified in a scratch copy. Vite 7 needs Node ≥ 20.19.
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
