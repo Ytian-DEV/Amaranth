@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { ProfileRow } from '@/lib/database.types';
 import { isSupabaseConfigured } from '@/lib/env';
-import { getSupabase, unwrap } from '@/lib/supabase';
+import { getSupabase, unwrapMaybe } from '@/lib/supabase';
 
 type AuthStatus = 'loading' | 'signed-out' | 'signed-in';
 
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     enabled: Boolean(userId),
     staleTime: 5 * 60_000,
     queryFn: async () =>
-      unwrap(await getSupabase().from('profiles').select('*').eq('id', userId!).maybeSingle()),
+      unwrapMaybe(await getSupabase().from('profiles').select('*').eq('id', userId!).maybeSingle()),
   });
 
   const signOut = useCallback(async () => {

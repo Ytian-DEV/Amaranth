@@ -7,8 +7,10 @@ export const queryClient = new QueryClient({
       gcTime: 10 * 60_000,
       refetchOnWindowFocus: false,
       retry: (count, error) => {
-        const status = (error as { status?: number } | null)?.status;
-        if (status && status >= 400 && status < 500) return false;
+        const e = error as { status?: number; code?: string } | null;
+        // PostgREST / Postgres errors (missing table, RLS, bad input) won't fix themselves
+        if (typeof e?.code === 'string' && e.code !== '') return false;
+        if (e?.status && e.status >= 400 && e.status < 500) return false;
         return count < 2;
       },
     },
