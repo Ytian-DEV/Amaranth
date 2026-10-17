@@ -202,6 +202,15 @@ select tests.expect_ok('managing editor switches it off', $$update public.sk_edi
 select tests.login(null);
 select tests.expect_count('off: nothing public', 'select * from public.sk_countdown()', 0);
 
+-- ---------------------------------------------------------------- newer categories
+select tests.login('me@test.local');
+select tests.expect_ok('combat sports, pageant and others can be used',
+  $$insert into public.sk_sports (edition_id, name, slug, category) values
+    ('00000000-0000-0000-0000-00000000e001', 'Arnis', 'arnis', 'combat_sports'),
+    ('00000000-0000-0000-0000-00000000e001', 'Mr & Ms Salingkusog', 'mr-ms-salingkusog', 'pageant'),
+    ('00000000-0000-0000-0000-00000000e001', 'Laro ng Lahi', 'laro-ng-lahi', 'others')$$);
+select tests.expect_count('…and are saved', $$select 1 from public.sk_sports where category in ('combat_sports', 'pageant', 'others')$$, 3);
+
 -- ---------------------------------------------------------------- one current edition
 select tests.login('me@test.local');
 select tests.expect_ok('a new current edition replaces the old one',

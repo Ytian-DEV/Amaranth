@@ -54,8 +54,10 @@ function EventModal({ sport, event, venues, nextOrder, onClose }: { sport: SkSpo
   const save = useSaveSkRow('sk_events');
   const ns = useNameSlug(event?.name, event?.slug, sport.slug);
   const [division, setDivision] = useState<SkDivision>(event?.division ?? 'men');
-  const [format, setFormat] = useState<SkFormat>(event?.format ?? (sport.category === 'athletics' || sport.category === 'aquatics' ? 'timed' : 'bracket'));
-  const [isTeam, setIsTeam] = useState(event?.is_team ?? !['athletics', 'aquatics'].includes(sport.category));
+  // sensible starting points per category; staff can change both
+  const defaultFormat: SkFormat = ['athletics', 'aquatics'].includes(sport.category) ? 'timed' : sport.category === 'pageant' || sport.category === 'dance_cheer' ? 'judged' : 'bracket';
+  const [format, setFormat] = useState<SkFormat>(event?.format ?? defaultFormat);
+  const [isTeam, setIsTeam] = useState(event?.is_team ?? !['athletics', 'aquatics', 'combat_sports', 'pageant'].includes(sport.category));
   const [unit, setUnit] = useState(event?.result_unit ?? '');
   const [venueId, setVenueId] = useState(event?.venue_id ?? '');
   const [order, setOrder] = useState(event?.sort_order ?? nextOrder);
