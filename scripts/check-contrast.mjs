@@ -44,6 +44,14 @@ export const pairs = [
   ['status-scheduled', 'status-scheduled-soft', 4.5, 'scheduled pill'],
   ['ink-muted', 'status-archived-soft', 4.5, 'archived pill'],
   ['lime-dark', 'paper', 3, 'large italic numerals (30px)'],
+  ['on-dark', 'night', 4.5, 'Salingkusog header'],
+  ['on-dark-muted', 'night', 4.5, 'Salingkusog header meta'],
+  ['lime', 'night', 4.5, 'Salingkusog kicker / active tab'],
+  ['green-soft', 'night', 4.5, 'Salingkusog tabs'],
+  ['on-dark', 'night-2', 4.5, 'podium text'],
+  ['ink', 'gold', 4.5, 'gold medal count'],
+  ['ink', 'silver', 4.5, 'silver medal count'],
+  ['on-dark', 'bronze-deep', 4.5, 'bronze medal count'],
 ];
 
 export function check(tokens) {

@@ -1,31 +1,15 @@
 // Pure helpers for the scorekeeper, results and awards screens. Salingkusog runs on Philippine time (UTC+8, no DST).
 import type { SkEditionRow, SkMatchRow, SkMatchStatus, SkPlacementInput, SkSportRow } from '@/lib/database.types';
+import { dayRange, manilaDate, manilaTime } from '@/lib/manila';
 
-const MANILA_OFFSET_MS = 8 * 3600_000;
-
-/** YYYY-MM-DD in Manila for an instant. */
-export function manilaDate(at: string | Date = new Date()) {
-  return new Date(new Date(at).getTime() + MANILA_OFFSET_MS).toISOString().slice(0, 10);
-}
-
-/** HH:MM in Manila for an instant. */
-export function manilaTime(at: string | Date) {
-  return new Date(new Date(at).getTime() + MANILA_OFFSET_MS).toISOString().slice(11, 16);
-}
+export { manilaDate, manilaTime };
 
 /** <input type="datetime-local"> value (Manila) ↔ ISO instant. */
 export const toLocalInput = (iso: string) => `${manilaDate(iso)}T${manilaTime(iso)}`;
 export const fromLocalInput = (local: string) => `${local}:00+08:00`;
 
 /** Every competition day of an edition: [{ date, number }]. */
-export function editionDays(edition: Pick<SkEditionRow, 'starts_on' | 'ends_on'>) {
-  const days: { date: string; number: number }[] = [];
-  const end = new Date(`${edition.ends_on}T00:00:00Z`).getTime();
-  for (let t = new Date(`${edition.starts_on}T00:00:00Z`).getTime(), n = 1; t <= end && n <= 60; t += 86_400_000, n++) {
-    days.push({ date: new Date(t).toISOString().slice(0, 10), number: n });
-  }
-  return days;
-}
+export const editionDays = (edition: Pick<SkEditionRow, 'starts_on' | 'ends_on'>) => dayRange(edition.starts_on, edition.ends_on);
 
 /** Today if it falls inside the edition, else its first (or last, once over) day. */
 export function defaultDay(edition: Pick<SkEditionRow, 'starts_on' | 'ends_on'>, today = manilaDate()) {

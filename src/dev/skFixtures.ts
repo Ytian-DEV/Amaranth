@@ -1,5 +1,5 @@
 // Salingkusog sample data for /dev fixtures and tests. Faction names follow the Figma design (placeholders).
-import type { SkAthleteRow, SkAwardRow, SkEditionRow, SkEventRow, SkFactionRow, SkMatchRow, SkPlacementRow, SkSportRow, SkVenueRow } from '@/lib/database.types';
+import type { SkAthleteRow, SkAwardRow, SkEditionRow, SkEventRow, SkFactionRow, SkMatchRow, SkMedalTableRow, SkPlacementRow, SkPointsByDayRow, SkSportRow, SkVenueRow } from '@/lib/database.types';
 
 const t = '2026-10-10T08:00:00+08:00';
 const base = { edition_id: 'ed26', created_at: t, updated_at: t };
@@ -24,10 +24,10 @@ const edition: SkEditionRow = {
 
 // colours are data (stored per faction), written as rgb() to keep hex out of the source
 const factions: SkFactionRow[] = [
-  { ...base, id: 'pt', name: 'Primordial Tiamat', slug: 'primordial-tiamat', short_name: 'PT', motto: 'From the deep, we rise.', color: 'rgb(139 30 45)', logo_asset_id: null, sort_order: 0 },
-  { ...base, id: 'cv', name: 'Centicore Vanguard', slug: 'centicore-vanguard', short_name: 'CV', motto: null, color: 'rgb(30 79 160)', logo_asset_id: null, sort_order: 1 },
-  { ...base, id: 'sd', name: 'Sylvan Dragons', slug: 'sylvan-dragons', short_name: 'SD', motto: null, color: 'rgb(31 138 76)', logo_asset_id: null, sort_order: 2 },
-  { ...base, id: 'mm', name: 'Mystic Moirai', slug: 'mystic-moirai', short_name: 'MM', motto: null, color: 'rgb(106 61 154)', logo_asset_id: null, sort_order: 3 },
+  { ...base, id: 'pt', name: 'Primordial Tiamat', slug: 'primordial-tiamat', short_name: 'PT', motto: 'From the deep, we rise.', color: 'rgb(37 99 201)', logo_asset_id: null, sort_order: 0 },
+  { ...base, id: 'cv', name: 'Centicore Vanguard', slug: 'centicore-vanguard', short_name: 'CV', motto: null, color: 'rgb(198 40 57)', logo_asset_id: null, sort_order: 1 },
+  { ...base, id: 'sd', name: 'Sylvan Dragons', slug: 'sylvan-dragons', short_name: 'SD', motto: null, color: 'rgb(18 148 107)', logo_asset_id: null, sort_order: 2 },
+  { ...base, id: 'mm', name: 'Mystic Moirai', slug: 'mystic-moirai', short_name: 'MM', motto: null, color: 'rgb(107 63 160)', logo_asset_id: null, sort_order: 3 },
 ];
 
 const venues: SkVenueRow[] = [
@@ -112,4 +112,19 @@ const awards: SkAwardRow[] = [
   { ...base, id: 'aw2', kind: 'athlete_of_day', day: '2026-11-03', athlete_id: 'a2', match_id: null, event_id: 'at-100w', headline: '12.84s', stat_line: [], quote: 'I ran for my block.' },
 ];
 
-export const skFixture = { edition, factions, venues, sports, events, athletes, matches, placements, awards };
+// standings as in the Figma medal tally (after day 4 of 6)
+const tally: [string, number, number, number, number[]][] = [
+  ['pt', 12, 8, 6, [22, 47, 70, 90]],
+  ['cv', 10, 10, 9, [25, 45, 66, 89]],
+  ['sd', 8, 9, 12, [18, 39, 60, 79]],
+  ['mm', 6, 8, 11, [14, 31, 48, 65]],
+];
+const medalTable: SkMedalTableRow[] = tally.map(([id, gold, silver, bronze], i) => {
+  const f = factions.find((x) => x.id === id)!;
+  return { edition_id: 'ed26', faction_id: id, name: f.name, slug: f.slug, short_name: f.short_name, color: f.color, logo_asset_id: null, gold, silver, bronze, total: gold + silver + bronze, points: gold * 5 + silver * 3 + bronze, rank: i + 1 };
+});
+const pointsByDay: SkPointsByDayRow[] = tally.flatMap(([id, , , , race]) =>
+  [1, 2, 3, 4, 5, 6].map((d) => ({ edition_id: 'ed26', faction_id: id, day: `2026-11-0${d + 1}`, day_number: d, points: race[Math.min(d, 4) - 1] })),
+);
+
+export const skFixture = { edition, factions, venues, sports, events, athletes, matches, placements, awards, medalTable, pointsByDay };
