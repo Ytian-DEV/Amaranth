@@ -1,4 +1,4 @@
-import { createBrowserRouter, type RouteObject } from 'react-router-dom';
+import { createBrowserRouter, Navigate, type RouteObject } from 'react-router-dom';
 import { RootLayout } from './RootLayout';
 import { RouteError } from './RouteError';
 
@@ -25,6 +25,16 @@ const adminRoutes: RouteObject[] = [
   },
 ];
 
+const publicRoutes: RouteObject[] = [
+  {
+    lazy: async () => ({ Component: (await import('@/features/public/layout/PublicLayout')).PublicLayout }),
+    children: [
+      { index: true, lazy: async () => ({ Component: (await import('@/features/public/home/HomePage')).HomePage }) },
+      { path: 'home', element: <Navigate to="/" replace /> },
+    ],
+  },
+];
+
 export const routes: RouteObject[] = [
   {
     element: <RootLayout />,
@@ -32,6 +42,7 @@ export const routes: RouteObject[] = [
     children: [
       ...devRoutes,
       ...adminRoutes,
+      ...publicRoutes,
       // v1 app for every route not rebuilt yet (removed in feature/v2-polish)
       { path: '*', lazy: async () => ({ Component: (await import('../legacy/App')).default }) },
     ],

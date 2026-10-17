@@ -16,10 +16,12 @@ export function SectionHeader({
   as: Heading = 'h2',
   size = 'l',
   id,
+  rule = true,
   className,
 }: {
   title: string;
   id?: string;
+  rule?: boolean;
   href?: string;
   linkLabel?: string;
   as?: 'h1' | 'h2' | 'h3';
@@ -29,10 +31,10 @@ export function SectionHeader({
   return (
     <div className={cn('flex items-center gap-4', className)}>
       <span className={cn('w-1.5 shrink-0 rounded-[2px] bg-lime', size === 'l' ? 'h-7' : 'h-6')} aria-hidden />
-      <Heading id={id} className={cn('shrink-0 font-serif text-ink', size === 'l' ? 'text-[26px] font-semibold leading-tight tracking-[-0.5px] md:text-headline-l' : 'text-headline-m')}>
+      <Heading id={id} className={cn('min-w-0 font-serif text-ink', size === 'l' ? 'text-[26px] font-semibold leading-tight tracking-[-0.5px] md:text-headline-l' : 'text-headline-m')}>
         {title}
       </Heading>
-      <span className="h-px min-w-4 flex-1 bg-line" aria-hidden />
+      {rule && <span className="h-px min-w-0 flex-1 bg-line" aria-hidden />}
       {href && (
         <Link to={href} className="shrink-0 text-button text-green-700 hover:text-green-900 hover:underline">
           {linkLabel} <span aria-hidden>→</span>
