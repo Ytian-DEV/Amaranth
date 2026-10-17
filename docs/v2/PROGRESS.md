@@ -24,6 +24,8 @@
   - When off, the page redirects to the hub. **The user must re-paste `supabase/v2/salingkusog.sql`** to add the new columns and function.
   - Fixtures: `/dev/countdown` and `/dev/countdown/done`.
 
+- `feature/countdown-redesign`: countdown restyled as a flat "official notice" (charcoal, one gold accent, hairline rules, line emblem, no glow or particles); share image regenerated.
+
 **Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
 
 | # | Branch | Status |

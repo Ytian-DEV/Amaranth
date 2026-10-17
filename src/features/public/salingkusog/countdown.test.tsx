@@ -36,15 +36,17 @@ describe('CountdownView', () => {
     const timer = screen.getByRole('timer', { name: 'Countdown to Salingkusog 2026' });
     expect(timer).toHaveTextContent('2 days, 1 hour and 0 minutes until the games begin.');
     expect(timer).toHaveTextContent(/2\s*Days\s*01\s*Hours\s*00\s*Minutes\s*30\s*Seconds/);
-    expect(screen.getByText(/Opening: Monday, November 2, 2026/)).toBeInTheDocument();
+    expect(screen.getByText('Official notice')).toBeInTheDocument();
+    expect(screen.getByText(/Monday, November 2, 2026 · 8:00 AM, Philippine time/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Continue to Salingkusog/ })).toHaveAttribute('href', '/salingkusog-2026');
   });
 
   it('switches to "The games have begun" at zero', () => {
     wrap(<CountdownView title="Salingkusog 2026" target="2026-11-02T08:00:00+08:00" now={new Date('2026-11-02T01:00:00Z')} />);
     expect(screen.queryByRole('timer')).not.toBeInTheDocument();
-    expect(screen.getByText('The games have begun')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Continue to Salingkusog/ })).toHaveClass('px-8');
+    expect(screen.getByText('Let the games begin.')).toBeInTheDocument();
+    expect(screen.getByText(/are underway/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Continue to Salingkusog/ })).toHaveAttribute('href', '/salingkusog-2026');
   });
 });
 
