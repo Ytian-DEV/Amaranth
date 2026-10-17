@@ -1710,6 +1710,7 @@ begin
   for r in
     select schemaname, tablename, policyname from pg_policies
     where schemaname = 'public'
+      and tablename not like 'sk\_%' -- Salingkusog tables are owned by salingkusog.sql
   loop
     execute format('drop policy %I on %I.%I', r.policyname, r.schemaname, r.tablename);
   end loop;

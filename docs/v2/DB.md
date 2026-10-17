@@ -7,12 +7,13 @@ The v1 schema is kept at `supabase/legacy/schema-v1.sql` for reference only; don
 | File | What |
 |---|---|
 | `supabase/v2/schema.sql` | Types, tables, indexes, triggers, helpers (`app` schema), RPCs, RLS, storage buckets + policies |
+| `supabase/v2/salingkusog.sql` | Salingkusog (intramurals) add-on: editions, factions, venues, sports/events, athletes, matches, placements, awards, `sk_team`; medal-table / points / head-to-head / event views; RLS; Realtime on `sk_matches` |
 | `supabase/v2/seed.sql` | Reference data: 12 sections, categories, department contacts, home slots, site settings |
 | `supabase/v2/seed_board.sql` | Optional: the current editorial board from the v1 site (18 people, photos from `/public/images`) |
 | `supabase/tests/00_supabase_stub.sql` | Local stand-in for `auth`, `storage`, roles (never run on Supabase) |
 | `supabase/tests/01_helpers.sql` | `tests.login`, `tests.expect_error`, `tests.expect_count`, `tests.expect_ok`, `tests.expect_eq` |
 | `supabase/tests/02_fixtures.sql` | Test staff (one per role), articles in each state |
-| `supabase/tests/*.test.sql` | RLS / trigger / RPC tests |
+| `supabase/tests/*.test.sql` | RLS / trigger / RPC tests (`salingkusog.test.sql` for the add-on) |
 | `scripts/db-test.mjs` | Runner (`npm run db:test`) |
 
 ## 2. Deploy day (paste in this order)
@@ -28,22 +29,23 @@ The v1 schema is kept at `supabase/legacy/schema-v1.sql` for reference only; don
    ```
    (Empty or delete the old storage buckets from the Storage page if you don't need the files.)
 2. Paste **`supabase/v2/schema.sql`** → Run.
-3. Paste **`supabase/v2/seed.sql`** → Run.
+3. Paste **`supabase/v2/salingkusog.sql`** → Run. (Base schema already deployed? Just paste this one; it only adds `sk_*` objects.)
+4. Paste **`supabase/v2/seed.sql`** → Run.
    Optional: edit the term label/date at the top of **`supabase/v2/seed_board.sql`**, then paste → Run (fills the Editorial Board page).
-4. **Invite the first admin** (role comes only from this table; nobody can make themselves admin):
+5. **Invite the first admin** (role comes only from this table; nobody can make themselves admin):
    ```sql
    insert into public.staff_invites (email, role) values ('you@vsu.edu.ph', 'super_admin');
    ```
    Then Dashboard → Authentication → Users → **Invite user** with that email. Accepting the invite creates an active `super_admin` profile.
    (If the auth user already exists: `update public.profiles set role = 'super_admin', is_active = true where email = 'you@vsu.edu.ph';`)
-5. **Auth settings** (Dashboard → Authentication):
+6. **Auth settings** (Dashboard → Authentication):
    - Sign In / Providers → Email: **disable "Allow new users to sign up"** (staff are invited).
    - URL Configuration: Site URL = production URL; Redirect URLs add `https://<site>/admin/reset-password` and `http://localhost:5173/**`.
-6. **Optional — pg_cron** (Database → Extensions → enable `pg_cron`), so scheduled articles also flip to `published` in the CMS list (the public site already shows them on time without it):
+7. **Optional — pg_cron** (Database → Extensions → enable `pg_cron`), so scheduled articles also flip to `published` in the CMS list (the public site already shows them on time without it):
    ```sql
    select cron.schedule('publish-due-articles', '*/5 * * * *', $$select app.publish_due_articles()$$);
    ```
-7. Re-running `schema.sql` / `seed.sql` later is safe (no data changes besides re-asserting seed rows).
+8. Re-running `schema.sql` / `salingkusog.sql` / `seed.sql` later is safe (no data changes besides re-asserting seed rows). `schema.sql` leaves the `sk_*` policies alone, so the order of re-runs doesn't matter.
 
 ## 3. Model summary
 - **Staff only have accounts.** `profiles.role` + `is_active`; `staff_invites` pre-authorises emails (with optional `section_slugs` for section editors → `profile_sections`).
@@ -56,6 +58,11 @@ The v1 schema is kept at `supabase/legacy/schema-v1.sql` for reference only; don
 - **Staff RPCs:** `transition_article`, `add_article_note`, `convert_intake_to_article`, `dashboard_stats`, `media_usage`.
 - **Storage:** `media` (public images ≤10 MB), `archives` (public PDFs ≤60 MB, publishers write), `intake` (private ≤20 MB; anyone may upload under `submissions/` or `events/`, only editors read).
 - Commenter emails live in `article_comment_private` (editors only).
+- **Salingkusog** (`salingkusog.sql`): one `sk_editions` row per year (dates, medal points 5/3/1 by default, `is_current`, `is_published`). Everything else hangs off an edition; `edition_id` on events, athletes, matches and placements is copied from the parent by trigger.
+  - **Who edits:** super_admin, editor_in_chief ("Executive Editor") and managing_editor always; other active staff only while they are in `sk_team`. Only those three roles add/remove `sk_team` members (audited as `salingkusog.team.add` / `.remove`).
+  - **Who reads:** staff always; the public once the edition is published.
+  - **Computed, never typed:** `sk_medal_table` (gold/silver/bronze/total/points/rank), `sk_points_by_day` (cumulative race), `sk_head_to_head`, `sk_event_status` (completed = gold awarded, live), `sk_event_leaders` (stat totals per athlete). `sk_matches.winner_side` is generated; `started_at` / `ended_at` are set when the status changes.
+  - **Realtime:** `sk_matches` is in the `supabase_realtime` publication for live scores.
 
 ## 4. How it's tested
 ```bash

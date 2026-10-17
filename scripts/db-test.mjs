@@ -70,9 +70,12 @@ try {
   psql(join(sb, 'tests', '00_supabase_stub.sql'), 'supabase stub');
   for (const pass of [1, 2]) {
     psql(join(sb, 'v2', 'schema.sql'), `schema.sql (pass ${pass})`);
+    psql(join(sb, 'v2', 'salingkusog.sql'), `salingkusog.sql (pass ${pass})`);
     psql(join(sb, 'v2', 'seed.sql'), `seed.sql (pass ${pass})`);
     psql(join(sb, 'v2', 'seed_board.sql'), `seed_board.sql (pass ${pass})`);
   }
+  // re-running the base schema later must not drop the add-on's policies
+  psql(join(sb, 'v2', 'schema.sql'), 'schema.sql re-run after salingkusog.sql');
   psql(join(sb, 'tests', '01_helpers.sql'), 'test helpers');
   psql(join(sb, 'tests', '02_fixtures.sql'), 'fixtures');
   psql(join(sb, 'tests', '02_fixtures.sql'), 'fixtures (re-run)');

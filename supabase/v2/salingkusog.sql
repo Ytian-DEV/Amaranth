@@ -1,0 +1,547 @@
+-- =============================================================================
+-- AMARANTH v2 — Salingkusog (VSU intramural games) add-on
+--
+-- Paste AFTER schema.sql (any time; re-runnable). All tables are prefixed sk_.
+--
+-- Who can do what
+--   readers (anon)                     read everything in a published edition
+--   any active staff                   read everything, incl. unpublished editions
+--   Salingkusog team (sk_team)         create/edit all Salingkusog data
+--   super_admin, editor_in_chief       = "Executive Editor", and managing_editor:
+--                                      everything above + choose the team
+--
+-- Medal table, points, the day-by-day race, head-to-head and top scorers are
+-- views over the results — nobody types totals in by hand.
+-- =============================================================================
+
+begin;
+
+-- -----------------------------------------------------------------------------
+-- Enums
+-- -----------------------------------------------------------------------------
+do $$ begin
+  create type public.sk_category as enum ('ball_games', 'athletics', 'racket_sports', 'aquatics', 'mind_games', 'esports', 'dance_cheer');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type public.sk_division as enum ('men', 'women', 'mixed', 'open');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  -- bracket: elimination games · round_robin: league · timed/measured: races, throws · judged: cheerdance
+  create type public.sk_format as enum ('bracket', 'round_robin', 'timed', 'judged');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type public.sk_match_status as enum ('upcoming', 'live', 'final', 'postponed', 'cancelled');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type public.sk_medal as enum ('gold', 'silver', 'bronze');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type public.sk_award_kind as enum ('mvp_of_day', 'athlete_of_day', 'finals_mvp');
+exception when duplicate_object then null; end $$;
+
+-- -----------------------------------------------------------------------------
+-- Tables
+-- -----------------------------------------------------------------------------
+create table if not exists public.sk_editions (
+  id uuid primary key default gen_random_uuid(),
+  year integer not null unique check (year between 2000 and 2100),
+  title text not null,                          -- "Salingkusog 2026"
+  subtitle text,                                -- "VSU Intramural Games"
+  starts_on date not null,
+  ends_on date not null,
+  points_gold smallint not null default 5 check (points_gold >= 0),
+  points_silver smallint not null default 3 check (points_silver >= 0),
+  points_bronze smallint not null default 1 check (points_bronze >= 0),
+  is_current boolean not null default false,
+  is_published boolean not null default false,
+  schedule_pdf_asset_id uuid references public.media_assets (id) on delete set null,
+  map_asset_id uuid references public.media_assets (id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint sk_editions_dates check (ends_on >= starts_on)
+);
+create unique index if not exists sk_editions_one_current on public.sk_editions (is_current) where is_current;
+
+create table if not exists public.sk_factions (
+  id uuid primary key default gen_random_uuid(),
+  edition_id uuid not null references public.sk_editions (id) on delete cascade,
+  name text not null,
+  slug text not null check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
+  short_name text,                              -- "PT", used in compact score tables
+  motto text,
+  color text not null default '#0e5a36' check (color ~ '^#[0-9a-fA-F]{6}$'),
+  logo_asset_id uuid references public.media_assets (id) on delete set null,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (edition_id, slug),
+  unique (edition_id, id)
+);
+
+create table if not exists public.sk_venues (
+  id uuid primary key default gen_random_uuid(),
+  edition_id uuid not null references public.sk_editions (id) on delete cascade,
+  name text not null,
+  slug text not null check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
+  description text,
+  map_number smallint,                          -- the numbered pin on the venue map
+  map_x numeric(5, 2) check (map_x is null or map_x between 0 and 100), -- % from left
+  map_y numeric(5, 2) check (map_y is null or map_y between 0 and 100), -- % from top
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (edition_id, slug),
+  unique (edition_id, id)
+);
+
+create table if not exists public.sk_sports (
+  id uuid primary key default gen_random_uuid(),
+  edition_id uuid not null references public.sk_editions (id) on delete cascade,
+  name text not null,                           -- "Basketball"
+  slug text not null check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
+  category public.sk_category not null,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (edition_id, slug),
+  unique (edition_id, id)
+);
+
+-- A medal event within a sport: "Basketball · Men", "100m Dash · Women", "Chess · Individual Open"
+create table if not exists public.sk_events (
+  id uuid primary key default gen_random_uuid(),
+  edition_id uuid not null,
+  sport_id uuid not null,
+  name text not null,                           -- shown after the sport: "Men", "100m Dash · Women"
+  slug text not null check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
+  division public.sk_division not null default 'open',
+  format public.sk_format not null default 'bracket',
+  is_team boolean not null default true,        -- false = individual athletes win the medals
+  result_unit text,                             -- "s", "m", "pts" for timed/measured events
+  venue_id uuid,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (edition_id, slug),
+  unique (edition_id, id),
+  foreign key (edition_id, sport_id) references public.sk_sports (edition_id, id) on delete cascade,
+  foreign key (edition_id, venue_id) references public.sk_venues (edition_id, id) on delete set null (venue_id)
+);
+create index if not exists sk_events_sport_idx on public.sk_events (sport_id, sort_order);
+
+create table if not exists public.sk_athletes (
+  id uuid primary key default gen_random_uuid(),
+  edition_id uuid not null,
+  faction_id uuid not null,
+  name text not null,
+  slug text not null check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'),
+  program text,                                 -- course / year
+  photo_asset_id uuid references public.media_assets (id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (edition_id, slug),
+  unique (edition_id, id),
+  foreign key (edition_id, faction_id) references public.sk_factions (edition_id, id) on delete cascade
+);
+create index if not exists sk_athletes_faction_idx on public.sk_athletes (faction_id);
+
+-- Head-to-head games (bracket rounds, league games, finals)
+create table if not exists public.sk_matches (
+  id uuid primary key default gen_random_uuid(),
+  edition_id uuid not null,
+  event_id uuid not null,
+  round text,                                   -- "Semifinal 1", "Final", "Bronze game", "Group A"
+  round_order smallint not null default 0,      -- column in the bracket (higher = later round)
+  bracket_slot smallint,                        -- position within the round, top to bottom
+  venue_id uuid,
+  scheduled_at timestamptz not null,
+  status public.sk_match_status not null default 'upcoming',
+  side_a_id uuid,                               -- null = to be decided (TBD) in early brackets
+  side_b_id uuid,
+  score_a numeric(8, 2),
+  score_b numeric(8, 2),
+  -- quarters / sets / games: [{"label": "Q1", "a": 20, "b": 16}, …]
+  periods jsonb not null default '[]'::jsonb check (jsonb_typeof(periods) = 'array'),
+  -- team stats for the recap: [{"label": "Field goal %", "a": "46%", "b": "41%"}, …]
+  team_stats jsonb not null default '[]'::jsonb check (jsonb_typeof(team_stats) = 'array'),
+  live_note text,                               -- "Set 4 · Now", "Q3 · 4:12"
+  started_at timestamptz,
+  ended_at timestamptz,
+  recap_article_id uuid references public.articles (id) on delete set null,
+  winner_side char(1) generated always as (
+    case
+      when status = 'final' and score_a > score_b then 'a'
+      when status = 'final' and score_b > score_a then 'b'
+    end
+  ) stored,
+  updated_by uuid references public.profiles (id) on delete set null, -- audit only
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (edition_id, id),
+  foreign key (edition_id, event_id) references public.sk_events (edition_id, id) on delete cascade,
+  foreign key (edition_id, venue_id) references public.sk_venues (edition_id, id) on delete set null (venue_id),
+  foreign key (edition_id, side_a_id) references public.sk_factions (edition_id, id) on delete set null (side_a_id),
+  foreign key (edition_id, side_b_id) references public.sk_factions (edition_id, id) on delete set null (side_b_id),
+  constraint sk_matches_two_sides check (side_a_id is null or side_b_id is null or side_a_id <> side_b_id),
+  constraint sk_matches_final_needs_scores check (status <> 'final' or (score_a is not null and score_b is not null))
+);
+create index if not exists sk_matches_schedule_idx on public.sk_matches (edition_id, scheduled_at);
+create index if not exists sk_matches_live_idx on public.sk_matches (edition_id) where status = 'live';
+create index if not exists sk_matches_event_idx on public.sk_matches (event_id, round_order, bracket_slot);
+create index if not exists sk_matches_side_a_idx on public.sk_matches (side_a_id);
+create index if not exists sk_matches_side_b_idx on public.sk_matches (side_b_id);
+create index if not exists sk_matches_venue_idx on public.sk_matches (venue_id, scheduled_at);
+
+-- Per-athlete box score for a game: {"PTS": 24, "REB": 9, "AST": 5, "STL": 3}
+create table if not exists public.sk_athlete_stats (
+  match_id uuid not null references public.sk_matches (id) on delete cascade,
+  athlete_id uuid not null references public.sk_athletes (id) on delete cascade,
+  stats jsonb not null default '{}'::jsonb check (jsonb_typeof(stats) = 'object'),
+  primary key (match_id, athlete_id)
+);
+create index if not exists sk_athlete_stats_athlete_idx on public.sk_athlete_stats (athlete_id);
+
+-- Official placings. A medal earns its faction points on `awarded_on` (the competition day).
+create table if not exists public.sk_placements (
+  id uuid primary key default gen_random_uuid(),
+  edition_id uuid not null,
+  event_id uuid not null,
+  place smallint not null check (place between 1 and 64),
+  medal public.sk_medal,                        -- null for 4th place and below
+  faction_id uuid not null,
+  athlete_id uuid,                              -- individual events
+  result text,                                  -- "12.84s", "78–71", "92.5 pts"
+  awarded_on date not null default ((now() at time zone 'Asia/Manila')::date),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  foreign key (edition_id, event_id) references public.sk_events (edition_id, id) on delete cascade,
+  foreign key (edition_id, faction_id) references public.sk_factions (edition_id, id) on delete cascade,
+  foreign key (edition_id, athlete_id) references public.sk_athletes (edition_id, id) on delete set null (athlete_id),
+  constraint sk_placements_medal_matches_place check (
+    medal is null or (medal = 'gold' and place = 1) or (medal = 'silver' and place = 2) or (medal = 'bronze' and place = 3)
+  )
+);
+create unique index if not exists sk_placements_unique on public.sk_placements
+  (event_id, place, faction_id, coalesce(athlete_id, '00000000-0000-0000-0000-000000000000'::uuid));
+create index if not exists sk_placements_edition_idx on public.sk_placements (edition_id, awarded_on);
+create index if not exists sk_placements_faction_idx on public.sk_placements (faction_id);
+create index if not exists sk_placements_athlete_idx on public.sk_placements (athlete_id) where athlete_id is not null;
+
+create table if not exists public.sk_awards (
+  id uuid primary key default gen_random_uuid(),
+  edition_id uuid not null,
+  kind public.sk_award_kind not null,
+  day date not null,
+  athlete_id uuid not null,
+  match_id uuid references public.sk_matches (id) on delete set null,
+  event_id uuid references public.sk_events (id) on delete set null,
+  headline text,                                -- "12.84s" or "Gold · 100m Dash, Women"
+  stat_line jsonb not null default '[]'::jsonb check (jsonb_typeof(stat_line) = 'array'), -- [{"label":"PTS","value":"24"}]
+  quote text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  foreign key (edition_id, athlete_id) references public.sk_athletes (edition_id, id) on delete cascade
+);
+create unique index if not exists sk_awards_one_per_day on public.sk_awards (edition_id, kind, day) where kind <> 'finals_mvp';
+create index if not exists sk_awards_athlete_idx on public.sk_awards (athlete_id);
+
+-- Staff allowed to enter Salingkusog data (chosen by the three manager roles)
+create table if not exists public.sk_team (
+  profile_id uuid primary key references public.profiles (id) on delete cascade,
+  added_by uuid references public.profiles (id) on delete set null, -- audit only
+  created_at timestamptz not null default now()
+);
+
+-- -----------------------------------------------------------------------------
+-- Permission helpers
+-- -----------------------------------------------------------------------------
+create or replace function app.can_manage_sk_team()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce(app.current_role() in ('super_admin', 'editor_in_chief', 'managing_editor'), false);
+$$;
+
+create or replace function app.can_edit_sk()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select app.can_manage_sk_team()
+    or (app.is_staff() and exists (select 1 from public.sk_team t where t.profile_id = auth.uid()));
+$$;
+
+create or replace function app.sk_edition_visible(p_edition_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select app.is_staff() or exists (select 1 from public.sk_editions e where e.id = p_edition_id and e.is_published);
+$$;
+
+-- -----------------------------------------------------------------------------
+-- Triggers
+-- -----------------------------------------------------------------------------
+-- Child rows always carry their parent's edition (so a match can't mix editions)
+create or replace function app.sk_inherit_edition()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if tg_table_name = 'sk_events' then
+    select s.edition_id into new.edition_id from public.sk_sports s where s.id = new.sport_id;
+  elsif tg_table_name in ('sk_matches', 'sk_placements') then
+    select e.edition_id into new.edition_id from public.sk_events e where e.id = new.event_id;
+  elsif tg_table_name = 'sk_athletes' then
+    select f.edition_id into new.edition_id from public.sk_factions f where f.id = new.faction_id;
+  end if;
+  if new.edition_id is null then
+    raise exception 'Unknown parent record.' using errcode = '23503';
+  end if;
+  return new;
+end;
+$$;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['sk_events', 'sk_matches', 'sk_placements', 'sk_athletes'] loop
+    execute format('drop trigger if exists %I on public.%I', t || '_edition', t);
+    execute format('create trigger %I before insert or update on public.%I for each row execute function app.sk_inherit_edition()', t || '_edition', t);
+  end loop;
+  foreach t in array array['sk_editions', 'sk_factions', 'sk_venues', 'sk_sports', 'sk_events', 'sk_athletes', 'sk_matches', 'sk_placements', 'sk_awards'] loop
+    execute format('drop trigger if exists %I on public.%I', t || '_touch', t);
+    execute format('create trigger %I before update on public.%I for each row execute function app.touch_updated_at()', t || '_touch', t);
+  end loop;
+end $$;
+
+-- Live / final timestamps and who touched the score last
+create or replace function app.sk_match_status()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if auth.uid() is not null then
+    new.updated_by := auth.uid();
+  end if;
+  if new.status = 'live' and (tg_op = 'INSERT' or old.status <> 'live') then
+    new.started_at := coalesce(new.started_at, now());
+    new.ended_at := null;
+  elsif new.status = 'final' and (tg_op = 'INSERT' or old.status <> 'final') then
+    new.started_at := coalesce(new.started_at, new.scheduled_at);
+    new.ended_at := coalesce(new.ended_at, now());
+    new.live_note := null;
+  elsif new.status = 'upcoming' then
+    new.started_at := null;
+    new.ended_at := null;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists sk_matches_status on public.sk_matches;
+create trigger sk_matches_status before insert or update on public.sk_matches
+for each row execute function app.sk_match_status();
+
+-- Only one current edition
+create or replace function app.sk_single_current()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.is_current then
+    update public.sk_editions set is_current = false where is_current and id <> new.id;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists sk_editions_single_current on public.sk_editions;
+create trigger sk_editions_single_current before insert or update of is_current on public.sk_editions
+for each row when (new.is_current) execute function app.sk_single_current();
+
+-- Team changes are audited
+create or replace function app.sk_team_audit()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if tg_op = 'INSERT' then
+    perform app.audit('salingkusog.team.add', 'sk_team', new.profile_id::text);
+    return new;
+  end if;
+  perform app.audit('salingkusog.team.remove', 'sk_team', old.profile_id::text);
+  return old;
+end;
+$$;
+
+drop trigger if exists sk_team_audit on public.sk_team;
+create trigger sk_team_audit after insert or delete on public.sk_team
+for each row execute function app.sk_team_audit();
+
+-- -----------------------------------------------------------------------------
+-- Views (security invoker: RLS of the underlying tables applies)
+-- -----------------------------------------------------------------------------
+create or replace view public.sk_medal_table
+with (security_invoker = true)
+as
+with tallies as (
+  select f.edition_id, f.id as faction_id, f.name, f.slug, f.short_name, f.color, f.logo_asset_id, f.sort_order,
+         count(*) filter (where p.medal = 'gold') as gold,
+         count(*) filter (where p.medal = 'silver') as silver,
+         count(*) filter (where p.medal = 'bronze') as bronze
+  from public.sk_factions f
+  left join public.sk_placements p on p.faction_id = f.id
+  group by f.id
+)
+select t.edition_id, t.faction_id, t.name, t.slug, t.short_name, t.color, t.logo_asset_id,
+       t.gold, t.silver, t.bronze,
+       t.gold + t.silver + t.bronze as total,
+       (t.gold * e.points_gold + t.silver * e.points_silver + t.bronze * e.points_bronze)::integer as points,
+       rank() over (
+         partition by t.edition_id
+         order by (t.gold * e.points_gold + t.silver * e.points_silver + t.bronze * e.points_bronze) desc, t.gold desc, t.silver desc
+       )::integer as rank
+from tallies t
+join public.sk_editions e on e.id = t.edition_id;
+
+-- Cumulative points at the end of each competition day (0 before any medal)
+create or replace view public.sk_points_by_day
+with (security_invoker = true)
+as
+with days as (
+  select e.id as edition_id, d::date as day, (d::date - e.starts_on + 1)::integer as day_number
+  from public.sk_editions e
+  cross join generate_series(e.starts_on, e.ends_on, interval '1 day') as d
+),
+daily as (
+  select p.edition_id, p.faction_id, p.awarded_on as day,
+         sum(case p.medal when 'gold' then e.points_gold when 'silver' then e.points_silver when 'bronze' then e.points_bronze else 0 end) as pts
+  from public.sk_placements p
+  join public.sk_editions e on e.id = p.edition_id
+  where p.medal is not null
+  group by p.edition_id, p.faction_id, p.awarded_on
+)
+select d.edition_id, f.id as faction_id, d.day, d.day_number,
+       coalesce(sum(daily.pts) over (partition by f.id order by d.day), 0)::integer as points
+from days d
+join public.sk_factions f on f.edition_id = d.edition_id
+left join daily on daily.faction_id = f.id and daily.day = d.day;
+
+-- Wins and losses between every pair of factions (final games only)
+create or replace view public.sk_head_to_head
+with (security_invoker = true)
+as
+with sides as (
+  select m.edition_id, m.side_a_id as faction_id, m.side_b_id as opponent_id, (m.winner_side = 'a') as won, (m.winner_side = 'b') as lost
+  from public.sk_matches m where m.status = 'final' and m.side_a_id is not null and m.side_b_id is not null
+  union all
+  select m.edition_id, m.side_b_id, m.side_a_id, (m.winner_side = 'b'), (m.winner_side = 'a')
+  from public.sk_matches m where m.status = 'final' and m.side_a_id is not null and m.side_b_id is not null
+)
+select edition_id, faction_id, opponent_id,
+       count(*) filter (where won)::integer as wins,
+       count(*) filter (where lost)::integer as losses
+from sides
+group by edition_id, faction_id, opponent_id;
+
+-- Event progress: completed once its gold is awarded ("31 of 48 events completed")
+create or replace view public.sk_event_status
+with (security_invoker = true)
+as
+select ev.edition_id, ev.id as event_id, ev.sport_id,
+       exists (select 1 from public.sk_placements p where p.event_id = ev.id and p.medal = 'gold') as completed,
+       (select min(m.scheduled_at) from public.sk_matches m where m.event_id = ev.id) as first_match_at,
+       (select max(coalesce(m.ended_at, m.scheduled_at)) from public.sk_matches m where m.event_id = ev.id) as last_match_at,
+       exists (select 1 from public.sk_matches m where m.event_id = ev.id and m.status = 'live') as live
+from public.sk_events ev;
+
+-- Totals of one numeric stat per athlete and event ("Top scorers · PTS")
+create or replace view public.sk_event_leaders
+with (security_invoker = true)
+as
+select m.edition_id, m.event_id, s.athlete_id, k.key as stat,
+       sum((k.value #>> '{}')::numeric) as total,
+       count(*)::integer as games
+from public.sk_athlete_stats s
+join public.sk_matches m on m.id = s.match_id
+cross join lateral jsonb_each(s.stats) as k
+where jsonb_typeof(k.value) = 'number'
+group by m.edition_id, m.event_id, s.athlete_id, k.key;
+
+-- -----------------------------------------------------------------------------
+-- RLS
+-- -----------------------------------------------------------------------------
+do $$
+declare t text;
+begin
+  foreach t in array array['sk_editions', 'sk_factions', 'sk_venues', 'sk_sports', 'sk_events', 'sk_athletes', 'sk_matches', 'sk_athlete_stats', 'sk_placements', 'sk_awards', 'sk_team'] loop
+    execute format('alter table public.%I enable row level security', t);
+  end loop;
+end $$;
+
+-- re-runnable: drop this file's policies first
+do $$
+declare r record;
+begin
+  for r in select tablename, policyname from pg_policies where schemaname = 'public' and tablename like 'sk\_%' loop
+    execute format('drop policy %I on public.%I', r.policyname, r.tablename);
+  end loop;
+end $$;
+
+create policy sk_editions_read on public.sk_editions for select to anon, authenticated using (is_published or app.is_staff());
+create policy sk_editions_write on public.sk_editions for all to authenticated using (app.can_edit_sk()) with check (app.can_edit_sk());
+
+do $$
+declare t text;
+begin
+  foreach t in array array['sk_factions', 'sk_venues', 'sk_sports', 'sk_events', 'sk_athletes', 'sk_matches', 'sk_placements', 'sk_awards'] loop
+    execute format('create policy %I on public.%I for select to anon, authenticated using (app.sk_edition_visible(edition_id))', t || '_read', t);
+    execute format('create policy %I on public.%I for all to authenticated using (app.can_edit_sk()) with check (app.can_edit_sk())', t || '_write', t);
+  end loop;
+end $$;
+
+create policy sk_athlete_stats_read on public.sk_athlete_stats for select to anon, authenticated
+  using (exists (select 1 from public.sk_matches m where m.id = match_id and app.sk_edition_visible(m.edition_id)));
+create policy sk_athlete_stats_write on public.sk_athlete_stats for all to authenticated
+  using (app.can_edit_sk()) with check (app.can_edit_sk());
+
+create policy sk_team_read on public.sk_team for select to authenticated using (app.is_staff());
+create policy sk_team_add on public.sk_team for insert to authenticated with check (app.can_manage_sk_team());
+create policy sk_team_remove on public.sk_team for delete to authenticated using (app.can_manage_sk_team());
+
+revoke execute on all functions in schema app from public;
+grant execute on all functions in schema app to anon, authenticated, service_role;
+
+-- -----------------------------------------------------------------------------
+-- Realtime: live scores push to readers (Supabase only; skipped elsewhere)
+-- -----------------------------------------------------------------------------
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+     and not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'sk_matches') then
+    alter publication supabase_realtime add table public.sk_matches;
+  end if;
+end $$;
+
+commit;
