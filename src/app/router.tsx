@@ -32,8 +32,6 @@ const legacy = async () => ({ Component: (await import('../legacy/App')).default
 const legacyRoutes: RouteObject[] = [
   'about',
   'editorial-board',
-  'contact',
-  'submit-article',
   'dashboard',
 ].map((path) => ({ path, lazy: legacy }));
 
@@ -43,8 +41,7 @@ const redirects: RouteObject[] = [
   ['features', '/feature'],
   ['blog', '/blogs'],
   ['s&t', '/science-technology'],
-  ['submit', '/submit-article'],
-  ['submit/event', '/submit-article'],
+  ['submit-article', '/submit'],
 ].map(([path, to]) => ({ path, element: <Navigate to={to} replace /> }));
 
 const publicRoutes: RouteObject[] = [
@@ -53,6 +50,9 @@ const publicRoutes: RouteObject[] = [
     children: [
       { index: true, lazy: async () => ({ Component: (await import('@/features/public/home/HomePage')).HomePage }) },
       { path: 'article/:slug', lazy: async () => ({ Component: (await import('@/features/public/article/ArticlePage')).ArticlePage }) },
+      { path: 'submit', lazy: async () => ({ Component: (await import('@/features/public/intake/SubmitArticlePage')).SubmitArticlePage }) },
+      { path: 'submit/event', lazy: async () => ({ Component: (await import('@/features/public/intake/SubmitEventPage')).SubmitEventPage }) },
+      { path: 'contact', lazy: async () => ({ Component: (await import('@/features/public/intake/ContactPage')).ContactPage }) },
       { path: 'search', lazy: async () => ({ Component: (await import('@/features/public/search/SearchPage')).SearchPage }) },
       { path: 'archives', lazy: async () => ({ Component: (await import('@/features/public/archives/ArchivesPage')).ArchivesPage }) },
       { path: 'archives/:month', lazy: async () => ({ Component: (await import('@/features/public/archives/ArchivesPage')).ArchiveMonthPage }) },
