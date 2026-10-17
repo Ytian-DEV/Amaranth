@@ -56,6 +56,24 @@ const samples: Record<string, Sample> = {
       ['lifestyle', 'Thrifting in Baybay: where students shop on a budget', 'A guide to the ukay-ukay stalls near the terminal.'],
     ],
   },
+  literary: {
+    section: { slug: 'literary', name: 'Literary', description: 'Poetry, prose and creative writing.', nav_placement: 'primary' },
+    categories: [
+      { slug: 'poetry', name: 'Poetry' },
+      { slug: 'fiction', name: 'Fiction' },
+      { slug: 'essay', name: 'Essay' },
+    ],
+    stories: [
+      ['essay', 'Tides & Thresholds', 'Thirty-two poems, stories, essays and artworks by VSU students about leaving, staying and the places in between.'],
+      ['poetry', 'Baybay at Dusk', 'The tide forgets the shape of every foot\nbut keeps the salt.\nI have been leaving this town for years,\nand every time the sea says stay,\nI believe it.', 'a 3rd-year BS Marine Biology student'],
+      ['fiction', 'The Last Jeepney to Brgy. Gabas', 'The driver knew I was not going home.'],
+      ['essay', 'On Leaving Home for the First Time', 'My mother packed rice in three different bags.'],
+      ['poetry', 'Inventory of a Dorm Room', 'One electric fan, borrowed. One rosary, unprayed.'],
+      ['poetry', 'Rain over the Lower Campus', 'Even the carabaos stop to listen.'],
+      ['fiction', 'What the Sea Took Back', 'After the storm, the shoreline moved three meters inland.'],
+      ['essay', 'Ate, I Made It', 'A performance piece recorded at Open Mic Night.'],
+    ],
+  },
 };
 
 function build(sample: Sample): StoryItem[] {

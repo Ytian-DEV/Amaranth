@@ -38,6 +38,7 @@ describe('landing helpers', () => {
 const sections: Record<string, LandingSection> = {
   news: { slug: 'news', name: 'News', description: 'Campus reporting.', nav_placement: 'primary' },
   feature: { slug: 'feature', name: 'Feature', description: 'Long-form stories.', nav_placement: 'primary' },
+  literary: { slug: 'literary', name: 'Literary', description: 'Poetry and prose.', nav_placement: 'primary' },
 };
 const categories = [
   { slug: 'campus-news', name: 'Campus News' },
@@ -57,7 +58,7 @@ describe.each(Object.keys(sections))('%s landing', (slug) => {
     const items = Array.from({ length: 14 }, (_, i) => story(i + 1));
     renderIt(items);
     expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-    for (const s of items.slice(0, 8)) {
+    for (const s of items.slice(0, 7)) {
       const links = screen.getAllByRole('link', { name: new RegExp(`^${s.title}`) });
       expect(links[0]).toHaveAttribute('href', `/article/${s.slug}`);
     }

@@ -45,7 +45,9 @@
 
 - B3 `feature/section-feature` (2026-10-18): `/feature` follows Figma 31:252: full-bleed photo hero (newest story with a photo), category chips, two alternating long reads (6+ min), Profiles from People & Events (photo circle, name, dek as quote), an "In pictures" band when three more photo stories exist, then more features. Photo essays need a gallery model, so the band uses story photos for now.
 
-**Next:** B4 `feature/section-literary`.
+- B4 `feature/section-literary` (2026-10-18): `/literary` follows Figma 33:366: folio hero (newest work, drawn cover art on tablet and up), genre tab bar, Poem of the week (newest Poetry piece, dek as verse), "From the Folio" tiles in white / dark / lime, and the call-for-submissions band. A real Folio issue (title, semester, PDF) would need an issue type; for now the hero features the newest work.
+
+**Next:** B5 `feature/section-blogs`.
 
 | # | Branch | Status |
 |---|---|---|
@@ -65,7 +67,7 @@
 | B1 | `feature/nav-more-menu` | ✅ |
 | B2 | `feature/section-news` | ✅ |
 | B3 | `feature/section-feature` | ✅ |
-| B4 | `feature/section-literary` | ⬜ |
+| B4 | `feature/section-literary` | ✅ |
 | B5 | `feature/section-blogs` | ⬜ |
 | B6 | `feature/section-specials` | ⬜ |
 | B7 | `feature/section-views` | ⬜ |
