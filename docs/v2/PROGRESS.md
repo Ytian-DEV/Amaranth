@@ -8,12 +8,16 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A11 `feature/salingkusog-venues` merged: `/salingkusog/venues` (Figma 20:1856).
-- Map: the edition's **Venue map** image, with numbered pins placed from each venue's map position (%). Pins highlight with the list, and tapping one jumps to it. Until a map image is uploaded, a plain placeholder shows the pins.
-- List: sports per venue and a status line: "Live now", "Next … · 3:00 PM", "Done for today", "Tomorrow …" or "No games scheduled yet".
-- Every hub tab is now real; no more "coming soon" tabs. Fixture: `/dev/salingkusog/venues`.
+**Last done:** A12 `feature/sports-landing` merged: `/sports` page 1 with all categories (Figma 21:1963 / 22:2645).
+- Latest-results strip: live games first, then recent finals, each linking to the recap.
+- Chips: All Sports, a "Salingkusog 2026" chip that opens the hub, and the section's categories.
+- Lead story beside a Salingkusog block: top 4 and "Open the Salingkusog hub".
+- Latest in Sports.
+- Athlete spotlight, from the newest award with a quote.
+- More from the courts.
 
-**Next:** A12 `feature/sports-landing` (awaiting go).
+With no visible edition, the Salingkusog parts are left out. Category or page views keep the old section list. Fixtures: `/dev/sports` and `/dev/sports/no-salingkusog`.
+**Next:** A13 `feature/salingkusog-social-cards` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
@@ -28,7 +32,7 @@
 | A9 | `feature/salingkusog-sports-bracket` | ✅ |
 | A10 | `feature/salingkusog-match-recap` | ✅ |
 | A11 | `feature/salingkusog-venues` | ✅ |
-| A12 | `feature/sports-landing` | ⬜ |
+| A12 | `feature/sports-landing` | ✅ |
 | A13 | `feature/salingkusog-social-cards` | ⬜ |
 | B1 | `feature/nav-more-menu` | ⬜ |
 | B2–B12 | `feature/section-<slug>` (News, Feature, Literary, Blogs, Specials, Views, S&T, Investigative, Explainer, Bulletin, Stories) | ⬜ |

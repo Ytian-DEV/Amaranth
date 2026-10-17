@@ -5,6 +5,7 @@ import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { usePageMeta } from '@/lib/usePageMeta';
 import { NotFoundPage } from '../NotFoundPage';
 import { SectionSkeleton, SectionView } from './SectionView';
+import { SportsLandingPage } from './SportsLandingPage';
 import { useArticlePage, useSectionInfo } from './sectionData';
 
 function useListParams() {
@@ -45,6 +46,9 @@ export function SectionPage() {
   if (!info.data) return <NotFoundPage />;
 
   const { section, categories } = info.data;
+  if (section.slug === 'sports' && page === 1 && !activeCategory && !category) {
+    return <SportsLandingPage categories={categories} items={articles.data?.items ?? []} hasMore={(articles.data?.pageCount ?? 1) > 1} />;
+  }
   return (
     <SectionView
       title={section.name}
