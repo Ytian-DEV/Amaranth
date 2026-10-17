@@ -8,6 +8,7 @@ import { useAuth } from '@/features/auth/AuthProvider';
 import { cn } from '@/lib/cn';
 import type { ProfileRow } from '@/lib/database.types';
 import { navFor } from '../nav';
+import { useOnSkTeam } from '../salingkusog/skApi';
 import { usePendingCount } from './usePendingCount';
 
 type ShellProfile = Pick<ProfileRow, 'display_name' | 'role' | 'avatar_url' | 'email'>;
@@ -21,10 +22,12 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-function SidebarNav({ profile, pending, onNavigate }: { profile: ShellProfile; pending: number; onNavigate?: () => void }) {
+type NavProps = { profile: ShellProfile; pending: number; skTeam: boolean; onNavigate?: () => void };
+
+function SidebarNav({ profile, pending, skTeam, onNavigate }: NavProps) {
   return (
     <ul className="flex flex-col gap-1.5">
-      {navFor(profile.role).map((item) => (
+      {navFor(profile.role, { skTeam }).map((item) => (
         <li key={item.to}>
           <NavLink
             to={item.to}
@@ -75,14 +78,14 @@ function ProfileBlock({ profile, onSignOut }: { profile: ShellProfile; onSignOut
   );
 }
 
-function SidebarContent({ profile, pending, onSignOut, onNavigate }: { profile: ShellProfile; pending: number; onSignOut: () => void; onNavigate?: () => void }) {
+function SidebarContent({ profile, pending, skTeam, onSignOut, onNavigate }: NavProps & { onSignOut: () => void }) {
   return (
     <div className="flex h-full flex-col gap-6 px-5 pb-6 pt-7">
       <Link to="/admin" onClick={onNavigate} className="text-[24px]" aria-label="Newsroom overview">
         <Lockup tone="light" subtitle="Newsroom" />
       </Link>
       <nav aria-label="Newsroom" className="flex-1 overflow-y-auto">
-        <SidebarNav profile={profile} pending={pending} onNavigate={onNavigate} />
+        <SidebarNav profile={profile} pending={pending} skTeam={skTeam} onNavigate={onNavigate} />
       </nav>
       <Link to="/" className="inline-flex items-center gap-2 text-meta text-on-dark-muted hover:text-on-dark">
         <ExternalLink className="size-4" aria-hidden /> View the site
@@ -96,11 +99,14 @@ function SidebarContent({ profile, pending, onSignOut, onNavigate }: { profile: 
 export function AdminShell({
   profile,
   pending,
+  skTeam = false,
   onSignOut,
   children,
 }: {
   profile: ShellProfile;
   pending: number;
+  /** on the Salingkusog team: shows the Salingkusog item to roles that don't always get it */
+  skTeam?: boolean;
   onSignOut: () => void;
   children: ReactNode;
 }) {
@@ -120,7 +126,7 @@ export function AdminShell({
     <div className="min-h-dvh bg-paper lg:pl-[260px]">
       <SkipLink />
       <aside className="fixed inset-y-0 left-0 hidden w-[260px] bg-green-900 lg:block">
-        <SidebarContent profile={profile} pending={pending} onSignOut={onSignOut} />
+        <SidebarContent profile={profile} pending={pending} skTeam={skTeam} onSignOut={onSignOut} />
       </aside>
 
       <div className="sticky top-0 z-20 flex h-14 items-center justify-between bg-green-900 px-2 lg:hidden">
@@ -153,7 +159,7 @@ export function AdminShell({
         >
           <X className="size-6" aria-hidden />
         </button>
-        <SidebarContent profile={profile} pending={pending} onSignOut={onSignOut} onNavigate={() => setOpen(false)} />
+        <SidebarContent profile={profile} pending={pending} skTeam={skTeam} onSignOut={onSignOut} onNavigate={() => setOpen(false)} />
       </dialog>
 
       <main id="main" className="mx-auto w-full max-w-[1180px] px-4 py-6 md:px-10 md:py-8">
@@ -167,9 +173,10 @@ export function AdminShell({
 export function AdminLayout() {
   const { profile, signOut } = useAuth();
   const pending = usePendingCount(isEditor(profile?.role));
+  const skTeam = useOnSkTeam();
   if (!profile) return null;
   return (
-    <AdminShell profile={profile} pending={pending.data ?? 0} onSignOut={() => void signOut()}>
+    <AdminShell profile={profile} pending={pending.data ?? 0} skTeam={skTeam.data ?? false} onSignOut={() => void signOut()}>
       <Outlet />
     </AdminShell>
   );

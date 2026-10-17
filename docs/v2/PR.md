@@ -103,7 +103,7 @@ Never set `VITE_ENABLE_FIXTURES` on Vercel.
 - [ ] Note appears in the writer's activity timeline
 - [ ] Moderate comments; read inbox; review submissions and convert one to a draft
 
-**Editor-in-chief / managing editor / super admin**
+**Executive Editor (`editor_in_chief`) / managing editor / super admin**
 - [ ] Publish, schedule (goes live on time), archive, unpublish
 - [ ] Front page: set lead story, folio pull quote, manual ticker
 - [ ] Staff: change roles, deactivate, section assignments; only super admin can grant super admin; last super admin can't step down

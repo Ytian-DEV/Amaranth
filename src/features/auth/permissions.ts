@@ -1,11 +1,12 @@
 // Client-side mirror of the permission helpers in supabase/v2/schema.sql
-// (app.is_admin, app.can_publish, app.is_editor, app.article_before_write).
+// (app.is_admin, app.can_publish, app.is_editor, app.article_before_write) and
+// supabase/v2/salingkusog.sql (app.can_manage_sk_team, app.can_edit_sk).
 // The database is the source of truth; these only decide what the UI offers.
 import type { AppRole, ArticleStatus } from '@/lib/database.types';
 
 export const roleLabels: Record<AppRole, string> = {
   super_admin: 'Super admin',
-  editor_in_chief: 'Editor-in-chief',
+  editor_in_chief: 'Executive Editor',
   managing_editor: 'Managing editor',
   section_editor: 'Section editor',
   staff_writer: 'Staff writer',
@@ -24,6 +25,11 @@ export const roleOrder: AppRole[] = [
 export const isAdmin = (role?: AppRole | null) => role === 'super_admin' || role === 'editor_in_chief';
 export const canPublish = (role?: AppRole | null) => isAdmin(role) || role === 'managing_editor';
 export const isEditor = (role?: AppRole | null) => canPublish(role) || role === 'section_editor';
+
+/** Super admin, Executive Editor and Managing editor choose the Salingkusog team (and always edit its data). */
+export const canManageSkTeam = (role?: AppRole | null) => canPublish(role);
+/** Can enter Salingkusog data: the three managing roles, or a member of the Salingkusog team. */
+export const canEditSk = (role: AppRole | null | undefined, onSkTeam: boolean) => canManageSkTeam(role) || (!!role && onSkTeam);
 
 /** Roles a user may assign to others (only super admins hand out super admin). */
 export function assignableRoles(role?: AppRole | null): AppRole[] {

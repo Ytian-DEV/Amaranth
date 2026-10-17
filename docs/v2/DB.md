@@ -49,7 +49,7 @@ The v1 schema is kept at `supabase/legacy/schema-v1.sql` for reference only; don
 
 ## 3. Model summary
 - **Staff only have accounts.** `profiles.role` + `is_active`; `staff_invites` pre-authorises emails (with optional `section_slugs` for section editors → `profile_sections`).
-- **Roles:** super_admin, editor_in_chief (admin: staff, settings, sections) · managing_editor (publish) · section_editor (review/edit own sections) · staff_writer / contributor (own drafts).
+- **Roles:** super_admin, editor_in_chief (shown as "Executive Editor"; admin: staff, settings, sections) · managing_editor (publish) · section_editor (review/edit own sections) · staff_writer / contributor (own drafts).
 - **Workflow** (enforced by trigger `app.article_before_write`, so it holds for direct updates too):
   draft → submitted → in_review → scheduled/published → archived; reject/return with notes via `transition_article(id, status, note, scheduled_for)`. History in `article_activity`, snapshots in `article_revisions` (newest 50).
 - **Scheduling** sets `published_at = scheduled_for`; public reads use `app.is_live(status, published_at)`, so scheduled pieces go live by themselves.

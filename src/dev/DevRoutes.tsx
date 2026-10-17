@@ -146,6 +146,8 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'admin/editor', label: 'CMS editor (body + workflow)' },
   { path: 'admin/media', label: 'CMS media library' },
   { path: 'admin/intake', label: 'CMS submission review' },
+  { path: 'admin/salingkusog-team', label: 'CMS Salingkusog team (manager)' },
+  { path: 'admin/salingkusog-team-member', label: 'CMS Salingkusog team (member, read-only)' },
   { path: '/admin/login', label: 'Staff sign in' },
   { path: '/admin/forgot-password', label: 'Forgot password' },
   { path: '/admin/set-password', label: 'Set password (expired link state)' },
