@@ -9,6 +9,9 @@ import { ArticleSkeleton, ArticleView } from '@/features/public/article/ArticleV
 import { Comments } from '@/features/public/article/Comments';
 import { ArchivesView } from '@/features/public/archives/ArchivesView';
 import { SearchView } from '@/features/public/search/SearchView';
+import { SubmitArticleForm, SubmitArticleLayout } from '@/features/public/intake/SubmitArticlePage';
+import { SubmitEventForm, SubmitEventLayout } from '@/features/public/intake/SubmitEventPage';
+import { ContactForm, ContactLayout } from '@/features/public/intake/ContactPage';
 import { defaultSections } from '@/features/public/nav';
 import { fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
 
@@ -67,11 +70,27 @@ export default function DevRoutes() {
         }
       />
       <Route path="archives" element={<PublicShell><ArchivesView issues={fixtureIssues} months={fixtureMonths} /></PublicShell>} />
+      <Route path="submit" element={<PublicShell><SubmitArticleLayout form={<SubmitArticleForm sections={defaultSections} onSubmit={fakeSubmit} />} /></PublicShell>} />
+      <Route path="submit/event" element={<PublicShell><SubmitEventLayout form={<SubmitEventForm onSubmit={fakeSubmit} />} /></PublicShell>} />
+      <Route
+        path="contact"
+        element={
+          <PublicShell>
+            <ContactLayout
+              info={{ office_address: ['Amaranth Publication Office', 'Student Center Building', 'Visayas State University', 'Baybay City, Leyte 6521-A'], phones: ['+63 53 335 2601'], emails: ['amaranth@vsu.edu.ph', 'editor@amaranth.vsu.edu.ph'], office_hours: ['Monday – Friday: 8:00 AM – 5:00 PM'] }}
+              departments={[{ id: 'd1', name: 'News Department', email: 'news@amaranth.vsu.edu.ph', phone: null, description: null }, { id: 'd2', name: 'Sports Department', email: 'sports@amaranth.vsu.edu.ph', phone: null, description: null }]}
+              form={<ContactForm onSubmit={fakeSubmit} />}
+            />
+          </PublicShell>
+        }
+      />
       <Route path="auth/pending" element={<AccessPending />} />
       <Route path="auth/forbidden" element={<main id="main" className="container-page"><Forbidden /></main>} />
     </Routes>
   );
 }
+
+const fakeSubmit = () => new Promise((resolve) => setTimeout(resolve, 700));
 
 const devScreens: { path: string; label: string }[] = [
   { path: 'components', label: 'Components' },
@@ -86,6 +105,9 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'article/loading', label: 'Article — loading' },
   { path: 'search', label: 'Search results' },
   { path: 'archives', label: 'Archives' },
+  { path: 'submit', label: 'Submit a story' },
+  { path: 'submit/event', label: 'Report an event' },
+  { path: 'contact', label: 'Contact' },
   { path: '/admin/login', label: 'Staff sign in' },
   { path: '/admin/forgot-password', label: 'Forgot password' },
   { path: '/admin/set-password', label: 'Set password (expired link state)' },

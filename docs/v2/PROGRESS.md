@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/submissions-contact`)
-**Last done:** `feature/search-archives` merged — `/search` (debounced full-text, section/date filters, `?tag=`), `/archives` (print issues + months via new `archive_months()` RPC), `/archives/:yyyy-mm`.
-**Next step:** `feature/submissions-contact` — `/submit` (article), `/submit/event`, `/contact` forms with uploads to the `intake` bucket, honeypot, RPCs; About + Editorial Board pages may follow in `feature/cms-people-board`. Remove `submit-article`, `contact` from legacy routes and the `/submit` redirects.
+**Current branch:** `develop` (next: create `feature/cms-shell-dashboard`)
+**Last done:** `feature/submissions-contact` merged — `/submit` (+ guidelines `#guidelines`), `/submit/event`, `/contact`; uploads to private `intake` bucket (images compressed client-side, `src/lib/images.ts`), honeypot, validation with focus on first error.
+**Next step:** `feature/cms-shell-dashboard` — `/admin` layout per Figma 8:101 (sidebar Overview/Articles/Submissions/Events/Media Library/Staff/Settings, mobile top bar + drawer), dashboard (stats via `dashboard_stats()`, recent articles table → stacked cards on mobile, submission queue, DB status); redirect `/dashboard` → `/admin`; remove legacy `dashboard` route.
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -30,7 +30,7 @@
 | 5 | `feature/section-pages` | ✅ merged | Legacy pages still routed: see `legacyRoutes` in router.tsx |
 | 6 | `feature/article-page` | ✅ merged | Tag links go to `/search?tag=` (handled in feature 7) |
 | 7 | `feature/search-archives` | ✅ merged | Schema gained `archive_months()` (in schema.sql) |
-| 8 | `feature/submissions-contact` | ⬜ | |
+| 8 | `feature/submissions-contact` | ✅ merged | Legacy still serves `/about`, `/editorial-board` |
 | 9 | `feature/cms-shell-dashboard` | ⬜ | |
 | 10 | `feature/cms-article-editor` | ⬜ | |
 | 11 | `feature/cms-editorial-workflow` | ⬜ | |
