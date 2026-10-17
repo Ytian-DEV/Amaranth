@@ -102,6 +102,23 @@ const samples: Record<string, Sample> = {
       ['comics', 'Freshman Survival Guide'],
     ],
   },
+  views: {
+    section: { slug: 'views', name: 'Views', description: 'Editorials, opinion, columns and vox pop.', nav_placement: 'primary' },
+    categories: [
+      { slug: 'editorial', name: 'Editorial' },
+      { slug: 'opinion', name: 'Opinion' },
+      { slug: 'column', name: 'Column' },
+    ],
+    stories: [
+      ['editorial', 'To protect the press is to protect democracy', 'Campus journalism is not a club activity. It is a public service, and the university owes it the same protection it gives to any other freedom it claims to teach.', 'The Editorial Board'],
+      ['column', 'The friends who carried me through thesis season', undefined, 'A graduating senior'],
+      ['column', 'What student councils can learn from barangay halls', undefined, 'A political science major'],
+      ['column', 'Why we should stop apologizing for reading slowly', undefined, 'An English literature student'],
+      ['opinion', 'The Algorithm Ate My Homework (and My Job, Too)', 'AI tools are reshaping how we study. Are we learning faster, or just learning less?', 'A computer science student'],
+      ['opinion', 'Fix the shuttle schedule before adding more routes', 'More stops mean nothing if the buses never come on time.', 'An engineering student'],
+      ['opinion', 'Org fees should come with receipts', 'Transparency is not an attack on student leaders. It protects them.', 'A business administration student'],
+    ],
+  },
 };
 
 function build(sample: Sample): StoryItem[] {

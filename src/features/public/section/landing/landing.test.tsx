@@ -41,6 +41,7 @@ const sections: Record<string, LandingSection> = {
   literary: { slug: 'literary', name: 'Literary', description: 'Poetry and prose.', nav_placement: 'primary' },
   blogs: { slug: 'blogs', name: 'Blogs', description: 'Personal takes.', nav_placement: 'primary' },
   specials: { slug: 'specials', name: 'Specials', description: 'Special reports.', nav_placement: 'primary' },
+  views: { slug: 'views', name: 'Views', description: 'Opinion.', nav_placement: 'primary' },
 };
 const categories = [
   { slug: 'campus-news', name: 'Campus News' },
@@ -64,7 +65,7 @@ describe.each(Object.keys(sections))('%s landing', (slug) => {
       const links = screen.getAllByRole('link', { name: new RegExp(`^${s.title}`) });
       expect(links[0]).toHaveAttribute('href', `/article/${s.slug}`);
     }
-    expect(screen.getAllByRole('link', { name: /Campus News/ })[0]).toHaveAttribute('href', `/${slug}?category=campus-news`);
+    for (const chip of screen.queryAllByRole('link', { name: 'Campus News' })) expect(chip).toHaveAttribute('href', `/${slug}?category=campus-news`);
   });
 
   it('shows an empty state with no stories', () => {

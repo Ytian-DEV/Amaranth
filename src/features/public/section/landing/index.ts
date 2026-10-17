@@ -5,6 +5,7 @@ import { FeatureLanding } from './FeatureLanding';
 import { LiteraryLanding } from './LiteraryLanding';
 import { NewsLanding } from './NewsLanding';
 import { SpecialsLanding } from './SpecialsLanding';
+import { ViewsLanding } from './ViewsLanding';
 
 /** Sections with their own front page (Track B). Others use the shared list template. */
 export const sectionLandings: Record<string, ComponentType<LandingProps>> = {
@@ -13,4 +14,5 @@ export const sectionLandings: Record<string, ComponentType<LandingProps>> = {
   literary: LiteraryLanding,
   blogs: BlogsLanding,
   specials: SpecialsLanding,
+  views: ViewsLanding,
 };

@@ -51,7 +51,9 @@
 
 - B6 `feature/section-specials` (2026-10-18): `/specials` follows Figma 34:554: dark special-report hero (newest special) with up to three parts of the series (same category, oldest first) and "Start with part 1", "More special coverage" tiles (the section categories plus the Salingkusog hub; the middle tile is lime so text keeps AA contrast, since the design blue is not in the palette), then the special-issue archive by year. The "By the numbers" strip needs per-story figures the schema lacks.
 
-**Next:** B7 `feature/section-views`.
+- B7 `feature/section-views` (2026-10-18): `/views` follows Figma 36:507: editorial hero (newest Editorial, else newest piece) with italic dek and cartoon frame when it has an image, Our columnists (newest three Column pieces), latest opinion list with italic deks, then Most read and a Letters to the editor box linking to Contact. The weekly poll and published letters need their own data; left out until then.
+
+**Next:** B8 `feature/section-science-technology`.
 
 | # | Branch | Status |
 |---|---|---|
@@ -74,7 +76,7 @@
 | B4 | `feature/section-literary` | ✅ |
 | B5 | `feature/section-blogs` | ✅ |
 | B6 | `feature/section-specials` | ✅ |
-| B7 | `feature/section-views` | ⬜ |
+| B7 | `feature/section-views` | ✅ |
 | B8 | `feature/section-science-technology` | ⬜ |
 | B9 | `feature/section-investigative` | ⬜ |
 | B10 | `feature/section-explainer` | ⬜ |
