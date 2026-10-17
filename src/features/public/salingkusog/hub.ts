@@ -100,10 +100,58 @@ export const hubTabs = [
 ];
 
 /** "Today · 3:00 PM" / "Nov 4 · 8:00 AM" in Philippine time. */
+/** "3:00 PM" in Philippine time. */
+export function clockLabel(at: string) {
+  const [h, m] = manilaTime(at).split(':').map(Number);
+  return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
+}
+
 export function whenLabel(at: string, today = manilaDate()) {
   const d = manilaDate(at);
-  const [h, m] = manilaTime(at).split(':').map(Number);
-  const time = `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
+  const time = clockLabel(at);
   const day = d === today ? 'Today' : new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${d}T00:00:00Z`));
   return `${day} · ${time}`;
 }
+
+// ---------------------------------------------------------------- schedule
+
+export type ScheduleShow = 'all' | 'live' | 'upcoming' | 'results';
+export type ScheduleFilters = { sport?: string; faction?: string; venue?: string; show: ScheduleShow };
+export type ScheduleGroup<T> = { key: 'live' | 'later' | 'completed' | 'off'; title: string; matches: T[] };
+
+/** Day to open: ?day= when it belongs to the edition, else today during the games, else the first day. */
+export function scheduleDay(edition: Pick<SkEditionRow, 'starts_on' | 'ends_on'>, requested: string | null, today = manilaDate()) {
+  const days = dayRange(edition.starts_on, edition.ends_on);
+  if (requested && days.some((d) => d.date === requested)) return requested;
+  if (today >= edition.starts_on && today <= edition.ends_on) return today;
+  return today > edition.ends_on ? edition.ends_on : edition.starts_on;
+}
+
+/** One day's games, filtered and grouped into live / later / completed / postponed. */
+export function scheduleGroups<T extends Pick<SkMatchRow, 'status' | 'scheduled_at' | 'event_id' | 'side_a_id' | 'side_b_id' | 'venue_id'>>(
+  matches: T[],
+  day: string,
+  filters: ScheduleFilters,
+  sportOf: (eventId: string) => string | undefined,
+  today = manilaDate(),
+): ScheduleGroup<T>[] {
+  const isToday = day === today;
+  const list = matches
+    .filter((m) => manilaDate(m.scheduled_at) === day)
+    .filter((m) => !filters.sport || sportOf(m.event_id) === filters.sport)
+    .filter((m) => !filters.faction || m.side_a_id === filters.faction || m.side_b_id === filters.faction)
+    .filter((m) => !filters.venue || m.venue_id === filters.venue)
+    .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
+  const groups: ScheduleGroup<T>[] = [
+    { key: 'live', title: 'Live now', matches: list.filter((m) => m.status === 'live') },
+    { key: 'later', title: isToday ? 'Later today' : day > today ? 'Scheduled' : 'Not played', matches: list.filter((m) => m.status === 'upcoming') },
+    { key: 'completed', title: isToday ? 'Completed today' : 'Completed', matches: list.filter((m) => m.status === 'final').reverse() },
+    { key: 'off', title: 'Postponed or cancelled', matches: list.filter((m) => m.status === 'postponed' || m.status === 'cancelled') },
+  ];
+  const wanted: Record<ScheduleShow, ScheduleGroup<T>['key'][]> = { all: ['live', 'later', 'completed', 'off'], live: ['live'], upcoming: ['later', 'off'], results: ['completed'] };
+  return groups.filter((g) => g.matches.length && wanted[filters.show].includes(g.key));
+}
+
+/** "Thu, Oct 16" */
+export const dayLabel = (date: string, weekday = true) =>
+  new Intl.DateTimeFormat('en-US', { ...(weekday ? { weekday: 'short' } : {}), month: 'short', day: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));

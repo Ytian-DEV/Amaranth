@@ -128,7 +128,7 @@ export function SalingkusogPage() {
             ) : !editions.data ? (
               <Skeleton className="h-64" />
             ) : (
-              <EditionTab edition={edition} onSelect={setEditionId} />
+              <EditionTab edition={edition} canUploadPdf={manager} onSelect={setEditionId} />
             )
           }
         />
