@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/seo-sharing`)
-**Last done:** `feature/cms-site-settings` merged — `/admin/submissions` & `/admin/events` (open/accepted/converted/declined views, detail with signed file links, mark reviewing/accept/decline with note, convert to draft), `/admin/settings` tabs: Front page (lead + folio slots, ticker), Comments moderation (+ global toggle), Inbox, Sections & categories, Desks, General (contact info, social). All CMS placeholders gone. Schema: publishers may edit the `ticker` setting.
-**Next step:** `feature/seo-sharing` — per-route meta (description, canonical, OG/Twitter) client-side + Vercel Edge Middleware that injects OG tags into `index.html` for `/article/:slug` (and sections) for crawlers; `/sitemap.xml` and `/rss.xml` via Vercel functions reading Supabase with the anon key; `vercel.json` (rewrites, immutable `/assets` cache headers, security headers).
+**Current branch:** `develop` (next: decide `feature/content-migration`, then `feature/v2-polish`)
+**Last done:** `feature/seo-sharing` merged — `middleware.ts` (crawler UA → index.html with article/section OG tags from Supabase REST), `/api/sitemap`, `/api/rss` (+`?section=`), `/api/robots` behind `vercel.json` rewrites; immutable `/assets` caching + security headers; `usePageMeta` (description, canonical, OG) on home/section/article; `public/og-default.jpg` (1200×630). Middleware/functions are unit-tested but NOT yet run on Vercel — check a preview deploy with the Facebook Sharing Debugger.
+**Next step:** `feature/content-migration` is optional (fresh DB chosen; old v1 content would need an export from the old project) — skip unless the user asks. Continue with `feature/v2-polish`: delete `src/legacy` + nested `Amaranth/` gitlink + unused deps (Radix, recharts, quill, cmdk, vaul…), remove vite legacy aliases, a11y/responsive pass on every /dev screen, 404 + error states review.
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -37,7 +37,7 @@
 | 12 | `feature/cms-media-library` | ✅ merged | |
 | 13 | `feature/cms-people-board` | ✅ merged | Board photos in /public/images are 2048px JPEGs — compress in perf pass |
 | 14 | `feature/cms-site-settings` | ✅ merged | |
-| 15 | `feature/seo-sharing` | ⬜ | |
+| 15 | `feature/seo-sharing` | ✅ merged | Verify on a Vercel preview (OG debugger, /sitemap.xml, /rss.xml) |
 | 16 | `feature/content-migration` | ⬜ optional (old data import) | |
 | 17 | `feature/v2-polish` | ⬜ | |
 | 18 | `feature/perf-pass` | ⬜ | |
