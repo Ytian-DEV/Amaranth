@@ -8,7 +8,7 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A13 `feature/salingkusog-social-cards` merged (Figma 20:2036 / 20:2067). **Track A (Salingkusog) is complete.**
+**Last done:** B12 `feature/section-stories` merged. **Track A, Statistics and Track B (B1–B12) are complete** (2026-10-18). Earlier: A13 `feature/salingkusog-social-cards` (Figma 20:2036 / 20:2067).
 - In the newsroom, Salingkusog → Awards → **Card** on each award opens a preview with **Download PNG**.
 - MVP of the Day and Finals MVP use the 1080×1350 card: photo, name, faction, stat line, faction stripe, game footer.
 - Athlete of the Day uses the 1080×1080 card: name, medal and event, big result, faction colour panel with the photo.
@@ -63,7 +63,19 @@
 
 - B12 `feature/section-stories` (2026-10-18): `/stories` follows Figma 42:851: intro (category circles when the section has several), a swipeable "New this week" row of 9:16 tiles (photo or colour, progress dashes, kicker, title), then Faces of VSU quote cards (a `faces-of-vsu` category, else "More stories"). The "How stories work" band describes a tap-through player the site does not have, so it is left out. **Track B is complete.**
 
-**Next:** Nothing queued: Track B is done. The user decides what comes next.
+**Track B follow-ups (design widgets left out because the data doesn't exist yet; each needs a small schema + newsroom form, ask the user first):**
+- News: none. Feature: photo essays as galleries (the band uses story photos).
+- Literary: a real Folio issue (title, semester, PDF); the hero uses the newest work.
+- Blogs: named blog columns with avatars; likes and comment counts.
+- Specials: "By the numbers" figures for a series.
+- Views: weekly poll; published letters to the editor.
+- S&T: "study at a glance" facts; innovation tracker.
+- Investigative: reporting stats, documents gallery, impact badges.
+- Explainer: the four "what changed / who it affects / what to check / where to ask" cards.
+- Bulletin: deadline dates (Deadlines strip, calendar deadlines) and pinned notices.
+- Stories: a tap-through story player ("How stories work" band).
+
+**Next:** Nothing queued: Track B is done. The user decides what comes next (open a `develop` → `main` PR for Track B, or one of the follow-ups above).
 
 | # | Branch | Status |
 |---|---|---|
