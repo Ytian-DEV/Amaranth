@@ -7,7 +7,7 @@ export const LIST_PAGE_SIZE = 20;
 
 // ---------------------------------------------------------------- list
 
-export type ArticleListFilters = { q: string; status: ArticleStatus | ''; section: string; mine: boolean; page: number };
+export type ArticleListFilters = { q: string; status: ArticleStatus | '' | 'review'; section: string; mine: boolean; page: number };
 
 export type ArticleListRow = {
   id: string;
@@ -33,7 +33,8 @@ export function useArticleList(filters: ArticleListFilters, userId: string | und
           count: 'exact',
         });
       if (filters.q.trim()) query = query.ilike('title', `%${filters.q.trim().replace(/[%_]/g, '')}%`);
-      if (filters.status) query = query.eq('status', filters.status);
+      if (filters.status === 'review') query = query.in('status', ['submitted', 'in_review']);
+      else if (filters.status) query = query.eq('status', filters.status);
       if (filters.section) query = query.eq('section_slug', filters.section);
       if (filters.mine && userId) query = query.eq('created_by', userId);
       const { data, error, count } = await query.order('updated_at', { ascending: false }).range(from, from + LIST_PAGE_SIZE - 1);

@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/cms-editorial-workflow`)
-**Last done:** `feature/cms-article-editor` merged — `/admin/articles` (search, status/section/mine filters, pagination, stacked on mobile) and editor (TipTap body with image upload + YouTube, autosave every 2.5s for drafts / revision snapshots for live articles, unsaved-changes guard, cover upload with variants, authors, tags, category, label, featured, excerpt, SEO with preview, workflow buttons via `transition_article`). Schema: invited staff get a contributor; creator auto-credited.
-**Next step:** `feature/cms-editorial-workflow` — activity timeline + review notes thread on the editor (`article_activity`, `add_article_note`), review queue view (`/admin/articles?status=submitted` shortcut / “Needs review” tab), revisions list with restore, home-page curation (lead + folio slots) for publishers.
+**Current branch:** `develop` (next: create `feature/cms-media-library`)
+**Last done:** `feature/cms-editorial-workflow` merged — editor gains Notes & activity (timeline + `add_article_note`) and Revisions (restore into editor); article list gains quick views (All, Mine, Needs review, Drafts, Scheduled, Published). Home-page curation moved to `feature/cms-site-settings`.
+**Next step:** `feature/cms-media-library` — `/admin/media`: grid of `media_assets` (search by alt/caption, filter mine/unused), multi-upload (compressed + variants via `uploadMediaImage`), edit alt/caption/credit, delete when unused (`media_usage`), and a picker dialog reused by the editor cover field.
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -33,7 +33,7 @@
 | 8 | `feature/submissions-contact` | ✅ merged | Legacy still serves `/about`, `/editorial-board` |
 | 9 | `feature/cms-shell-dashboard` | ✅ merged | Legacy v1 Dashboard is no longer routed (`/dashboard` → `/admin`) |
 | 10 | `feature/cms-article-editor` | ✅ merged | Not exercised against a live v2 project yet |
-| 11 | `feature/cms-editorial-workflow` | ⬜ | |
+| 11 | `feature/cms-editorial-workflow` | ✅ merged | Workflow rules live in the DB trigger; UI mirrors them |
 | 12 | `feature/cms-media-library` | ⬜ | |
 | 13 | `feature/cms-people-board` | ⬜ | |
 | 14 | `feature/cms-site-settings` | ⬜ | |
