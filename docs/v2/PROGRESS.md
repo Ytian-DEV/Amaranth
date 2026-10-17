@@ -41,7 +41,9 @@
 
 - B1 `feature/nav-more-menu` (2026-10-18): Header "More" opens a full-width mega menu (Figma 42:1077): a card per More section with icon, pitch and its newest story (fetched on first open), plus an "Also on Amaranth" strip. Esc and outside click close it; Esc returns focus to the button. 5 columns on desktop, 3 on tablet; phones keep the section chips.
 
-**Next:** B2 `feature/section-news` (the user asked for B1–B12 back to back).
+- B2 `feature/section-news` (2026-10-18): `/news` page 1 follows Figma 30:108: intro with category chips, lead story + campus briefs (times in Manila), top stories, more news feed, most read (this month, this section) and a tip box. Shared `section/landing/` toolkit (data hook, picker, blocks, registry) for B3–B12; `?view=all` (and any filter or page 2+) keeps the paginated list. Fixtures `/dev/section/:slug` and `/dev/section/:slug/empty`.
+
+**Next:** B3 `feature/section-feature`.
 
 | # | Branch | Status |
 |---|---|---|
@@ -59,7 +61,7 @@
 | A12 | `feature/sports-landing` | ✅ |
 | A13 | `feature/salingkusog-social-cards` | ✅ |
 | B1 | `feature/nav-more-menu` | ✅ |
-| B2 | `feature/section-news` | ⬜ |
+| B2 | `feature/section-news` | ✅ |
 | B3 | `feature/section-feature` | ⬜ |
 | B4 | `feature/section-literary` | ⬜ |
 | B5 | `feature/section-blogs` | ⬜ |

@@ -7,10 +7,12 @@ import { NotFoundPage } from '../NotFoundPage';
 import { SectionSkeleton, SectionView } from './SectionView';
 import { SportsLandingPage } from './SportsLandingPage';
 import { useArticlePage, useSectionInfo } from './sectionData';
+import { sectionLandings } from './landing';
+import { useSectionLanding } from './landing/data';
 
 function useListParams() {
   const [params] = useSearchParams();
-  return { page: parsePage(params.get('page')), category: params.get('category') };
+  return { page: parsePage(params.get('page')), category: params.get('category'), all: params.get('view') === 'all' };
 }
 
 const categoryHref = (base: string) => (slug: string | null) => (slug ? `${base}?category=${encodeURIComponent(slug)}` : base);
@@ -18,9 +20,12 @@ const categoryHref = (base: string) => (slug: string | null) => (slug ? `${base}
 /** /:section — every section uses this one template. */
 export function SectionPage() {
   const { section: slug = '' } = useParams();
-  const { page, category } = useListParams();
+  const { page, category, all } = useListParams();
   const info = useSectionInfo(slug);
-  const articles = useArticlePage({ section: slug, category, page });
+  // page 1 of a section with its own design shows that landing instead of the list
+  const Landing = page === 1 && !category && !all ? sectionLandings[slug] : undefined;
+  const landing = useSectionLanding(slug, info.data?.section.name, Boolean(Landing));
+  const articles = useArticlePage({ section: slug, category, page, enabled: !Landing });
   const activeCategory = info.data?.categories.some((c) => c.slug === category) ? category : null;
   usePageMeta({
     title: info.data?.section.name ?? (info.data === null ? 'Page not found' : undefined),
@@ -28,16 +33,17 @@ export function SectionPage() {
     path: `/${slug}`,
   });
 
-  if (info.isPending || (articles.isPending && !articles.data)) return <SectionSkeleton />;
-  if (info.error || articles.error) {
+  const list = Landing ? landing : articles;
+  if (info.isPending || (list.isPending && !list.data)) return <SectionSkeleton />;
+  if (info.error || list.error) {
     return (
       <div className="container-page py-16">
         <h1 className="sr-only">{slug}</h1>
         <ErrorState
-          error={info.error ?? articles.error}
+          error={info.error ?? list.error}
           onRetry={() => {
             void info.refetch();
-            void articles.refetch();
+            void list.refetch();
           }}
         />
       </div>
@@ -46,6 +52,7 @@ export function SectionPage() {
   if (!info.data) return <NotFoundPage />;
 
   const { section, categories } = info.data;
+  if (Landing && landing.data) return <Landing section={section} categories={categories} items={landing.data.items} mostRead={landing.data.mostRead} />;
   if (section.slug === 'sports' && page === 1 && !activeCategory && !category) {
     return <SportsLandingPage categories={categories} items={articles.data?.items ?? []} hasMore={(articles.data?.pageCount ?? 1) > 1} />;
   }
