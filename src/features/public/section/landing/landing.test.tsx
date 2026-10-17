@@ -39,6 +39,7 @@ const sections: Record<string, LandingSection> = {
   news: { slug: 'news', name: 'News', description: 'Campus reporting.', nav_placement: 'primary' },
   feature: { slug: 'feature', name: 'Feature', description: 'Long-form stories.', nav_placement: 'primary' },
   literary: { slug: 'literary', name: 'Literary', description: 'Poetry and prose.', nav_placement: 'primary' },
+  blogs: { slug: 'blogs', name: 'Blogs', description: 'Personal takes.', nav_placement: 'primary' },
 };
 const categories = [
   { slug: 'campus-news', name: 'Campus News' },

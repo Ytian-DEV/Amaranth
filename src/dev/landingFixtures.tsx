@@ -74,6 +74,18 @@ const samples: Record<string, Sample> = {
       ['essay', 'Ate, I Made It', 'A performance piece recorded at Open Mic Night.'],
     ],
   },
+  blogs: {
+    section: { slug: 'blogs', name: 'Blogs', description: 'Personal takes, campus diaries and student voices, written by the people living it.', nav_placement: 'primary' },
+    categories: [{ slug: 'blogs', name: 'Blogs' }],
+    stories: [
+      ['blogs', 'Things nobody tells you about your first typhoon in the dorm', 'Pack a power bank, befriend the guard and never, ever leave your window open.', 'Mika Santos'],
+      ['blogs', 'I tried studying with AI for a week. Here’s what happened', 'Spoiler: it helped me understand more and remember less.', 'Paolo Reyes'],
+      ['blogs', 'Ranking every canteen ulam under ₱60', 'A highly scientific, deeply personal, totally biased guide.', 'Jessa Cruz'],
+      ['blogs', 'What a semester on the demo farm taught me about patience', 'Rice doesn’t care about your deadlines.', 'Rico Villamor'],
+      ['blogs', 'The dorm curfew diaries, part two', 'We timed the walk from the library. It is not possible.', 'Mika Santos'],
+      ['blogs', 'My thesis playlist, explained', 'Twelve songs that got me through chapter three.', 'Paolo Reyes'],
+    ],
+  },
 };
 
 function build(sample: Sample): StoryItem[] {
