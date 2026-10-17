@@ -16,6 +16,7 @@ import { ImportView } from '@/features/cms/salingkusog/setup/ImportTab';
 import { SportsView } from '@/features/cms/salingkusog/setup/SportsTab';
 import type { MediaAssetRow } from '@/lib/database.types';
 import { fixtureArticle, fixtureEditor, fixtureQueue, fixtureRecent, fixtureStats } from './fixtures';
+import { FixtureAwardsAthletes, FixtureResults, FixtureScorekeeper, FixtureScores } from './SkFixturePages';
 import { skFixture } from './skFixtures';
 
 const fixtureMedia: MediaAssetRow[] = Array.from({ length: 8 }, (_, i) => ({
@@ -172,6 +173,50 @@ export default function AdminFixtures() {
               <section className="flex flex-col gap-3" aria-label="Schedule import">
                 <ImportView setup={{ ...skFixture, existing: [] }} onImport={() => undefined} />
               </section>
+            </div>
+          </AdminShell>
+        }
+      />
+      <Route
+        path="salingkusog-scores"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <div className="flex flex-col gap-6">
+              <h1 className="font-serif text-headline-l text-ink">Scores</h1>
+              <FixtureScores />
+            </div>
+          </AdminShell>
+        }
+      />
+      <Route
+        path="salingkusog-scorekeeper"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <div className="flex flex-col gap-6">
+              <h1 className="font-serif text-headline-l text-ink">Scores</h1>
+              <FixtureScorekeeper />
+            </div>
+          </AdminShell>
+        }
+      />
+      <Route
+        path="salingkusog-results"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <div className="flex flex-col gap-6">
+              <h1 className="font-serif text-headline-l text-ink">Results & medals</h1>
+              <FixtureResults />
+            </div>
+          </AdminShell>
+        }
+      />
+      <Route
+        path="salingkusog-awards"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <div className="flex flex-col gap-6">
+              <h1 className="font-serif text-headline-l text-ink">Awards and athletes</h1>
+              <FixtureAwardsAthletes />
             </div>
           </AdminShell>
         }

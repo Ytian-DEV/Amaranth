@@ -1,4 +1,4 @@
-import type { SkCategory, SkDivision, SkFormat } from '@/lib/database.types';
+import type { SkAwardKind, SkCategory, SkDivision, SkFormat } from '@/lib/database.types';
 
 export const categoryLabels: Record<SkCategory, string> = {
   ball_games: 'Ball games',
@@ -22,3 +22,6 @@ export const formatLabels: Record<SkFormat, string> = {
 export const categories = Object.keys(categoryLabels) as SkCategory[];
 export const divisions = Object.keys(divisionLabels) as SkDivision[];
 export const formats = Object.keys(formatLabels) as SkFormat[];
+
+export const awardKindLabels: Record<SkAwardKind, string> = { mvp_of_day: 'MVP of the Day', athlete_of_day: 'Athlete of the Day', finals_mvp: 'Finals MVP' };
+export const awardKinds = Object.keys(awardKindLabels) as SkAwardKind[];
