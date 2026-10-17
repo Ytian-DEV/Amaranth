@@ -8,18 +8,15 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A9 `feature/salingkusog-sports-bracket` merged: `/salingkusog/sports/:slug?event=` (Figma 18:1441).
-- Sport switcher strip (the list); `/sports` opens the first sport. Division toggle (events).
-- Bracket events:
-  - columns come from each game's `round_order` and are ordered top to bottom by `bracket_slot`;
-  - connector lines are pure CSS on equal-height cells;
-  - champion card and the bronze game below the final;
-  - the bracket scrolls sideways on phones.
-- Round robin gets a standings table (P/W/L/D/+/−); timed and judged events get the results card.
-- All matches, plus top scorers from `sk_event_leaders` (PTS, or the most recorded stat).
-- Fixture: `/dev/salingkusog/sports`. For a correct bracket, the newsroom must set **Bracket column** (0 = first round) and **Position** on each game.
+**Last done:** A10 `feature/salingkusog-match-recap` merged: `/salingkusog/match/:id` (Figma 19:1742).
+- Dark scoreboard: breadcrumb, emblems, "Champion · 2–0 in tournament", live/final pill, big score with the winner in lime, and a period table.
+- The linked recap article in full (only once it is live), plus a player box score.
+- Award card (MVP / Finals MVP with stat line and quote) and team-stats bars.
+- Schedule & Results stays highlighted on recap pages.
+- Newsroom: the game form has a **Recap article** picker (search by title), and the scorekeeper has a "Public page ↗" link.
+- `useArticle` gained an `enabled` flag. Fixture: `/dev/salingkusog/match`. The design's photo gallery is not built; there is no gallery data yet.
 
-**Next:** A10 `feature/salingkusog-match-recap` (awaiting go).
+**Next:** A11 `feature/salingkusog-venues` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
@@ -32,7 +29,7 @@
 | A7 | `feature/salingkusog-winners` | ✅ |
 | A8 | `feature/salingkusog-factions` | ✅ |
 | A9 | `feature/salingkusog-sports-bracket` | ✅ |
-| A10 | `feature/salingkusog-match-recap` | ⬜ |
+| A10 | `feature/salingkusog-match-recap` | ✅ |
 | A11 | `feature/salingkusog-venues` | ⬜ |
 | A12 | `feature/sports-landing` | ⬜ |
 | A13 | `feature/salingkusog-social-cards` | ⬜ |

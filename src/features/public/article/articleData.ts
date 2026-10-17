@@ -121,8 +121,8 @@ export async function fetchArticle(slug: string): Promise<ArticleDetail | null> 
   };
 }
 
-export function useArticle(slug: string) {
-  return useQuery({ queryKey: ['article', slug], queryFn: () => fetchArticle(slug) });
+export function useArticle(slug: string, enabled = true) {
+  return useQuery({ queryKey: ['article', slug], queryFn: () => fetchArticle(slug), enabled });
 }
 
 export function useRelated(article: Pick<ArticleDetail, 'id' | 'sectionSlug'> | null | undefined) {

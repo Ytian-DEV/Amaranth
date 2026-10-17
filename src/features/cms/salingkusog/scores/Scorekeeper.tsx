@@ -143,6 +143,9 @@ export function ScorekeeperView({
         <Link to="/admin/salingkusog/scores" className="inline-flex items-center gap-1.5 text-button text-green-700 hover:underline">
           <ArrowLeft className="size-4" aria-hidden /> All games
         </Link>
+        <a href={`/salingkusog/match/${match.id}`} target="_blank" rel="noopener" className="ml-3 text-meta text-green-700 hover:underline">
+          Public page ↗
+        </a>
         <span className="ml-auto text-meta text-ink-muted" aria-live="polite">
           {saving === 'pending' ? 'Saving…' : saving === 'saved' ? 'Saved' : ''}
         </span>

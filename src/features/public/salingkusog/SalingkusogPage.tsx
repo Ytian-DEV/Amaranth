@@ -9,7 +9,9 @@ import { SalingkusogHeader } from './SalingkusogHeader';
 import { ScheduleView } from './ScheduleView';
 import { FactionView } from './FactionView';
 import { SportView } from './SportView';
-import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useEventLeaders, useMediaList, useResults, useStandings, type HubData } from './skData';
+import { RecapView } from './RecapView';
+import { useArticle } from '@/features/public/article/articleData';
+import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useArticleSlug, useEventLeaders, useMatchExtras, useMediaList, useResults, useStandings, type HubData } from './skData';
 import { completedCount, winnerCards } from './winners';
 import { WinnersView } from './WinnersView';
 
@@ -122,6 +124,33 @@ function SportPage({ hub, editionId }: { hub: HubData; editionId: string }) {
   return <SportView sport={sport} event={event} hub={hub} placements={results.data.placements} athletes={results.data.athletes} leaders={leaders.data ?? []} />;
 }
 
+/** /salingkusog/match/:id — scoreline, periods, box score, award and the linked recap article. */
+function RecapPage({ hub, editionId }: { hub: HubData; editionId: string }) {
+  const { id } = useParams();
+  const match = hub.matches.find((m) => m.id === id);
+  const results = useResults(editionId);
+  const extras = useMatchExtras(match?.id);
+  const slug = useArticleSlug(match?.recap_article_id);
+  const article = useArticle(slug.data ?? '', !!slug.data);
+  const photos = useMediaList((extras.data?.awards ?? []).map((a) => results.data?.athletes.find((x) => x.id === a.athlete_id)?.photo_asset_id));
+  if (!match) return <ComingSoon title="This game" />;
+  const error = results.error ?? extras.error;
+  if (error) return <div className="container-page py-12"><ErrorState error={error} onRetry={() => (void results.refetch(), void extras.refetch())} /></div>;
+  if (!results.data || !extras.data) return <div className="container-page py-12"><Skeleton className="h-96" /></div>;
+  return (
+    <RecapView
+      match={match}
+      hub={hub}
+      placements={results.data.placements}
+      athletes={results.data.athletes}
+      stats={extras.data.stats}
+      awards={extras.data.awards}
+      photos={photos.data ?? []}
+      article={slug.data && article.data?.isLive ? article.data : null}
+    />
+  );
+}
+
 /** /salingkusog/* — the intramurals hub. */
 export function SalingkusogPage() {
   const edition = useCurrentEdition();
@@ -132,7 +161,10 @@ export function SalingkusogPage() {
   // one place sets the meta for every hub tab (a child's effect would run first and be overwritten)
   const { pathname } = useLocation();
   const path = pathname.replace(/\/$/, '');
-  const tab = hubTabs.find((t) => t.to === path) ?? hubTabs.find((t) => t.to !== '/salingkusog' && path.startsWith(`${t.to}/`)) ?? hubTabs[0];
+  const tab =
+    hubTabs.find((t) => t.to === (path.startsWith('/salingkusog/match/') ? '/salingkusog/schedule' : path)) ??
+    hubTabs.find((t) => t.to !== '/salingkusog' && path.startsWith(`${t.to}/`)) ??
+    hubTabs[0];
   usePageMeta({
     title: ed ? `${ed.title} ${tab.label}` : edition.data === null ? 'Salingkusog' : undefined,
     description: ed
@@ -175,6 +207,7 @@ export function SalingkusogPage() {
         <Route path="factions/:slug" element={<FactionPage hub={hub.data} table={standings.data.table} editionId={ed.id} />} />
         <Route path="sports" element={<SportPage hub={hub.data} editionId={ed.id} />} />
         <Route path="sports/:slug" element={<SportPage hub={hub.data} editionId={ed.id} />} />
+        <Route path="match/:id" element={<RecapPage hub={hub.data} editionId={ed.id} />} />
         {hubTabs.slice(5).map((t) => (
           <Route key={t.to} path={t.to.replace('/salingkusog/', '')} element={<ComingSoon title={t.label} />} />
         ))}

@@ -6,7 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import type { SkMatchRow } from '@/lib/database.types';
 import { numOrNull } from '../setup/form';
 import { fromLocalInput, toLocalInput } from '../scoring';
-import { skErrorText, useCreateMatch, useUpdateMatch } from '../skApi';
+import { skErrorText, useCreateMatch, useRecapArticleOptions, useUpdateMatch } from '../skApi';
 import type { SkLookups } from './lookups';
 
 type Props = { lookups: SkLookups; match: SkMatchRow | null; day: string; onClose: () => void; onCreated?: (id: string) => void };
@@ -26,7 +26,9 @@ export function GameModal(props: Props) {
   return props.match ? <EditGame {...props} match={props.match} /> : <NewGame {...props} />;
 }
 
-type GameRow = Pick<SkMatchRow, 'event_id' | 'round' | 'scheduled_at' | 'venue_id' | 'side_a_id' | 'side_b_id' | 'round_order' | 'bracket_slot'>;
+type GameRow = Pick<SkMatchRow, 'event_id' | 'round' | 'scheduled_at' | 'venue_id' | 'side_a_id' | 'side_b_id' | 'round_order' | 'bracket_slot' | 'recap_article_id'>;
+
+const statusNote: Record<string, string> = { published: '', scheduled: ' (scheduled)', draft: ' (draft)', submitted: ' (in review)', in_review: ' (in review)', rejected: ' (rejected)', archived: ' (archived)' };
 
 function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: boolean; save: (row: GameRow) => Promise<void> }) {
   const [f, setF] = useState({
@@ -38,7 +40,10 @@ function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: 
     side_b_id: match?.side_b_id ?? '',
     round_order: match?.round_order?.toString() ?? '0',
     bracket_slot: match?.bracket_slot?.toString() ?? '',
+    recap_article_id: match?.recap_article_id ?? '',
   });
+  const [articleSearch, setArticleSearch] = useState('');
+  const articles = useRecapArticleOptions(articleSearch, f.recap_article_id || null);
   const [error, setError] = useState<string | null>(null);
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((x) => ({ ...x, [k]: e.target.value }));
 
@@ -57,6 +62,7 @@ function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: 
         side_b_id: f.side_b_id || null,
         round_order: Number(f.round_order) || 0,
         bracket_slot: numOrNull(f.bracket_slot),
+        recap_article_id: f.recap_article_id || null,
       });
       onClose();
     } catch (err) {
@@ -135,6 +141,22 @@ function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: 
             </Field>
           </div>
         </div>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-1 text-[14px] font-semibold">Recap article</legend>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Input aria-label="Search articles" type="search" placeholder="Search by title" value={articleSearch} onChange={(e) => setArticleSearch(e.target.value)} />
+            <Select aria-label="Recap article" value={f.recap_article_id} onChange={set('recap_article_id')}>
+              <option value="">— none —</option>
+              {(articles.data ?? []).map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.title}
+                  {statusNote[a.status] ?? ''}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <p className="text-meta font-normal text-ink-muted">Shown on the game’s public recap page once the article is published.</p>
+        </fieldset>
       </div>
     </Modal>
   );

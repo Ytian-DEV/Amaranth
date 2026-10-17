@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import type { SkEditionRow, SkFactionRow } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
 import { dateSpan, hubTabs, phasePill, type HubPhase } from './hub';
@@ -27,6 +27,9 @@ export function SalingkusogHeader({
   liveCount: number;
   phase: HubPhase;
 }) {
+  const { pathname } = useLocation();
+  // a game recap belongs to Schedule & Results
+  const activeFor = (to: string, isActive: boolean) => isActive || (to === '/salingkusog/schedule' && pathname.startsWith('/salingkusog/match/'));
   const meta = [edition.subtitle, dateSpan(edition.starts_on, edition.ends_on), `${factions.length} faction${factions.length === 1 ? '' : 's'}, ${sportsCount} sport${sportsCount === 1 ? '' : 's'}`]
     .filter(Boolean)
     .join('  ·  ');
@@ -66,7 +69,7 @@ export function SalingkusogHeader({
                 className={({ isActive }) =>
                   cn(
                     'block border-b-[3px] py-3 text-[13px] font-semibold uppercase tracking-[0.52px] md:py-3.5',
-                    isActive ? 'border-lime text-lime' : 'border-transparent text-green-soft hover:border-on-dark-muted',
+                    activeFor(t.to, isActive) ? 'border-lime text-lime' : 'border-transparent text-green-soft hover:border-on-dark-muted',
                   )
                 }
               >
