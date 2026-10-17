@@ -102,12 +102,19 @@ const matches: SkMatchRow[] = [
   match('m4', { event_id: 'bb-w', side_a_id: null, side_b_id: null, scheduled_at: '2026-11-04T00:00:00Z', round: 'Final', round_order: 2 }),
   match('m5', { event_id: 'bb-w', side_a_id: 'sd', side_b_id: 'pt', status: 'final', score_a: 64, score_b: 58, winner_side: 'a', scheduled_at: '2026-11-02T23:30:00Z', round: 'Semifinal 1' }),
   match('m6', { event_id: 'vb-w', venue_id: 'annex', side_a_id: 'mm', side_b_id: 'pt', scheduled_at: '2026-11-03T09:00:00Z', round: 'Group A' }),
+  match('m8', { round: 'Final', round_order: 2, side_a_id: 'pt', side_b_id: 'cv', status: 'final', score_a: 78, score_b: 71, winner_side: 'a', scheduled_at: '2026-11-04T08:00:00Z', ended_at: '2026-11-04T09:40:00Z' }),
+  match('m9', { round: 'Bronze game', round_order: 2, side_a_id: 'sd', side_b_id: 'mm', status: 'final', score_a: 66, score_b: 60, winner_side: 'a', scheduled_at: '2026-11-04T06:00:00Z' }),
   match('m7', { event_id: 'vb-w', venue_id: 'annex', side_a_id: 'cv', side_b_id: 'mm', status: 'postponed', scheduled_at: '2026-11-03T04:00:00Z', round: 'Group A' }),
 ];
 
 const placements: SkPlacementRow[] = [
   { ...base, id: 'p1', event_id: 'at-100w', place: 1, medal: 'gold', faction_id: 'sd', athlete_id: 'a2', result: '12.84s', awarded_on: '2026-11-03' },
-  { ...base, id: 'p2', event_id: 'at-100w', place: 2, medal: 'silver', faction_id: 'pt', athlete_id: null, result: '12.97s', awarded_on: '2026-11-03' },
+  { ...base, id: 'p2', event_id: 'at-100w', place: 2, medal: 'silver', faction_id: 'pt', athlete_id: 'a1', result: '12.97s', awarded_on: '2026-11-03' },
+  { ...base, id: 'p3', event_id: 'at-100w', place: 3, medal: 'bronze', faction_id: 'cv', athlete_id: 'a3', result: '13.10s', awarded_on: '2026-11-03' },
+  { ...base, id: 'p4', event_id: 'bb-m', place: 1, medal: 'gold', faction_id: 'pt', athlete_id: null, result: null, awarded_on: '2026-11-04' },
+  { ...base, id: 'p5', event_id: 'bb-m', place: 2, medal: 'silver', faction_id: 'cv', athlete_id: null, result: null, awarded_on: '2026-11-04' },
+  { ...base, id: 'p6', event_id: 'bb-m', place: 3, medal: 'bronze', faction_id: 'sd', athlete_id: null, result: null, awarded_on: '2026-11-04' },
+  { ...base, id: 'p7', event_id: 'bb-m', place: 4, medal: null, faction_id: 'mm', athlete_id: null, result: null, awarded_on: '2026-11-04' },
 ];
 
 const awards: SkAwardRow[] = [

@@ -8,15 +8,15 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A6 `feature/salingkusog-schedule` merged: `/salingkusog/schedule` (Figma 14:474 / 22:2404).
-- Day tabs; opens on today during the games.
-- Sport, faction and venue filters, plus All / Live / Upcoming / Results.
-- Groups: Live now, Later today, Completed today, Postponed or cancelled.
-- A "Download PDF schedule" button.
-- State lives in the URL (`?day=&sport=&faction=&venue=&show=`). Live updates come from the hub's Realtime subscription.
+**Last done:** A7 `feature/salingkusog-winners` merged: `/salingkusog/winners` (Figma 15:901).
+- One card per event with results, newest first.
+- Rows: place chip, faction, athlete or faction name, and a note ("Champion · beat CV in the final", "Runner-up", "Won the bronze game"; the faction for individual events).
+- Each row's result is the typed result, or else the deciding game's score.
+- Category chips (`?category=`) and an "x of y events completed" bar.
+- A "Read the game recap" link goes to `/salingkusog/match/:id`, which shows coming soon until A10.
 
-CMS: an Edition form "Schedule PDF" upload goes to the `archives` bucket; only the three managing roles can upload. Phones keep the three filter dropdowns, made compact; the design leaves them out. Hub meta is set per tab from one place. Fixture: `/dev/salingkusog/schedule`.
-**Next:** A7 `feature/salingkusog-winners` (awaiting go).
+Labels moved to `src/lib/skLabels.ts`. Fixture: `/dev/salingkusog/winners`.
+**Next:** A8 `feature/salingkusog-factions` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
@@ -26,7 +26,7 @@ CMS: an Edition form "Schedule PDF" upload goes to the `archives` bucket; only t
 | A4 | `feature/salingkusog-scorekeeper` | ✅ |
 | A5 | `feature/salingkusog-medal-tally` | ✅ |
 | A6 | `feature/salingkusog-schedule` | ✅ |
-| A7 | `feature/salingkusog-winners` | ⬜ |
+| A7 | `feature/salingkusog-winners` | ✅ |
 | A8 | `feature/salingkusog-factions` | ⬜ |
 | A9 | `feature/salingkusog-sports-bracket` | ⬜ |
 | A10 | `feature/salingkusog-match-recap` | ⬜ |

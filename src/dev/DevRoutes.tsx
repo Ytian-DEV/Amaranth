@@ -20,6 +20,9 @@ import { defaultSections } from '@/features/public/nav';
 import { SalingkusogHeader } from '@/features/public/salingkusog/SalingkusogHeader';
 import { MedalTallyView } from '@/features/public/salingkusog/MedalTallyView';
 import { ScheduleView } from '@/features/public/salingkusog/ScheduleView';
+import { WinnersView } from '@/features/public/salingkusog/WinnersView';
+import { completedCount, winnerCards } from '@/features/public/salingkusog/winners';
+import type { SkCategory } from '@/lib/database.types';
 import type { ScheduleFilters } from '@/features/public/salingkusog/hub';
 import { skFixture } from './skFixtures';
 import { fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
@@ -133,9 +136,15 @@ function FixtureSalingkusog() {
       <Routes>
         <Route index element={<MedalTallyView edition={skFixture.edition} hub={skHub} table={skFixture.medalTable} race={skFixture.pointsByDay} phase={skPhase} now={new Date('2026-11-03T01:30:00Z')} />} />
         <Route path="schedule" element={<FixtureSchedule />} />
+        <Route path="winners" element={<FixtureWinners />} />
       </Routes>
     </>
   );
+}
+
+function FixtureWinners() {
+  const [category, setCategory] = useState<SkCategory | null>(null);
+  return <WinnersView cards={winnerCards(skHub, skFixture.placements, skFixture.athletes)} hub={skHub} completed={completedCount(skHub, skFixture.placements)} category={category} onCategory={setCategory} />;
 }
 
 function FixtureSchedule() {
@@ -154,6 +163,7 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'home', label: 'Home (Figma content)' },
   { path: 'salingkusog', label: 'Salingkusog — Medal Tally' },
   { path: 'salingkusog/schedule', label: 'Salingkusog — Schedule & Results (filters work)' },
+  { path: 'salingkusog/winners', label: 'Salingkusog — Winners per game' },
   { path: 'home/empty', label: 'Home — empty' },
   { path: 'home/loading', label: 'Home — loading' },
   { path: 'section', label: 'Section page' },

@@ -6,7 +6,7 @@ import { Alert, EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedbac
 import { Modal } from '@/components/ui/Modal';
 import type { SkCategory, SkDivision, SkEventRow, SkFormat, SkSportRow, SkVenueRow } from '@/lib/database.types';
 import { Card, CardHeader } from '../../ui';
-import { categories, categoryLabels, divisionLabels, divisions, formatLabels, formats } from '../labels';
+import { categories, categoryLabels, divisionLabels, divisions, formatLabels, formats } from '@/lib/skLabels';
 import { skErrorText, useDeleteSkRow, useSaveSkRow, useSkRows } from '../skApi';
 import { useNameSlug, validSlug } from './form';
 import { RowActions, SlugInput } from './shared';
