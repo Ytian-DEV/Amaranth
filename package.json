@@ -87,7 +87,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "db:test": "node scripts/db-test.mjs"
+    "db:test": "node scripts/db-test.mjs",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "type": "module"
 }
