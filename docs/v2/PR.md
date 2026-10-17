@@ -59,6 +59,24 @@ A ground-up rebuild of the Amaranth website and its staff CMS on the "Amaranth R
 | — | `fix/nested-dialog-close` | Media picker no longer closes the form it was opened from (logos and photos now save) |
 | — | `fix/sk-more-categories` | Combat sports, Pageant and Others categories |
 | — | `feature/statistics` | First-party statistics, `/api/e`, `stats.sql`, `/admin/statistics`, `/privacy` (see `docs/v2/STATS.md`) |
+| — | `fix/server-esm-imports` | `.js` extensions on relative imports in `middleware.ts` and `api/*` (production 500 fix) + guard test |
+
+**Phase 2 — Track B (section layouts)**
+
+| # | Branch | What |
+|---|---|---|
+| B1 | `feature/nav-more-menu` | Header "More" mega menu: section pitch + newest story per More section, "Also on Amaranth" strip |
+| B2 | `feature/section-news` | News landing + shared `section/landing/` toolkit; `?view=all`, filters and page 2+ keep the list template |
+| B3 | `feature/section-feature` | Feature: photo hero, long reads, profiles, in-pictures band |
+| B4 | `feature/section-literary` | Literary: folio hero, genre tabs, poem of the week, folio tiles, call for submissions |
+| B5 | `feature/section-blogs` | Blogs: featured bloggers, latest posts, topics, pitch box |
+| B6 | `feature/section-specials` | Specials: series hero with parts, coverage tiles, archive by year |
+| B7 | `feature/section-views` | Views: editorial hero, columnists, latest opinion, letters box |
+| B8 | `feature/section-science-technology` | S&T: lead + "Also in S&T", lab cards, explained band |
+| B9 | `feature/section-investigative` | Investigative: dark lead, investigations by year, desk CTA |
+| B10 | `feature/section-explainer` | Explainer: short answer, question cards, ask-us band |
+| B11 | `feature/section-bulletin` | Bulletin: notice cards, filters, month calendar, post-a-notice |
+| B12 | `feature/section-stories` | Stories: tall story tiles, quote cards |
 
 ## Database — apply in this order (fresh / emptied project)
 
@@ -155,6 +173,11 @@ Never set `VITE_ENABLE_FIXTURES` or `VITE_STATS_DEBUG` on Vercel.
 - [ ] Awards → Card → Download PNG for MVP and Athlete of the Day
 - [ ] Edition → Countdown page toggle: only the three managing roles can change it
 
+**Section pages (Track B)**
+- [ ] Header → More opens the mega menu (newest story per section); Esc closes it and returns focus
+- [ ] Each of `/news`, `/feature`, `/literary`, `/blogs`, `/specials`, `/views`, `/science-technology`, `/investigative`, `/explainer`, `/bulletin`, `/stories` shows its own front page on desktop and phone; sections with no stories show the empty state
+- [ ] A category chip, `?page=2` and "Every … story" (`?view=all`) still show the paginated list
+
 **Statistics**
 - [ ] As Super admin, Executive Editor or Managing editor: Statistics is in the sidebar; after a few signed-out visits on production, today's numbers, top articles, sources, devices and share clicks appear; ranges and custom dates work
 - [ ] Newsroom activity shows active time in H:MM:SS that grows while a staff member works
@@ -187,6 +210,6 @@ Never set `VITE_ENABLE_FIXTURES` or `VITE_STATS_DEBUG` on Vercel.
 - Optional export/import of v1 articles if they should live in the new database.
 - Katalon test project in the untracked `Amaranth/` folder: keep in its own repo or delete.
 - Salingkusog faction names and colours, and the 5/3/1 medal points, are data: confirm them in the newsroom before the games.
-- Track B (section-specific layouts B1–B12) follows in a separate PR.
+- Track B design widgets that need new data (polls, deadlines, galleries, folio issues, and others): see the list in `docs/v2/PROGRESS.md`.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

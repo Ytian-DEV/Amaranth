@@ -8,7 +8,7 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A13 `feature/salingkusog-social-cards` merged (Figma 20:2036 / 20:2067). **Track A (Salingkusog) is complete.**
+**Last done:** B12 `feature/section-stories` merged. **Track A, Statistics and Track B (B1–B12) are complete** (2026-10-18). Earlier: A13 `feature/salingkusog-social-cards` (Figma 20:2036 / 20:2067).
 - In the newsroom, Salingkusog → Awards → **Card** on each award opens a preview with **Download PNG**.
 - MVP of the Day and Finals MVP use the 1080×1350 card: photo, name, faction, stat line, faction stripe, game footer.
 - Athlete of the Day uses the 1080×1080 card: name, medal and event, big result, faction colour panel with the photo.
@@ -39,7 +39,43 @@
 
 - `fix/server-esm-imports` (2026-10-18): production returned 500 MIDDLEWARE_INVOCATION_FAILED after the first merge to `main`. Vercel runs `middleware.ts` and `api/*` as plain Node ESM, so relative imports need `.js` (`./api/_lib/seo.js`). Fixed everywhere; `api/_lib/esm-imports.test.ts` guards it.
 
-**Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
+- B1 `feature/nav-more-menu` (2026-10-18): Header "More" opens a full-width mega menu (Figma 42:1077): a card per More section with icon, pitch and its newest story (fetched on first open), plus an "Also on Amaranth" strip. Esc and outside click close it; Esc returns focus to the button. 5 columns on desktop, 3 on tablet; phones keep the section chips.
+
+- B2 `feature/section-news` (2026-10-18): `/news` page 1 follows Figma 30:108: intro with category chips, lead story + campus briefs (times in Manila), top stories, more news feed, most read (this month, this section) and a tip box. Shared `section/landing/` toolkit (data hook, picker, blocks, registry) for B3–B12; `?view=all` (and any filter or page 2+) keeps the paginated list. Fixtures `/dev/section/:slug` and `/dev/section/:slug/empty`.
+
+- B3 `feature/section-feature` (2026-10-18): `/feature` follows Figma 31:252: full-bleed photo hero (newest story with a photo), category chips, two alternating long reads (6+ min), Profiles from People & Events (photo circle, name, dek as quote), an "In pictures" band when three more photo stories exist, then more features. Photo essays need a gallery model, so the band uses story photos for now.
+
+- B4 `feature/section-literary` (2026-10-18): `/literary` follows Figma 33:366: folio hero (newest work, drawn cover art on tablet and up), genre tab bar, Poem of the week (newest Poetry piece, dek as verse), "From the Folio" tiles in white / dark / lime, and the call-for-submissions band. A real Folio issue (title, semester, PDF) would need an issue type; for now the hero features the newest work.
+
+- B5 `feature/section-blogs` (2026-10-18): `/blogs` follows Figma 34:349: intro, Featured bloggers (the four most recent writers by byline, with post counts and initials avatars), latest posts with byline, category tag and thumbnail, a Topics panel when the section has several categories, and the "Pitch a blog" box. Named blog columns, avatars, likes and comment counts need data the schema lacks.
+
+- B6 `feature/section-specials` (2026-10-18): `/specials` follows Figma 34:554: dark special-report hero (newest special) with up to three parts of the series (same category, oldest first) and "Start with part 1", "More special coverage" tiles (the section categories plus the Salingkusog hub; the middle tile is lime so text keeps AA contrast, since the design blue is not in the palette), then the special-issue archive by year. The "By the numbers" strip needs per-story figures the schema lacks.
+
+- B7 `feature/section-views` (2026-10-18): `/views` follows Figma 36:507: editorial hero (newest Editorial, else newest piece) with italic dek and cartoon frame when it has an image, Our columnists (newest three Column pieces), latest opinion list with italic deks, then Most read and a Letters to the editor box linking to Contact. The weekly poll and published letters need their own data; left out until then.
+
+- B8 `feature/section-science-technology` (2026-10-18): `/science-technology` follows Figma 39:579: intro with chips, lead story with an "Also in S&T" panel in the study-at-a-glance slot, From VSU labs cards (tinted photo, dot + category), and a dark numbered "Explained" band linking to /explainer. Study-at-a-glance facts and the innovation tracker need data the schema lacks.
+
+- B9 `feature/section-investigative` (2026-10-18): `/investigative` follows Figma 39:763: dark hero with the newest investigation ("Read the investigation", byline, date) and a "How we report" note, Our investigations by year, and the Investigations desk band linking to Contact. Reporting stats, the documents gallery and impact badges need per-story data the schema lacks.
+
+- B10 `feature/section-explainer` (2026-10-18): `/explainer` follows Figma 40:721: intro, featured explainer with its dek as "The short answer" panel, More explainers as question cards ("Get the answer →"), and the Ask Amaranth band (links to Contact rather than a free-text box). The four-step "what changed / who it affects" cards need structured fields the schema lacks.
+
+- B11 `feature/section-bulletin` (2026-10-18): `/bulletin` follows Figma 40:879: intro, category filter chips, notice cards (category tag, "New" for three days, office byline, date and time, "View notice →"), a Manila-time month calendar marking today and the days notices went up, and "Post an announcement" (links to Contact, since Bulletin takes no public submissions). The Deadlines strip and pinned notices need deadline dates and a pin flag the schema lacks.
+
+- B12 `feature/section-stories` (2026-10-18): `/stories` follows Figma 42:851: intro (category circles when the section has several), a swipeable "New this week" row of 9:16 tiles (photo or colour, progress dashes, kicker, title), then Faces of VSU quote cards (a `faces-of-vsu` category, else "More stories"). The "How stories work" band describes a tap-through player the site does not have, so it is left out. **Track B is complete.**
+
+**Track B follow-ups (design widgets left out because the data doesn't exist yet; each needs a small schema + newsroom form, ask the user first):**
+- News: none. Feature: photo essays as galleries (the band uses story photos).
+- Literary: a real Folio issue (title, semester, PDF); the hero uses the newest work.
+- Blogs: named blog columns with avatars; likes and comment counts.
+- Specials: "By the numbers" figures for a series.
+- Views: weekly poll; published letters to the editor.
+- S&T: "study at a glance" facts; innovation tracker.
+- Investigative: reporting stats, documents gallery, impact badges.
+- Explainer: the four "what changed / who it affects / what to check / where to ask" cards.
+- Bulletin: deadline dates (Deadlines strip, calendar deadlines) and pinned notices.
+- Stories: a tap-through story player ("How stories work" band).
+
+**Next:** Nothing queued: Track B is done. The user decides what comes next (open a `develop` → `main` PR for Track B, or one of the follow-ups above).
 
 | # | Branch | Status |
 |---|---|---|
@@ -56,8 +92,18 @@
 | A11 | `feature/salingkusog-venues` | ✅ |
 | A12 | `feature/sports-landing` | ✅ |
 | A13 | `feature/salingkusog-social-cards` | ✅ |
-| B1 | `feature/nav-more-menu` | ⬜ |
-| B2–B12 | `feature/section-<slug>` (News, Feature, Literary, Blogs, Specials, Views, S&T, Investigative, Explainer, Bulletin, Stories) | ⬜ |
+| B1 | `feature/nav-more-menu` | ✅ |
+| B2 | `feature/section-news` | ✅ |
+| B3 | `feature/section-feature` | ✅ |
+| B4 | `feature/section-literary` | ✅ |
+| B5 | `feature/section-blogs` | ✅ |
+| B6 | `feature/section-specials` | ✅ |
+| B7 | `feature/section-views` | ✅ |
+| B8 | `feature/section-science-technology` | ✅ |
+| B9 | `feature/section-investigative` | ✅ |
+| B10 | `feature/section-explainer` | ✅ |
+| B11 | `feature/section-bulletin` | ✅ |
+| B12 | `feature/section-stories` | ✅ |
 
 ## Decisions log
 - 2026-10-18 Statistics: keep Vercel Web Analytics (`@vercel/analytics`) alongside the first-party statistics (user's choice). The privacy page mentions it.
