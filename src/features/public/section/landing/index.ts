@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import type { LandingProps } from './blocks';
 import { BlogsLanding } from './BlogsLanding';
 import { FeatureLanding } from './FeatureLanding';
+import { InvestigativeLanding } from './InvestigativeLanding';
 import { LiteraryLanding } from './LiteraryLanding';
 import { NewsLanding } from './NewsLanding';
 import { ScienceLanding } from './ScienceLanding';
@@ -17,4 +18,5 @@ export const sectionLandings: Record<string, ComponentType<LandingProps>> = {
   specials: SpecialsLanding,
   views: ViewsLanding,
   'science-technology': ScienceLanding,
+  investigative: InvestigativeLanding,
 };

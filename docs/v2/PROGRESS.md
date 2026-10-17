@@ -55,7 +55,9 @@
 
 - B8 `feature/section-science-technology` (2026-10-18): `/science-technology` follows Figma 39:579: intro with chips, lead story with an "Also in S&T" panel in the study-at-a-glance slot, From VSU labs cards (tinted photo, dot + category), and a dark numbered "Explained" band linking to /explainer. Study-at-a-glance facts and the innovation tracker need data the schema lacks.
 
-**Next:** B9 `feature/section-investigative`.
+- B9 `feature/section-investigative` (2026-10-18): `/investigative` follows Figma 39:763: dark hero with the newest investigation ("Read the investigation", byline, date) and a "How we report" note, Our investigations by year, and the Investigations desk band linking to Contact. Reporting stats, the documents gallery and impact badges need per-story data the schema lacks.
+
+**Next:** B10 `feature/section-explainer`.
 
 | # | Branch | Status |
 |---|---|---|
@@ -80,7 +82,7 @@
 | B6 | `feature/section-specials` | ✅ |
 | B7 | `feature/section-views` | ✅ |
 | B8 | `feature/section-science-technology` | ✅ |
-| B9 | `feature/section-investigative` | ⬜ |
+| B9 | `feature/section-investigative` | ✅ |
 | B10 | `feature/section-explainer` | ⬜ |
 | B11 | `feature/section-bulletin` | ⬜ |
 | B12 | `feature/section-stories` | ⬜ |
