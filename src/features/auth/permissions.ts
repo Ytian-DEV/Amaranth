@@ -26,6 +26,9 @@ export const isAdmin = (role?: AppRole | null) => role === 'super_admin' || role
 export const canPublish = (role?: AppRole | null) => isAdmin(role) || role === 'managing_editor';
 export const isEditor = (role?: AppRole | null) => canPublish(role) || role === 'section_editor';
 
+/** Statistics (and staff usage): Super admin, Executive Editor and Managing editor (app.can_view_stats). */
+export const canViewStats = (role?: AppRole | null) => role === 'super_admin' || role === 'editor_in_chief' || role === 'managing_editor';
+
 /** Super admin, Executive Editor and Managing editor choose the Salingkusog team (and always edit its data). */
 export const canManageSkTeam = (role?: AppRole | null) => canPublish(role);
 /** Can enter Salingkusog data: the three managing roles, or a member of the Salingkusog team. */

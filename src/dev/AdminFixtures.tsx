@@ -18,6 +18,7 @@ import type { MediaAssetRow } from '@/lib/database.types';
 import { fixtureArticle, fixtureEditor, fixtureQueue, fixtureRecent, fixtureStats } from './fixtures';
 import { FixtureAwardsAthletes, FixtureResults, FixtureScorekeeper, FixtureScores, FixtureSocialCards } from './SkFixturePages';
 import { skFixture } from './skFixtures';
+import { FixtureStatistics } from './statsFixtures';
 
 const fixtureMedia: MediaAssetRow[] = Array.from({ length: 8 }, (_, i) => ({
   id: `m${i + 1}`,
@@ -229,6 +230,30 @@ export default function AdminFixtures() {
               <h1 className="font-serif text-headline-l text-ink">Social cards</h1>
               <FixtureSocialCards />
             </div>
+          </AdminShell>
+        }
+      />
+      <Route
+        path="statistics"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <FixtureStatistics mode="full" />
+          </AdminShell>
+        }
+      />
+      <Route
+        path="statistics/empty"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <FixtureStatistics mode="empty" />
+          </AdminShell>
+        }
+      />
+      <Route
+        path="statistics/loading"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <FixtureStatistics mode="loading" />
           </AdminShell>
         }
       />

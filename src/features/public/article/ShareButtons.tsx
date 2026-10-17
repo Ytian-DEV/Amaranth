@@ -1,6 +1,7 @@
 import { Check, Facebook, Link2, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/cn';
+import { trackShare } from '../analytics/tracker';
 
 function XIcon({ className }: { className?: string }) {
   return (
@@ -28,6 +29,7 @@ export function ShareButtons({ url, title, className }: { url: string; title: st
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
   async function copy() {
+    trackShare('copy');
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
@@ -46,6 +48,7 @@ export function ShareButtons({ url, title, className }: { url: string; title: st
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Share on Facebook"
+        onClick={() => trackShare('facebook')}
       >
         <Facebook className="size-[18px]" aria-hidden />
       </a>
@@ -53,6 +56,7 @@ export function ShareButtons({ url, title, className }: { url: string; title: st
         className={cn(button, 'md:hidden')}
         href={`fb-messenger://share/?link=${enc(url)}`}
         aria-label="Send in Messenger"
+        onClick={() => trackShare('messenger')}
       >
         <MessengerIcon className="size-[18px]" />
       </a>
@@ -62,6 +66,7 @@ export function ShareButtons({ url, title, className }: { url: string; title: st
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Share on X"
+        onClick={() => trackShare('x')}
       >
         <XIcon className="size-4" />
       </a>
@@ -72,7 +77,10 @@ export function ShareButtons({ url, title, className }: { url: string; title: st
         <button
           type="button"
           className={cn(button, 'md:hidden')}
-          onClick={() => void navigator.share({ title, url }).catch(() => undefined)}
+          onClick={() => {
+            trackShare('native');
+            void navigator.share({ title, url }).catch(() => undefined);
+          }}
           aria-label="More sharing options"
         >
           <Share2 className="size-[18px]" aria-hidden />

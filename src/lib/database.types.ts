@@ -451,6 +451,35 @@ export type SkEditionRow = {
   created_at: string;
   updated_at: string;
 };
+// ---------------------------------------------------------------- Statistics (supabase/v2/stats.sql)
+export type StatsTotals = { pageviews: number; views: number; visitors: number; sessions: number; active_seconds: number; read_samples: number; shares: number };
+export type StatsOverview = {
+  current: StatsTotals;
+  previous: StatsTotals;
+  series: { day: string; pageviews: number; views: number; visitors: number; shares: number }[];
+};
+export type StatsArticleRow = {
+  article_id: string;
+  slug: string;
+  title: string;
+  section_name: string;
+  category_name: string;
+  authors: string | null;
+  published_at: string | null;
+  views: number;
+  pageviews: number;
+  visitors: number;
+  avg_read_seconds: number | null;
+  avg_scroll: number | null;
+  finish_rate: number | null;
+  shares: number;
+};
+export type StatsAuthorRow = { contributor_id: string; name: string; articles: number; views: number; avg_read_seconds: number | null; shares: number };
+export type StatsSectionRow = { section_name: string; category_name: string; articles: number; views: number; avg_read_seconds: number | null; shares: number };
+export type StatsDim = 'source' | 'referrer' | 'device' | 'browser' | 'os';
+export type StatsBreakdownRow = { value: string; pageviews: number; visitors: number };
+export type StatsStaffRow = { profile_id: string; display_name: string; role: AppRole; is_active: boolean; active_seconds: number; days_active: number; last_active_at: string | null };
+
 export type SkCountdownRow = { title: string; subtitle: string | null; starts_on: string; countdown_at: string };
 export type SkFactionRow = {
   id: string;
@@ -715,6 +744,14 @@ export type Database = {
       record_article_view: { Args: { p_article_id: string }; Returns: undefined };
       sk_set_placements: { Args: { p_event_id: string; p_rows: SkPlacementInput[] }; Returns: number };
       sk_countdown: { Args: Record<string, never>; Returns: SkCountdownRow[] };
+      staff_heartbeat: { Args: Record<string, never>; Returns: number };
+      stats_overview: { Args: { p_from: string; p_to: string }; Returns: StatsOverview };
+      stats_articles: { Args: { p_from: string; p_to: string; p_limit?: number }; Returns: StatsArticleRow[] };
+      stats_authors: { Args: { p_from: string; p_to: string }; Returns: StatsAuthorRow[] };
+      stats_sections: { Args: { p_from: string; p_to: string }; Returns: StatsSectionRow[] };
+      stats_breakdown: { Args: { p_from: string; p_to: string; p_dim: StatsDim }; Returns: StatsBreakdownRow[] };
+      stats_share_channels: { Args: { p_from: string; p_to: string }; Returns: { channel: string; shares: number }[] };
+      stats_staff_usage: { Args: { p_from: string; p_to: string }; Returns: StatsStaffRow[] };
       most_read_articles: { Args: { p_days?: number; p_limit?: number }; Returns: MostReadRow[] };
       archive_months: { Args: Record<string, never>; Returns: { month: string; articles: number }[] };
       search_articles: {
