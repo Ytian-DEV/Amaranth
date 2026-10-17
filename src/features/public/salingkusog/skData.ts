@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import type { MediaAssetRow, SkEditionRow, SkEventRow, SkFactionRow, SkMatchRow, SkMedalTableRow, SkPointsByDayRow, SkSportRow, SkVenueRow } from '@/lib/database.types';
+import type { MediaAssetRow, SkAthleteRow, SkEditionRow, SkEventRow, SkFactionRow, SkMatchRow, SkMedalTableRow, SkPlacementRow, SkPointsByDayRow, SkSportRow, SkVenueRow } from '@/lib/database.types';
 import { getSupabase, unwrap, unwrapMaybe } from '@/lib/supabase';
 
 const sb = () => getSupabase();
@@ -92,5 +92,21 @@ export function useMediaAsset(id: string | null | undefined) {
     enabled: !!id,
     staleTime: 10 * 60_000,
     queryFn: async () => unwrapMaybe(await sb().from('media_assets').select('bucket, path').eq('id', id!).maybeSingle()),
+  });
+}
+
+/** Results and the athletes named in them (Winners page). */
+export function useResults(editionId: string | undefined) {
+  return useQuery({
+    queryKey: ['sk-public', 'results', editionId],
+    enabled: !!editionId,
+    refetchInterval: LIVE_REFRESH,
+    queryFn: async (): Promise<{ placements: SkPlacementRow[]; athletes: SkAthleteRow[] }> => {
+      const [placements, athletes] = await Promise.all([
+        sb().from('sk_placements').select('*').eq('edition_id', editionId!).order('place').then(unwrap),
+        sb().from('sk_athletes').select('*').eq('edition_id', editionId!).then(unwrap),
+      ]);
+      return { placements, athletes };
+    },
   });
 }

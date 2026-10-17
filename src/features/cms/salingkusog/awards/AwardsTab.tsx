@@ -8,7 +8,7 @@ import { Pill } from '@/components/ui/StatusPill';
 import type { SkAwardKind, SkAwardRow, SkEditionRow, SkMatchRow, SkStatValue } from '@/lib/database.types';
 import { formatDate } from '@/lib/format';
 import { Card, CardHeader } from '../../ui';
-import { awardKindLabels, awardKinds } from '../labels';
+import { awardKindLabels, awardKinds } from '@/lib/skLabels';
 import { namer, useSkLookups, type SkLookups } from '../scores/lookups';
 import { defaultDay, editionDays, manilaDate, manilaTime } from '../scoring';
 import { skErrorText, useDeleteSkRow, useSaveSkRow, useSkAwards, useSkMatches } from '../skApi';

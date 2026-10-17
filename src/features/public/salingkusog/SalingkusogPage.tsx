@@ -1,12 +1,15 @@
 import { Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback';
 import { usePageMeta } from '@/lib/usePageMeta';
-import type { SkEditionRow } from '@/lib/database.types';
+import type { SkCategory, SkEditionRow } from '@/lib/database.types';
+import { categoryLabels } from '@/lib/skLabels';
 import { hubPhase, hubTabs, scheduleDay, type ScheduleFilters, type ScheduleShow } from './hub';
 import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
 import { ScheduleView } from './ScheduleView';
-import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useStandings, type HubData } from './skData';
+import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useResults, useStandings, type HubData } from './skData';
+import { completedCount, winnerCards } from './winners';
+import { WinnersView } from './WinnersView';
 
 function HubSkeleton() {
   return (
@@ -68,6 +71,25 @@ function SchedulePage({ edition, hub }: { edition: SkEditionRow; hub: HubData })
   );
 }
 
+/** /salingkusog/winners?category= */
+function WinnersPage({ edition, hub }: { edition: SkEditionRow; hub: HubData }) {
+  const [params, setParams] = useSearchParams();
+  const results = useResults(edition.id);
+  if (results.error) return <div className="container-page py-12"><ErrorState error={results.error} onRetry={() => void results.refetch()} /></div>;
+  if (!results.data) return <div className="container-page py-12"><Skeleton className="h-96" /></div>;
+  const raw = params.get('category') as SkCategory | null;
+  const category = raw && raw in categoryLabels ? raw : null;
+  return (
+    <WinnersView
+      cards={winnerCards(hub, results.data.placements, results.data.athletes)}
+      hub={hub}
+      completed={completedCount(hub, results.data.placements)}
+      category={category}
+      onCategory={(c) => setParams(c ? { category: c } : {}, { replace: true, preventScrollReset: true })}
+    />
+  );
+}
+
 /** /salingkusog/* — the intramurals hub. */
 export function SalingkusogPage() {
   const edition = useCurrentEdition();
@@ -83,7 +105,9 @@ export function SalingkusogPage() {
     description: ed
       ? tab.to === '/salingkusog/schedule'
         ? `Game times, live scores and results from ${ed.title}.`
-        : `Live medal tally, standings and scores from ${ed.title}${ed.subtitle ? `, ${ed.subtitle}` : ''}.`
+        : tab.to === '/salingkusog/winners'
+          ? `Gold, silver and bronze for every event of ${ed.title}.`
+          : `Live medal tally, standings and scores from ${ed.title}${ed.subtitle ? `, ${ed.subtitle}` : ''}.`
       : undefined,
     path: tab.to,
   });
@@ -113,7 +137,8 @@ export function SalingkusogPage() {
       <Routes>
         <Route index element={<MedalTallyView edition={ed} hub={hub.data} table={standings.data.table} race={standings.data.race} phase={phase} />} />
         <Route path="schedule" element={<SchedulePage edition={ed} hub={hub.data} />} />
-        {hubTabs.slice(2).map((t) => (
+        <Route path="winners" element={<WinnersPage edition={ed} hub={hub.data} />} />
+        {hubTabs.slice(3).map((t) => (
           <Route key={t.to} path={t.to.replace('/salingkusog/', '')} element={<ComingSoon title={t.label} />} />
         ))}
         <Route path="*" element={<ComingSoon title="This page" />} />

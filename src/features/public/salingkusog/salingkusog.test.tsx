@@ -3,6 +3,8 @@ import { MemoryRouter } from 'react-router-dom';
 import { skFixture } from '@/dev/skFixtures';
 import { dateSpan, hubPhase, liveAndNext, phasePill, podiumOrder, raceSeries, readableOn, scheduleDay, scheduleGroups, standingsHeadline, whenLabel } from './hub';
 import { ScheduleView } from './ScheduleView';
+import { completedCount, winnerCards } from './winners';
+import { WinnersView } from './WinnersView';
 import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
 
@@ -127,5 +129,40 @@ describe('Schedule & Results', () => {
     expect(screen.getByRole('link', { name: /Download PDF schedule/ }).getAttribute('href')).toMatch(/archives\/salingkusog\/2026\/schedule\.pdf$/);
     expect(screen.getByRole('heading', { name: /Live now/ })).toBeInTheDocument();
     expect(screen.getAllByRole('article')).toHaveLength(6);
+  });
+});
+
+describe('Winners per game', () => {
+  const cards = winnerCards(hub, skFixture.placements, skFixture.athletes);
+
+  it('builds one card per event with results, newest first', () => {
+    expect(cards.map((c) => c.title)).toEqual(['Basketball · Men', '100m Dash · Women']);
+    const bb = cards[0];
+    expect(bb).toMatchObject({ category: 'ball_games', final: true, venue: 'VSU Main Gymnasium', recapMatchId: 'm8' });
+    expect(bb.rows.map((r) => [r.place, r.name, r.note, r.result])).toEqual([
+      [1, 'Primordial Tiamat', 'Champion · beat CV in the final', '78–71'],
+      [2, 'Centicore Vanguard', 'Runner-up', '71–78'],
+      [3, 'Sylvan Dragons', 'Won the bronze game', '66–60'],
+      [4, 'Mystic Moirai', 'Fourth place', '60–66'],
+    ]);
+    // individual event: athlete name, faction as the note, typed result
+    expect(cards[1].rows[0]).toMatchObject({ name: 'Jessa Abad', note: 'Sylvan Dragons', result: '12.84s' });
+    expect(completedCount(hub, skFixture.placements)).toEqual({ done: 2, total: 4 });
+  });
+
+  it('filters by category and links the recap', () => {
+    const onCategory = vi.fn();
+    render(
+      <MemoryRouter>
+        <WinnersView cards={cards} hub={hub} completed={{ done: 2, total: 4 }} category={null} onCategory={onCategory} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('2 of 4 events completed')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '2');
+    fireEvent.click(screen.getByRole('button', { name: 'Athletics' }));
+    expect(onCategory).toHaveBeenCalledWith('athletics');
+    const card = screen.getByRole('article', { name: 'Basketball · Men' });
+    expect(within(card).getByRole('link', { name: /Read the game recap/ })).toHaveAttribute('href', '/salingkusog/match/m8');
+    expect(within(card).getByLabelText('gold, place 1')).toBeInTheDocument();
   });
 });
