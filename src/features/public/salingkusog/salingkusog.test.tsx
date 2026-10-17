@@ -7,6 +7,8 @@ import { completedCount, winnerCards } from './winners';
 import { WinnersView } from './WinnersView';
 import { factionProfile } from './factions';
 import { FactionView } from './FactionView';
+import { bracketColumns, eventStatusLine, formatLine, leaderStat, roundRobinTable, roundTitle } from './sports';
+import { SportView } from './SportView';
 import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
 
@@ -204,5 +206,55 @@ describe('Faction profile', () => {
     expect(screen.getByRole('link', { name: /Full history/ })).toHaveAttribute('href', '/salingkusog/schedule?faction=pt&show=results');
     expect(within(screen.getByRole('region', { name: 'Head-to-head' })).getByText('1W – 1L')).toBeInTheDocument();
     expect(screen.getAllByLabelText('Won')).toHaveLength(2);
+  });
+});
+
+describe('Sports and bracket', () => {
+  const bb = skFixture.matches.filter((m) => m.event_id === 'bb-m');
+
+  it('splits knockout games into columns and keeps the bronze game apart', () => {
+    const { columns, bronze } = bracketColumns(bb);
+    expect(columns.map((c) => [c.title, c.matches.map((m) => m.id)])).toEqual([
+      ['Semifinals', ['m1', 'm2']],
+      ['Final', ['m8']],
+    ]);
+    expect(bronze?.id).toBe('m9');
+    expect(roundTitle(['Quarterfinal 1', 'Quarterfinal 2'], 0)).toBe('Quarterfinals');
+    expect(formatLine('bracket', true)).toBe('Single elimination + bronze game');
+  });
+
+  it('round-robin table and leaders', () => {
+    const rows = roundRobinTable([
+      { status: 'final', side_a_id: 'pt', side_b_id: 'sd', score_a: 3, score_b: 1 },
+      { status: 'final', side_a_id: 'sd', side_b_id: 'cv', score_a: 2, score_b: 2 },
+      { status: 'upcoming', side_a_id: 'pt', side_b_id: 'cv', score_a: null, score_b: null },
+    ]);
+    expect(rows.map((r) => [r.factionId, r.played, r.wins, r.losses, r.draws, r.pf - r.pa])).toEqual([
+      ['pt', 1, 1, 0, 0, 2],
+      ['cv', 1, 0, 0, 1, 0],
+      ['sd', 2, 0, 1, 1, -2],
+    ]);
+    expect(leaderStat(skFixture.leaders)).toBe('PTS');
+    expect(eventStatusLine(bb, true, (d) => d)).toBe('Completed 2026-11-04');
+    expect(eventStatusLine([{ status: 'upcoming', scheduled_at: '2026-11-05T00:00:00Z', ended_at: null }], false, (d) => d)).toBe('Starts 2026-11-05');
+  });
+
+  it('renders the bracket, champion, division toggle and top scorers', () => {
+    render(
+      <MemoryRouter initialEntries={['/salingkusog/sports/basketball']}>
+        <SportView sport={skFixture.sports[0]} event={skFixture.events[0]} hub={hub} placements={skFixture.placements} athletes={skFixture.athletes} leaders={skFixture.leaders} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('heading', { name: 'Basketball' })).toBeInTheDocument();
+    expect(screen.getByText(/Champion: Primordial Tiamat/)).toBeInTheDocument();
+    const bracket = screen.getByRole('region', { name: 'Bracket' });
+    expect(within(bracket).getByText('Semifinals')).toBeInTheDocument();
+    expect(within(bracket).getByText(/Final: 78–71 vs Centicore Vanguard/)).toBeInTheDocument();
+    expect(within(bracket).getByRole('link', { name: /Bronze game/ })).toHaveAttribute('href', '/salingkusog/match/m9');
+    expect(within(screen.getByRole('navigation', { name: 'Division' })).getByRole('link', { name: 'Women' })).toHaveAttribute('href', '/salingkusog/sports/basketball?event=basketball-women');
+    const scorers = screen.getByRole('region', { name: 'Top scorers' });
+    const [, first, second] = within(scorers).getAllByRole('row');
+    expect(first).toHaveTextContent(/Marco Villanueva\s*52$/);
+    expect(second).toHaveTextContent(/Rene Lagunzad\s*47$/);
   });
 });

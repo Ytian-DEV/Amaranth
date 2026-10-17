@@ -1,7 +1,7 @@
 import { sitemapXml, type FeedItem } from './_lib/seo';
 import { liveCardsQuery, readEnv, rest, type CardRow } from './_lib/supabaseRest';
 
-const STATIC_PATHS = ['/latest', '/salingkusog', '/salingkusog/schedule', '/salingkusog/winners', '/salingkusog/factions', '/about', '/editorial-board', '/archives', '/contact', '/submit', '/submit/event'];
+const STATIC_PATHS = ['/latest', '/salingkusog', '/salingkusog/schedule', '/salingkusog/winners', '/salingkusog/factions', '/salingkusog/sports', '/about', '/editorial-board', '/archives', '/contact', '/submit', '/submit/event'];
 
 /** /sitemap.xml (rewritten here by vercel.json) */
 export async function GET(request: Request) {

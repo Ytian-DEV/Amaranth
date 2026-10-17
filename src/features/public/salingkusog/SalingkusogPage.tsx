@@ -8,7 +8,8 @@ import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
 import { ScheduleView } from './ScheduleView';
 import { FactionView } from './FactionView';
-import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useMediaList, useResults, useStandings, type HubData } from './skData';
+import { SportView } from './SportView';
+import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useEventLeaders, useMediaList, useResults, useStandings, type HubData } from './skData';
 import { completedCount, winnerCards } from './winners';
 import { WinnersView } from './WinnersView';
 
@@ -105,6 +106,22 @@ function FactionPage({ hub, table, editionId }: { hub: HubData; table: Parameter
   return <FactionView faction={faction} hub={hub} table={table} placements={results.data.placements} athletes={results.data.athletes} photos={photos.data ?? []} />;
 }
 
+/** /salingkusog/sports/:slug?event= (the bare /sports opens the first sport). */
+function SportPage({ hub, editionId }: { hub: HubData; editionId: string }) {
+  const { slug } = useParams();
+  const [params] = useSearchParams();
+  const sport = hub.sports.find((s) => s.slug === slug);
+  const events = sport ? hub.events.filter((e) => e.sport_id === sport.id) : [];
+  const event = events.find((e) => e.slug === params.get('event')) ?? events[0] ?? null;
+  const results = useResults(editionId);
+  const leaders = useEventLeaders(event?.id);
+  if (!slug) return hub.sports[0] ? <Navigate to={`/salingkusog/sports/${hub.sports[0].slug}`} replace /> : <ComingSoon title="Sports" />;
+  if (!sport) return <Navigate to="/salingkusog/sports" replace />;
+  if (results.error) return <div className="container-page py-12"><ErrorState error={results.error} onRetry={() => void results.refetch()} /></div>;
+  if (!results.data) return <div className="container-page py-12"><Skeleton className="h-96" /></div>;
+  return <SportView sport={sport} event={event} hub={hub} placements={results.data.placements} athletes={results.data.athletes} leaders={leaders.data ?? []} />;
+}
+
 /** /salingkusog/* — the intramurals hub. */
 export function SalingkusogPage() {
   const edition = useCurrentEdition();
@@ -156,7 +173,9 @@ export function SalingkusogPage() {
         <Route path="winners" element={<WinnersPage edition={ed} hub={hub.data} />} />
         <Route path="factions" element={<FactionPage hub={hub.data} table={standings.data.table} editionId={ed.id} />} />
         <Route path="factions/:slug" element={<FactionPage hub={hub.data} table={standings.data.table} editionId={ed.id} />} />
-        {hubTabs.slice(4).map((t) => (
+        <Route path="sports" element={<SportPage hub={hub.data} editionId={ed.id} />} />
+        <Route path="sports/:slug" element={<SportPage hub={hub.data} editionId={ed.id} />} />
+        {hubTabs.slice(5).map((t) => (
           <Route key={t.to} path={t.to.replace('/salingkusog/', '')} element={<ComingSoon title={t.label} />} />
         ))}
         <Route path="*" element={<ComingSoon title="This page" />} />
