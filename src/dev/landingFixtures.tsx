@@ -160,6 +160,22 @@ const samples: Record<string, Sample> = {
       ['explainer', 'How are scholarship stipends scheduled?'],
     ],
   },
+  bulletin: {
+    section: { slug: 'bulletin', name: 'Bulletin', description: 'Official announcements, deadlines and notices for the VSU community, all in one place.', nav_placement: 'more' },
+    categories: [
+      { slug: 'official-announcement', name: 'Official Announcement' },
+      { slug: 'board-passers', name: 'Board Passers' },
+      { slug: 'jobs', name: 'Jobs' },
+      { slug: 'events', name: 'Events' },
+    ],
+    stories: [
+      ['official-announcement', 'Water interruption at Lower Campus dormitories', 'Service resumes at 5:00 PM. Store water in advance.', 'Physical Plant Office'],
+      ['official-announcement', 'Schedule of second-semester enrollment released', 'Enrollment by college runs Jan 5 to Jan 16, 2027.', 'Office of the Registrar'],
+      ['official-announcement', 'Renewal of academic scholarships for AY 2026–2027', 'Submit grades and renewal forms by October 20.', 'Office of Student Affairs'],
+      ['events', 'University Foundation Week call for booth proposals', 'Proposals are due October 31.', 'Student Activities Office'],
+      ['official-announcement', 'Change in library hours during finals week', 'Extended hours start December 1.', 'University Library'],
+    ],
+  },
 };
 
 function build(sample: Sample): StoryItem[] {

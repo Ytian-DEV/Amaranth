@@ -4,6 +4,7 @@ import type { StoryItem } from '@/components/story/types';
 import type { LandingSection } from './blocks';
 import { picker } from './data';
 import { sectionLandings } from './index';
+import { MonthCalendar } from './BulletinLanding';
 import { briefTime } from './links';
 
 const story = (i: number, extra: Partial<StoryItem> = {}): StoryItem => ({
@@ -45,11 +46,24 @@ const sections: Record<string, LandingSection> = {
   'science-technology': { slug: 'science-technology', name: 'Science & Technology', description: 'Research.', nav_placement: 'more' },
   investigative: { slug: 'investigative', name: 'Investigative', description: 'Accountability.', nav_placement: 'more' },
   explainer: { slug: 'explainer', name: 'Explainer', description: 'Explained simply.', nav_placement: 'more' },
+  bulletin: { slug: 'bulletin', name: 'Bulletin', description: 'Notices.', nav_placement: 'more' },
 };
 const categories = [
   { slug: 'campus-news', name: 'Campus News' },
   { slug: 'environment', name: 'Environment' },
 ];
+
+describe('bulletin calendar', () => {
+  it('lays out the month with today and posting days marked', () => {
+    render(<MonthCalendar today="2026-10-16" marked={new Set(['2026-10-20', '2026-10-31'])} />);
+    expect(screen.getByRole('heading', { name: 'October 2026' })).toBeInTheDocument();
+    expect(screen.getByLabelText('16, today')).toBeInTheDocument();
+    expect(screen.getByLabelText('20, notices posted')).toBeInTheDocument();
+    // Oct 1 2026 is a Thursday: four empty cells first
+    const firstRow = screen.getAllByRole('row')[1];
+    expect(firstRow.querySelectorAll('td span')).toHaveLength(3);
+  });
+});
 
 describe.each(Object.keys(sections))('%s landing', (slug) => {
   const Landing = sectionLandings[slug];

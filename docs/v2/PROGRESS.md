@@ -59,7 +59,9 @@
 
 - B10 `feature/section-explainer` (2026-10-18): `/explainer` follows Figma 40:721: intro, featured explainer with its dek as "The short answer" panel, More explainers as question cards ("Get the answer →"), and the Ask Amaranth band (links to Contact rather than a free-text box). The four-step "what changed / who it affects" cards need structured fields the schema lacks.
 
-**Next:** B11 `feature/section-bulletin`.
+- B11 `feature/section-bulletin` (2026-10-18): `/bulletin` follows Figma 40:879: intro, category filter chips, notice cards (category tag, "New" for three days, office byline, date and time, "View notice →"), a Manila-time month calendar marking today and the days notices went up, and "Post an announcement" (links to Contact, since Bulletin takes no public submissions). The Deadlines strip and pinned notices need deadline dates and a pin flag the schema lacks.
+
+**Next:** B12 `feature/section-stories`.
 
 | # | Branch | Status |
 |---|---|---|
@@ -86,7 +88,7 @@
 | B8 | `feature/section-science-technology` | ✅ |
 | B9 | `feature/section-investigative` | ✅ |
 | B10 | `feature/section-explainer` | ✅ |
-| B11 | `feature/section-bulletin` | ⬜ |
+| B11 | `feature/section-bulletin` | ✅ |
 | B12 | `feature/section-stories` | ⬜ |
 
 ## Decisions log
