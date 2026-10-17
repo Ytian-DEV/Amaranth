@@ -61,7 +61,9 @@
 
 - B11 `feature/section-bulletin` (2026-10-18): `/bulletin` follows Figma 40:879: intro, category filter chips, notice cards (category tag, "New" for three days, office byline, date and time, "View notice →"), a Manila-time month calendar marking today and the days notices went up, and "Post an announcement" (links to Contact, since Bulletin takes no public submissions). The Deadlines strip and pinned notices need deadline dates and a pin flag the schema lacks.
 
-**Next:** B12 `feature/section-stories`.
+- B12 `feature/section-stories` (2026-10-18): `/stories` follows Figma 42:851: intro (category circles when the section has several), a swipeable "New this week" row of 9:16 tiles (photo or colour, progress dashes, kicker, title), then Faces of VSU quote cards (a `faces-of-vsu` category, else "More stories"). The "How stories work" band describes a tap-through player the site does not have, so it is left out. **Track B is complete.**
+
+**Next:** Nothing queued: Track B is done. The user decides what comes next.
 
 | # | Branch | Status |
 |---|---|---|
@@ -89,7 +91,7 @@
 | B9 | `feature/section-investigative` | ✅ |
 | B10 | `feature/section-explainer` | ✅ |
 | B11 | `feature/section-bulletin` | ✅ |
-| B12 | `feature/section-stories` | ⬜ |
+| B12 | `feature/section-stories` | ✅ |
 
 ## Decisions log
 - 2026-10-18 Statistics: keep Vercel Web Analytics (`@vercel/analytics`) alongside the first-party statistics (user's choice). The privacy page mentions it.

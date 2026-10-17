@@ -176,6 +176,20 @@ const samples: Record<string, Sample> = {
       ['official-announcement', 'Change in library hours during finals week', 'Extended hours start December 1.', 'University Library'],
     ],
   },
+  stories: {
+    section: { slug: 'stories', name: 'Stories', description: 'Short visual stories you can tap through in a minute. Made for your phone.', nav_placement: 'more' },
+    categories: [{ slug: 'stories', name: 'Stories' }],
+    stories: [
+      ['stories', 'Day 4 of Salingkusog in 10 photos'],
+      ['stories', 'The best sunset spots on campus'],
+      ['stories', 'What’s in a freshman’s bag?'],
+      ['stories', '5 canteen meals under ₱60'],
+      ['stories', 'Foundation Week through the years'],
+      ['stories', 'A morning at the piggery', 'I wake up at 4 a.m. to feed the pigs before my 7:30 class. My classmates think I’m always sleepy. I am.', 'BS Animal Science, 2nd year'],
+      ['stories', 'Kakanin and grades', 'My lola sold kakanin so I could study here. I bring her my grades every sem break.', 'BS Accountancy, 4th year'],
+      ['stories', 'For the mountains', 'I came here for the course. I stayed because of the mountains.', 'MS Forestry student'],
+    ],
+  },
 };
 
 function build(sample: Sample): StoryItem[] {
