@@ -1,23 +1,24 @@
 """Builds public/images/salingkusog/countdown-og.png (1200x630 link preview for the countdown page).
 
-Flat "official notice" style matching the page: charcoal, one gold accent, hairline rules,
-and the line mark (a flame between two wings in a ring), drawn with Pillow:
+Original artwork (a flame between two wings in a ring), drawn with Pillow:
     python scripts/countdown-og.py
-Colours match src/styles/tokens.css (charcoal, gold-light, ash, ember).
+Colours match src/styles/tokens.css (charcoal, ember, gold-light, ash).
 """
+import math
+import random
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 W, H = 1200, 630
 CHARCOAL = (18, 13, 11)
+EMBER = (255, 106, 26)
+EMBER_DEEP = (156, 47, 12)
+GOLD = (212, 160, 23)
 GOLD_LIGHT = (242, 199, 92)
 ASH = (205, 188, 170)
-RULE = (62, 52, 46)
-WATERMARK = (30, 24, 21)
 WHITE = (255, 255, 255)
 FONTS = Path("C:/Windows/Fonts")
-PAD = 72
 
 
 def font(name, size):
@@ -32,61 +33,82 @@ def spaced(draw, xy, text, fnt, fill, spacing):
     for ch in text:
         draw.text((x, y), ch, font=fnt, fill=fill)
         x += draw.textlength(ch, font=fnt) + spacing
-    return x
-
-
-def bezier(p0, c1, c2, p3, steps=20):
-    pts = []
-    for k in range(steps + 1):
-        t = k / steps
-        pts.append(tuple((1 - t) ** 3 * p0[i] + 3 * (1 - t) ** 2 * t * c1[i] + 3 * (1 - t) * t ** 2 * c2[i] + t ** 3 * p3[i] for i in range(2)))
-    return pts
-
-
-def emblem(draw, cx, cy, size, colour, width):
-    """The 64x64 line mark from CountdownView, scaled to `size`."""
-    s = size / 64
-
-    def P(x, y):
-        return (cx + (x - 32) * s, cy + (y - 32) * s)
-
-    r = 29 * s
-    draw.ellipse((cx - r, cy - r, cx + r, cy + r), outline=colour, width=width)
-    # outer flame
-    outer = bezier(P(32, 12), P(37, 19), P(41, 24), P(40.5, 32)) + bezier(P(40.5, 32), P(40, 39), P(36.5, 43), P(32, 45)) + bezier(P(32, 45), P(27.5, 43), P(24, 39), P(23.5, 32)) + bezier(P(23.5, 32), P(23, 24), P(27, 19), P(32, 12))
-    draw.line(outer, fill=colour, width=width, joint="curve")
-    inner = bezier(P(32, 24), P(34.5, 27.5), P(36, 30), P(35.8, 33.5)) + bezier(P(35.8, 33.5), P(35.5, 37), P(34, 38.5), P(32, 39.5)) + bezier(P(32, 39.5), P(30, 38.5), P(28.5, 37), P(28.2, 33.5)) + bezier(P(28.2, 33.5), P(28, 30), P(29.5, 27.5), P(32, 24))
-    draw.line(inner, fill=colour, width=width, joint="curve")
-    # wings
-    draw.line([P(23.5, 38), P(17, 36), P(12.5, 32), P(9.5, 26), P(14, 28.5), P(18, 29.5), P(22.5, 29.5)], fill=colour, width=width, joint="curve")
-    draw.line([P(40.5, 38), P(47, 36), P(51.5, 32), P(54.5, 26), P(50, 28.5), P(46, 29.5), P(41.5, 29.5)], fill=colour, width=width, joint="curve")
-    draw.line([P(24, 47), P(40, 47)], fill=colour, width=width)
 
 
 img = Image.new("RGB", (W, H), CHARCOAL)
+
+# ember glow from the bottom
+glow = Image.new("RGB", (W, H), CHARCOAL)
+g = ImageDraw.Draw(glow)
+for i in range(60, 0, -1):
+    t = i / 60
+    r = int(CHARCOAL[0] + (EMBER_DEEP[0] - CHARCOAL[0]) * (1 - t) * 0.9)
+    gg = int(CHARCOAL[1] + (EMBER_DEEP[1] - CHARCOAL[1]) * (1 - t) * 0.9)
+    b = int(CHARCOAL[2] + (EMBER_DEEP[2] - CHARCOAL[2]) * (1 - t) * 0.9)
+    g.ellipse((W / 2 - 900 * t, H - 260 * t, W / 2 + 900 * t, H + 300 * t), fill=(r, gg, b))
+img = Image.blend(img, glow.filter(ImageFilter.GaussianBlur(40)), 0.9)
+
+# embers
+sparks = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+s = ImageDraw.Draw(sparks)
+rnd = random.Random(2026)
+for _ in range(70):
+    x, y, rr = rnd.uniform(0, W), rnd.uniform(H * 0.25, H), rnd.uniform(1.2, 3.6)
+    s.ellipse((x - rr, y - rr, x + rr, y + rr), fill=EMBER + (int(rnd.uniform(90, 230)),))
+img.paste(sparks.filter(ImageFilter.GaussianBlur(0.6)), (0, 0), sparks)
+
 d = ImageDraw.Draw(img)
 
-# faint mark on the right, like a watermark on a printed notice
-emblem(d, 1010, 330, 560, WATERMARK, 10)
+# emblem (scaled from the 160x160 SVG in CountdownView)
+cx, cy, sc = 300, 315, 2.3
+def P(x, y):
+    return (cx + (x - 80) * sc, cy + (y - 80) * sc)
+d.ellipse((cx - 74 * sc, cy - 74 * sc, cx + 74 * sc, cy + 74 * sc), outline=GOLD_LIGHT, width=7)
+for a in range(0, 360, 8):
+    rad = math.radians(a)
+    x, y = cx + 64 * sc * math.cos(rad), cy + 64 * sc * math.sin(rad)
+    d.ellipse((x - 2, y - 2, x + 2, y + 2), fill=GOLD)
 
-# header
-emblem(d, PAD + 16, 66, 34, GOLD_LIGHT, 2)
-spaced(d, (PAD + 44, 52), "AMARANTH", font("georgiab.ttf", 24), GOLD_LIGHT, 5)
-d.line([(PAD, 110), (W - PAD, 110)], fill=RULE, width=2)
+def curve(points, steps=18):
+    """Cubic-bezier path from SVG-like segments: start, then (c1, c2, end) triples."""
+    out = [points[0]]
+    p0 = points[0]
+    for i in range(1, len(points), 3):
+        c1, c2, p3 = points[i], points[i + 1], points[i + 2]
+        for k in range(1, steps + 1):
+            t = k / steps
+            x = (1 - t) ** 3 * p0[0] + 3 * (1 - t) ** 2 * t * c1[0] + 3 * (1 - t) * t ** 2 * c2[0] + t ** 3 * p3[0]
+            y = (1 - t) ** 3 * p0[1] + 3 * (1 - t) ** 2 * t * c1[1] + 3 * (1 - t) * t ** 2 * c2[1] + t ** 3 * p3[1]
+            out.append(P(x, y))
+        p0 = p3
+    out[0] = P(*points[0])
+    return out
 
-# notice
-d.line([(PAD, 196), (PAD + 48, 196)], fill=GOLD_LIGHT, width=2)
-spaced(d, (PAD + 64, 184), "OFFICIAL NOTICE", font("segoeuib.ttf", 22), GOLD_LIGHT, 4)
-title = font("georgiab.ttf", 112)
-d.text((PAD - 4, 232), "Salingkusog 2026", font=title, fill=WHITE)
-d.text((PAD, 378), "The countdown to the VSU intramural games has begun.", font=font("segoeui.ttf", 30), fill=ASH)
+wing_l = [(78, 98), (58, 92), (40, 80), (26, 62), (44, 70), (56, 72), (66, 70), (54, 66), (46, 60), (40, 52), (54, 58), (64, 60), (72, 60)]
+wing_r = [(160 - x, y) for x, y in wing_l]
+d.polygon(curve(wing_l), fill=GOLD)
+d.polygon(curve(wing_r), fill=GOLD)
+d.polygon(curve([(80, 30), (92, 48), (102, 60), (100, 80), (98, 98), (90, 108), (80, 112), (70, 108), (62, 98), (60, 80), (58, 62), (70, 50), (80, 30)]), fill=EMBER_DEEP)
+d.polygon(curve([(80, 46), (88, 60), (94, 70), (92, 84), (90, 98), (85, 104), (80, 106), (75, 104), (70, 98), (68, 84), (66, 70), (72, 60), (80, 46)]), fill=EMBER)
+d.polygon(curve([(80, 66), (84, 74), (87, 80), (86, 88), (85, 96), (82, 99), (80, 100), (78, 99), (75, 96), (74, 88), (73, 80), (76, 74), (80, 66)]), fill=GOLD_LIGHT)
+d.polygon([P(58, 118), P(102, 118), P(96, 126), P(64, 126)], fill=GOLD)
 
-# footer
-d.line([(PAD, 520), (W - PAD, 520)], fill=RULE, width=2)
-d.text((PAD, 548), "May the odds be ever in your faction\u2019s favor.", font=font("georgiaz.ttf", 30), fill=GOLD_LIGHT)
-link = "amaranth.vsu.edu.ph"
-f_link = font("segoeui.ttf", 22)
-d.text((W - PAD - d.textlength(link, font=f_link), 556), link, font=f_link, fill=ASH)
+# text
+x0 = 540
+spaced(d, (x0, 118), "AMARANTH  ·  SPECIAL COVERAGE", font("segoeuib.ttf", 22), GOLD_LIGHT, 4)
+# largest title size that fits the right column
+size = 78
+while size > 40:
+    f_title = font("georgiab.ttf", size)
+    if sum(d.textlength(ch, font=f_title) + 5 for ch in "SALINGKUSOG") <= W - 60 - x0:
+        break
+    size -= 2
+spaced(d, (x0, 178), "SALINGKUSOG", f_title, WHITE, 5)
+spaced(d, (x0, 178 + size + 14), "2026", f_title, WHITE, 5)
+spaced(d, (x0, 372), "THE COUNTDOWN IS ON", font("georgiab.ttf", 34), EMBER, 5)
+d.text((x0, 440), "\u201cMay the odds be ever", font=font("georgiaz.ttf", 34), fill=GOLD_LIGHT)
+d.text((x0, 484), "in your faction\u2019s favor.\u201d", font=font("georgiaz.ttf", 34), fill=GOLD_LIGHT)
+d.text((x0, 560), "VSU Intramural Games  ·  amaranth.vsu.edu.ph", font=font("segoeui.ttf", 22), fill=ASH)
 
 out = Path(__file__).resolve().parent.parent / "public" / "images" / "salingkusog" / "countdown-og.png"
 img.save(out, optimize=True)

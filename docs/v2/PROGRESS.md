@@ -24,7 +24,7 @@
   - When off, the page redirects to the hub. **The user must re-paste `supabase/v2/salingkusog.sql`** to add the new columns and function.
   - Fixtures: `/dev/countdown` and `/dev/countdown/done`.
 
-- `feature/countdown-redesign`: countdown restyled as a flat "official notice" (charcoal, one gold accent, hairline rules, line emblem, no glow or particles); share image regenerated.
+- `feature/countdown-launch`: back to the first countdown design (the flat "official notice" redesign was reverted at the user's request). Clicking **Continue to Salingkusog** now plays a launch: cannon flash and screen shake, sparks from the button, a wall of fire rising, then a "Let the games begin" title card before the hub opens (~2.7 s). Click or Esc skips it, ctrl/cmd-click opens normally, and with reduced motion only the title card shows.
 
 **Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
 
