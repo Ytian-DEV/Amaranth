@@ -22,6 +22,7 @@ import { MedalTallyView } from '@/features/public/salingkusog/MedalTallyView';
 import { ScheduleView } from '@/features/public/salingkusog/ScheduleView';
 import { WinnersView } from '@/features/public/salingkusog/WinnersView';
 import { FactionView } from '@/features/public/salingkusog/FactionView';
+import { SportView } from '@/features/public/salingkusog/SportView';
 import { completedCount, winnerCards } from '@/features/public/salingkusog/winners';
 import type { SkCategory } from '@/lib/database.types';
 import type { ScheduleFilters } from '@/features/public/salingkusog/hub';
@@ -138,6 +139,7 @@ function FixtureSalingkusog() {
         <Route index element={<MedalTallyView edition={skFixture.edition} hub={skHub} table={skFixture.medalTable} race={skFixture.pointsByDay} phase={skPhase} now={new Date('2026-11-03T01:30:00Z')} />} />
         <Route path="schedule" element={<FixtureSchedule />} />
         <Route path="winners" element={<FixtureWinners />} />
+        <Route path="sports" element={<SportView sport={skFixture.sports[0]} event={skFixture.events[0]} hub={skHub} placements={skFixture.placements} athletes={skFixture.athletes} leaders={skFixture.leaders} />} />
         <Route path="factions" element={<FactionView faction={skFixture.factions[0]} hub={skHub} table={skFixture.medalTable} placements={skFixture.placements} athletes={skFixture.athletes} />} />
       </Routes>
     </>
@@ -167,6 +169,7 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'salingkusog/schedule', label: 'Salingkusog — Schedule & Results (filters work)' },
   { path: 'salingkusog/winners', label: 'Salingkusog — Winners per game' },
   { path: 'salingkusog/factions', label: 'Salingkusog — Faction profile' },
+  { path: 'salingkusog/sports', label: 'Salingkusog — Sport with bracket' },
   { path: 'home/empty', label: 'Home — empty' },
   { path: 'home/loading', label: 'Home — loading' },
   { path: 'section', label: 'Section page' },

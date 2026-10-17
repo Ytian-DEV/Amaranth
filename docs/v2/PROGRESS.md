@@ -8,13 +8,18 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A8 `feature/salingkusog-factions` merged: `/salingkusog/factions/:slug` (Figma 17:1248).
-- `/salingkusog/factions` opens the leader's profile; a switcher strip of all factions is the list.
-- Hero in the faction colour (text colour picked for contrast): emblem, motto, and rank / points / medals.
-- Recent results (W/L), with "Full history" linking to the schedule filtered by faction.
-- Medals by sport, medal count, head-to-head bars and top athletes.
-- Everything is computed from data already loaded. Fixture: `/dev/salingkusog/factions`.
-**Next:** A9 `feature/salingkusog-sports-bracket` (awaiting go).
+**Last done:** A9 `feature/salingkusog-sports-bracket` merged: `/salingkusog/sports/:slug?event=` (Figma 18:1441).
+- Sport switcher strip (the list); `/sports` opens the first sport. Division toggle (events).
+- Bracket events:
+  - columns come from each game's `round_order` and are ordered top to bottom by `bracket_slot`;
+  - connector lines are pure CSS on equal-height cells;
+  - champion card and the bronze game below the final;
+  - the bracket scrolls sideways on phones.
+- Round robin gets a standings table (P/W/L/D/+/−); timed and judged events get the results card.
+- All matches, plus top scorers from `sk_event_leaders` (PTS, or the most recorded stat).
+- Fixture: `/dev/salingkusog/sports`. For a correct bracket, the newsroom must set **Bracket column** (0 = first round) and **Position** on each game.
+
+**Next:** A10 `feature/salingkusog-match-recap` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
@@ -26,7 +31,7 @@
 | A6 | `feature/salingkusog-schedule` | ✅ |
 | A7 | `feature/salingkusog-winners` | ✅ |
 | A8 | `feature/salingkusog-factions` | ✅ |
-| A9 | `feature/salingkusog-sports-bracket` | ⬜ |
+| A9 | `feature/salingkusog-sports-bracket` | ✅ |
 | A10 | `feature/salingkusog-match-recap` | ⬜ |
 | A11 | `feature/salingkusog-venues` | ⬜ |
 | A12 | `feature/sports-landing` | ⬜ |

@@ -121,3 +121,13 @@ export function useMediaList(ids: (string | null | undefined)[]) {
     queryFn: async () => unwrap(await sb().from('media_assets').select('*').in('id', list)),
   });
 }
+
+/** Stat totals per athlete for one event (sk_event_leaders view). */
+export function useEventLeaders(eventId: string | undefined) {
+  return useQuery({
+    queryKey: ['sk-public', 'leaders', eventId],
+    enabled: !!eventId,
+    refetchInterval: LIVE_REFRESH,
+    queryFn: async () => unwrap(await sb().from('sk_event_leaders').select('*').eq('event_id', eventId!)),
+  });
+}

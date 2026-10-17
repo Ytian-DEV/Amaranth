@@ -8,7 +8,7 @@ import type { WinnerCard } from './winners';
 
 const placeChip: Record<SkMedal, string> = { gold: 'bg-gold text-ink', silver: 'bg-silver text-ink', bronze: 'bg-bronze-deep text-on-dark' };
 
-function Card({ card, hub }: { card: WinnerCard; hub: HubData }) {
+export function WinnerCardView({ card, hub }: { card: WinnerCard; hub: HubData }) {
   const faction = (id: string) => hub.factions.find((f) => f.id === id);
   return (
     <article aria-labelledby={`win-${card.eventId}`} className="flex min-w-0 flex-col gap-4 rounded-[12px] border border-line bg-surface p-[18px] md:p-5">
@@ -102,7 +102,7 @@ export function WinnersView({ cards, hub, completed, category, onCategory }: {
       {shown.length ? (
         <div className="grid gap-4 md:grid-cols-2 md:gap-6">
           {shown.map((c) => (
-            <Card key={c.eventId} card={c} hub={hub} />
+            <WinnerCardView key={c.eventId} card={c} hub={hub} />
           ))}
         </div>
       ) : (

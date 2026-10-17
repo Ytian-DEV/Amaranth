@@ -1,5 +1,5 @@
 // Salingkusog sample data for /dev fixtures and tests. Faction names follow the Figma design (placeholders).
-import type { SkAthleteRow, SkAwardRow, SkEditionRow, SkEventRow, SkFactionRow, SkMatchRow, SkMedalTableRow, SkPlacementRow, SkPointsByDayRow, SkSportRow, SkVenueRow } from '@/lib/database.types';
+import type { SkAthleteRow, SkAwardRow, SkEditionRow, SkEventLeaderRow, SkEventRow, SkFactionRow, SkMatchRow, SkMedalTableRow, SkPlacementRow, SkPointsByDayRow, SkSportRow, SkVenueRow } from '@/lib/database.types';
 
 const t = '2026-10-10T08:00:00+08:00';
 const base = { edition_id: 'ed26', created_at: t, updated_at: t };
@@ -137,4 +137,10 @@ const pointsByDay: SkPointsByDayRow[] = tally.flatMap(([id, , , , race]) =>
   [1, 2, 3, 4, 5, 6].map((d) => ({ edition_id: 'ed26', faction_id: id, day: `2026-11-0${d + 1}`, day_number: d, points: race[Math.min(d, 4) - 1] })),
 );
 
-export const skFixture = { edition, factions, venues, sports, events, athletes, matches, placements, awards, medalTable, pointsByDay };
+const leaders: SkEventLeaderRow[] = [
+  { edition_id: 'ed26', event_id: 'bb-m', athlete_id: 'a1', stat: 'PTS', total: 52, games: 2 },
+  { edition_id: 'ed26', event_id: 'bb-m', athlete_id: 'a3', stat: 'PTS', total: 47, games: 2 },
+  { edition_id: 'ed26', event_id: 'bb-m', athlete_id: 'a1', stat: 'REB', total: 18, games: 2 },
+];
+
+export const skFixture = { edition, factions, venues, sports, events, athletes, matches, placements, awards, medalTable, pointsByDay, leaders };
