@@ -1,37 +1,22 @@
-<<<<<<< HEAD
-node_modules/ 
-dist/ 
-.env 
-.DS_Store 
-*.log 
-=======
 # Dependencies
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# Build outputs
+# Build output
 dist/
 build/
-.out/
+*.tsbuildinfo
 
-# Environment variables
+# Environment
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
-# IDE files
+# Tooling / local
+.claude/
 .vscode/
 .idea/
+launch.json
+*.log
 *.swp
-*.swo
-
-# OS files
 .DS_Store
 Thumbs.db
->>>>>>> 3b10c9f278094fbcb79a95ebfdb95f12a575ada4
-build/ 
-dist/ 
