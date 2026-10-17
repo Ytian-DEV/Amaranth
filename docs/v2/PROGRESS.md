@@ -49,7 +49,9 @@
 
 - B5 `feature/section-blogs` (2026-10-18): `/blogs` follows Figma 34:349: intro, Featured bloggers (the four most recent writers by byline, with post counts and initials avatars), latest posts with byline, category tag and thumbnail, a Topics panel when the section has several categories, and the "Pitch a blog" box. Named blog columns, avatars, likes and comment counts need data the schema lacks.
 
-**Next:** B6 `feature/section-specials`.
+- B6 `feature/section-specials` (2026-10-18): `/specials` follows Figma 34:554: dark special-report hero (newest special) with up to three parts of the series (same category, oldest first) and "Start with part 1", "More special coverage" tiles (the section categories plus the Salingkusog hub; the middle tile is lime so text keeps AA contrast, since the design blue is not in the palette), then the special-issue archive by year. The "By the numbers" strip needs per-story figures the schema lacks.
+
+**Next:** B7 `feature/section-views`.
 
 | # | Branch | Status |
 |---|---|---|
@@ -71,7 +73,7 @@
 | B3 | `feature/section-feature` | ✅ |
 | B4 | `feature/section-literary` | ✅ |
 | B5 | `feature/section-blogs` | ✅ |
-| B6 | `feature/section-specials` | ⬜ |
+| B6 | `feature/section-specials` | ✅ |
 | B7 | `feature/section-views` | ⬜ |
 | B8 | `feature/section-science-technology` | ⬜ |
 | B9 | `feature/section-investigative` | ⬜ |

@@ -86,6 +86,22 @@ const samples: Record<string, Sample> = {
       ['blogs', 'My thesis playlist, explained', 'Twelve songs that got me through chapter three.', 'Paolo Reyes'],
     ],
   },
+  specials: {
+    section: { slug: 'specials', name: 'Specials', description: 'Comics, multimedia and special storytelling formats.', nav_placement: 'primary' },
+    categories: [
+      { slug: 'comics', name: 'Comics' },
+      { slug: 'multimedia', name: 'Multimedia' },
+    ],
+    stories: [
+      ['multimedia', 'Climate-Ready Campus', 'How prepared is VSU for the next super typhoon? Our reporters spent three months inside the university’s disaster plans, labs and dormitories.'],
+      ['multimedia', 'Inside the labs that can’t lose power'],
+      ['multimedia', 'The storm we weren’t ready for'],
+      ['comics', 'Graduation Issue: The Class That Came Back'],
+      ['comics', 'Water Watch: Where Our Campus Water Comes From'],
+      ['multimedia', 'To Protect the Press: Campus Journalism Under Pressure'],
+      ['comics', 'Freshman Survival Guide'],
+    ],
+  },
 };
 
 function build(sample: Sample): StoryItem[] {
