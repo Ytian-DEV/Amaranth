@@ -1,6 +1,6 @@
 import { FileText, FolderInput, Images, LayoutDashboard, Megaphone, Settings, Users, type LucideIcon } from 'lucide-react';
 import type { AppRole } from '@/lib/database.types';
-import { isAdmin, isEditor } from '@/features/auth/permissions';
+import { isEditor } from '@/features/auth/permissions';
 
 export type CmsNavItem = {
   to: string;
@@ -21,7 +21,7 @@ export const cmsNav: CmsNavItem[] = [
   { to: '/admin/events', label: 'Events', icon: Megaphone, allow: isEditor },
   { to: '/admin/media', label: 'Media Library', icon: Images, allow: everyone },
   { to: '/admin/staff', label: 'Staff', icon: Users, allow: isEditor },
-  { to: '/admin/settings', label: 'Settings', icon: Settings, allow: isAdmin },
+  { to: '/admin/settings', label: 'Settings', icon: Settings, allow: isEditor },
 ];
 
 export const navFor = (role: AppRole) => cmsNav.filter((item) => item.allow(role));

@@ -77,6 +77,9 @@ select tests.expect_ok('section editor rejects',
   $$select public.transition_article('00000000-0000-0000-0000-000000000004', 'rejected', 'Off-topic')$$);
 select tests.expect_error('section editor cannot touch sports',
   $$select public.transition_article('00000000-0000-0000-0000-000000000005', 'in_review')$$, 'not found');
+select tests.expect_error('section editor cannot change the ticker',
+  $$insert into public.site_settings (key, value, is_public) values ('ticker', '{}', true)
+    on conflict (key) do update set value = excluded.value$$);
 select tests.expect_count('section editor reads submissions intake', 'select id from public.article_submissions', 0);
 
 -- ---------------------------------------------------------------- editor in chief
@@ -92,6 +95,8 @@ select tests.expect_ok('eic archives', $$select public.transition_article('00000
 select tests.expect_ok('eic restores', $$select public.transition_article('00000000-0000-0000-0000-0000000000b1', 'published')$$);
 select tests.expect_ok('eic features an article',
   $$update public.articles set is_featured = true where id = '00000000-0000-0000-0000-0000000000b1'$$);
+select tests.expect_ok('publisher can change the ticker',
+  $$update public.site_settings set value = '{"mode":"manual","count":3,"items":[{"text":"Enrollment opens Jan 5"}]}' where key = 'ticker'$$);
 select tests.expect_ok('eic sets lead slot',
   $$update public.home_slots set article_id = '00000000-0000-0000-0000-0000000000b1' where slot = 'lead'$$);
 select tests.expect_error('eic cannot grant super_admin',

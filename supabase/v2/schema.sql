@@ -1852,7 +1852,8 @@ create policy department_contacts_write on public.department_contacts for all to
 create policy site_settings_read on public.site_settings for select to anon, authenticated
   using (is_public or app.is_staff());
 create policy site_settings_write on public.site_settings for all to authenticated
-  using (app.is_admin()) with check (app.is_admin());
+  using (app.is_admin() or (app.can_publish() and key = 'ticker'))
+  with check (app.is_admin() or (app.can_publish() and key = 'ticker'));
 
 create policy audit_log_admin on public.audit_log for select to authenticated using (app.is_admin());
 
