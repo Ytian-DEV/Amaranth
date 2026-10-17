@@ -1,4 +1,4 @@
-import { allowedTransitions, assignableRoles, canEditContent, canPublish, isAdmin, isEditor } from './permissions';
+import { allowedTransitions, assignableRoles, canEditContent, canEditSk, canManageSkTeam, canPublish, isAdmin, isEditor, roleLabels } from './permissions';
 
 describe('roles', () => {
   it('ranks roles like the database', () => {
@@ -14,6 +14,22 @@ describe('roles', () => {
     expect(assignableRoles('super_admin')).toContain('super_admin');
     expect(assignableRoles('editor_in_chief')).not.toContain('super_admin');
     expect(assignableRoles('managing_editor')).toEqual([]);
+  });
+});
+
+describe('Salingkusog', () => {
+  it('only super admin, Executive Editor and managing editor choose the team', () => {
+    expect(roleLabels.editor_in_chief).toBe('Executive Editor');
+    expect(['super_admin', 'editor_in_chief', 'managing_editor'].every((r) => canManageSkTeam(r as never))).toBe(true);
+    expect(canManageSkTeam('section_editor')).toBe(false);
+    expect(canManageSkTeam('staff_writer')).toBe(false);
+  });
+
+  it('team members of any role can enter data', () => {
+    expect(canEditSk('managing_editor', false)).toBe(true);
+    expect(canEditSk('contributor', true)).toBe(true);
+    expect(canEditSk('section_editor', false)).toBe(false);
+    expect(canEditSk(null, true)).toBe(false);
   });
 });
 

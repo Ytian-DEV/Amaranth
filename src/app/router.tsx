@@ -39,6 +39,7 @@ const adminRoutes: RouteObject[] = [
           { path: '*', element: <Navigate to="/admin" replace /> },
           { path: 'staff/*', lazy: async () => ({ Component: (await import('@/features/cms/people/PeoplePage')).PeoplePage }) },
           { path: 'media', lazy: async () => ({ Component: (await import('@/features/cms/media/MediaLibraryPage')).MediaLibraryPage }) },
+          { path: 'salingkusog/*', lazy: async () => ({ Component: (await import('@/features/cms/salingkusog/SalingkusogPage')).SalingkusogPage }) },
           { path: 'articles/:id', lazy: async () => ({ Component: (await import('@/features/cms/articles/editor/ArticleEditorPage')).ArticleEditorPage }) },
         ],
       },

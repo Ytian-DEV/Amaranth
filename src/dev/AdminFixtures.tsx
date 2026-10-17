@@ -8,6 +8,8 @@ import { IntakeDetailView } from '@/features/cms/intake/IntakePage';
 import { AdminShell } from '@/features/cms/layout/AdminLayout';
 import { MediaDetails } from '@/features/cms/media/MediaDetails';
 import { MediaGrid, MediaUploader } from '@/features/cms/media/MediaGrid';
+import { buildTeam, type SkStaff } from '@/features/cms/salingkusog/skApi';
+import { TeamView } from '@/features/cms/salingkusog/TeamTab';
 import type { MediaAssetRow } from '@/lib/database.types';
 import { fixtureArticle, fixtureEditor, fixtureQueue, fixtureRecent, fixtureStats } from './fixtures';
 
@@ -28,6 +30,19 @@ const fixtureMedia: MediaAssetRow[] = Array.from({ length: 8 }, (_, i) => ({
   created_at: '2026-10-1' + (i % 9) + 'T08:00:00+08:00',
   updated_at: '2026-10-10T08:00:00+08:00',
 }));
+
+const fixtureSkStaff: SkStaff[] = [
+  { id: 'p1', display_name: 'Administrator', email: 'editor@amaranth.vsu.edu.ph', role: 'editor_in_chief', is_active: true, avatar_url: null },
+  { id: 'p2', display_name: 'Mara Managing', email: 'mara@vsu.edu.ph', role: 'managing_editor', is_active: true, avatar_url: null },
+  { id: 'p3', display_name: 'Sam Sports', email: 'sam@vsu.edu.ph', role: 'section_editor', is_active: true, avatar_url: null },
+  { id: 'p4', display_name: 'Wes Writer', email: 'wes@vsu.edu.ph', role: 'staff_writer', is_active: true, avatar_url: null },
+  { id: 'p5', display_name: 'Cora Contributor', email: 'cora@vsu.edu.ph', role: 'contributor', is_active: true, avatar_url: null },
+  { id: 'p6', display_name: 'Old Scorer', email: 'old@vsu.edu.ph', role: 'staff_writer', is_active: false, avatar_url: null },
+];
+const fixtureSkTeam = buildTeam(fixtureSkStaff, [
+  { profile_id: 'p3', added_by: 'p1', created_at: '2026-10-12T09:00:00+08:00' },
+  { profile_id: 'p6', added_by: 'p2', created_at: '2026-10-02T09:00:00+08:00' },
+]);
 
 /** /dev/admin/* — newsroom fixtures (lazy, so the editor stays out of the public fixtures). */
 export default function AdminFixtures() {
@@ -108,6 +123,28 @@ export default function AdminFixtures() {
                   <MediaDetails asset={fixtureMedia[1]} usage={2} canDelete onSave={async () => undefined} onDelete={async () => undefined} />
                 </div>
               </div>
+            </div>
+          </AdminShell>
+        }
+      />
+      <Route
+        path="salingkusog-team"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <div className="flex flex-col gap-6">
+              <h1 className="font-serif text-headline-l text-ink">Salingkusog</h1>
+              <TeamView {...fixtureSkTeam} canManage onAdd={() => undefined} onRemove={() => undefined} message={{ tone: 'success', text: 'Sam Sports can now enter Salingkusog data.' }} />
+            </div>
+          </AdminShell>
+        }
+      />
+      <Route
+        path="salingkusog-team-member"
+        element={
+          <AdminShell profile={{ ...fixtureEditor, display_name: 'Sam Sports', role: 'section_editor' }} skTeam pending={0} onSignOut={() => undefined}>
+            <div className="flex flex-col gap-6">
+              <h1 className="font-serif text-headline-l text-ink">Salingkusog</h1>
+              <TeamView {...fixtureSkTeam} canManage={false} onAdd={() => undefined} onRemove={() => undefined} />
             </div>
           </AdminShell>
         }

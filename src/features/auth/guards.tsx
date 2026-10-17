@@ -24,7 +24,7 @@ export function AccessPending() {
     <FullScreen>
       <h1 className="font-serif text-headline-l">Your account isn’t active</h1>
       <p className="max-w-md text-body-m text-ink-muted">
-        {session?.user.email} isn’t on the Amaranth staff list yet. Ask the editor-in-chief to invite you, then sign in
+        {session?.user.email} isn’t on the Amaranth staff list yet. Ask the Executive Editor to invite you, then sign in
         again.
       </p>
       <Button variant="outline" onClick={() => void signOut()}>

@@ -8,13 +8,13 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A1 `feature/salingkusog-db` merged — `supabase/v2/salingkusog.sql` (user pastes it after `schema.sql`), 47 SQL checks (148 total), TS types in `src/lib/database.types.ts`.
-**Next:** A2 `feature/salingkusog-team-access` (awaiting go).
+**Last done:** A2 `feature/salingkusog-team-access` merged — `editor_in_chief` shows as "Executive Editor"; newsroom sidebar item **Salingkusog** (managing roles + team members); `/admin/salingkusog/team` to add/remove members (managing roles only, read-only for members). Fixtures `/dev/admin/salingkusog-team` and `-member`. Needs `salingkusog.sql` pasted (A1); before that the team page shows an error and the sidebar item only shows for the managing roles.
+**Next:** A3 `feature/salingkusog-cms-setup` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
 | A1 | `feature/salingkusog-db` | ✅ |
-| A2 | `feature/salingkusog-team-access` | ⬜ |
+| A2 | `feature/salingkusog-team-access` | ✅ |
 | A3 | `feature/salingkusog-cms-setup` | ⬜ |
 | A4 | `feature/salingkusog-scorekeeper` | ⬜ |
 | A5 | `feature/salingkusog-medal-tally` | ⬜ |
