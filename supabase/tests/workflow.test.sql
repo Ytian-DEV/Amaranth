@@ -18,6 +18,9 @@ select tests.expect_eq('slug generated from title',
 select tests.expect_eq('section derived from category',
   (select s.slug from public.articles a join public.sections s on s.id = a.section_id
    where a.id = '00000000-0000-0000-0000-0000000000b1'), 'news');
+select tests.expect_count('creator credited as author',
+  $$select 1 from public.article_authors aa join public.contributors c on c.id = aa.contributor_id
+    where aa.article_id = '00000000-0000-0000-0000-0000000000b1' and c.profile_id = auth.uid()$$, 1);
 select tests.expect_error('writer cannot create published',
   $$insert into public.articles (category_id, title, status)
     select c.id, 'Sneaky', 'published' from public.categories c where c.slug = 'campus-news'$$, 'drafts');
@@ -145,6 +148,8 @@ select tests.expect_error('last super admin cannot step down',
 -- ---------------------------------------------------------------- stranger (signed up, not invited)
 select tests.login('stranger@test.local');
 select tests.expect_count('uninvited user sees only live articles', 'select id from public.articles', 3);
+select tests.expect_count('uninvited user has no contributor byline',
+  $$select 1 from public.contributors where profile_id = auth.uid()$$, 0);
 select tests.expect_error('uninvited user cannot write',
   $$insert into public.articles (category_id, title) select id, 'x' from public.categories where slug = 'campus-news'$$);
 select tests.expect_error('uninvited user cannot upload media',

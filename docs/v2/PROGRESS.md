@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/cms-article-editor`)
-**Last done:** `feature/cms-shell-dashboard` merged — `/admin` shell per Figma (sidebar with role-filtered nav + pending badge, mobile top bar + drawer), dashboard (stats, recent articles table/cards, submission queue with decline, DB status). Other CMS screens are `ComingSoon` placeholders (`cmsPlaceholders` in router.tsx).
-**Next step:** `feature/cms-article-editor` — `/admin/articles` list (search `?q=`, status/section filters, pagination) and `/admin/articles/new|:id` editor: TipTap, autosave revisions, cover from media/upload, authors (contributors), tags, category, SEO fields, preview link.
+**Current branch:** `develop` (next: create `feature/cms-editorial-workflow`)
+**Last done:** `feature/cms-article-editor` merged — `/admin/articles` (search, status/section/mine filters, pagination, stacked on mobile) and editor (TipTap body with image upload + YouTube, autosave every 2.5s for drafts / revision snapshots for live articles, unsaved-changes guard, cover upload with variants, authors, tags, category, label, featured, excerpt, SEO with preview, workflow buttons via `transition_article`). Schema: invited staff get a contributor; creator auto-credited.
+**Next step:** `feature/cms-editorial-workflow` — activity timeline + review notes thread on the editor (`article_activity`, `add_article_note`), review queue view (`/admin/articles?status=submitted` shortcut / “Needs review” tab), revisions list with restore, home-page curation (lead + folio slots) for publishers.
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -32,7 +32,7 @@
 | 7 | `feature/search-archives` | ✅ merged | Schema gained `archive_months()` (in schema.sql) |
 | 8 | `feature/submissions-contact` | ✅ merged | Legacy still serves `/about`, `/editorial-board` |
 | 9 | `feature/cms-shell-dashboard` | ✅ merged | Legacy v1 Dashboard is no longer routed (`/dashboard` → `/admin`) |
-| 10 | `feature/cms-article-editor` | ⬜ | |
+| 10 | `feature/cms-article-editor` | ✅ merged | Not exercised against a live v2 project yet |
 | 11 | `feature/cms-editorial-workflow` | ⬜ | |
 | 12 | `feature/cms-media-library` | ⬜ | |
 | 13 | `feature/cms-people-board` | ⬜ | |
