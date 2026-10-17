@@ -39,6 +39,15 @@ async function metaFor(pathname: string, env: NonNullable<ReturnType<typeof read
       section: a.section_name,
     };
   }
+  if (/^\/salingkusog-2026\/countdown\/?$/.test(pathname)) {
+    return {
+      title: `Salingkusog 2026 Countdown · ${SITE_NAME}`,
+      description: 'The countdown to the VSU intramural games is on. May the odds be ever in your faction’s favor.',
+      url,
+      image: `${env.siteUrl}/images/salingkusog/countdown-og.png`,
+      imageAlt: 'Salingkusog 2026: the countdown is on',
+    };
+  }
   const section = /^\/([a-z0-9-]+)\/?$/.exec(pathname);
   if (section) {
     const rows = await rest<{ name: string; description: string | null }[]>(env, `sections?select=name,description&slug=eq.${section[1]}&limit=1`);

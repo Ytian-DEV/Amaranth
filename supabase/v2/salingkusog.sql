@@ -66,6 +66,9 @@ create table if not exists public.sk_editions (
   constraint sk_editions_dates check (ends_on >= starts_on)
 );
 create unique index if not exists sk_editions_one_current on public.sk_editions (is_current) where is_current;
+-- Countdown page (/salingkusog-2026/countdown): off by default; null time = first day, 8:00 AM Manila
+alter table public.sk_editions add column if not exists countdown_enabled boolean not null default false;
+alter table public.sk_editions add column if not exists countdown_at timestamptz;
 
 create table if not exists public.sk_factions (
   id uuid primary key default gen_random_uuid(),
@@ -378,6 +381,29 @@ drop trigger if exists sk_editions_single_current on public.sk_editions;
 create trigger sk_editions_single_current before insert or update of is_current on public.sk_editions
 for each row when (new.is_current) execute function app.sk_single_current();
 
+-- Only the managing roles may switch the countdown page or move its time (team members edit everything else)
+create or replace function app.sk_countdown_guard()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if auth.uid() is null or app.can_manage_sk_team() then
+    return new;
+  end if;
+  if (tg_op = 'INSERT' and (new.countdown_enabled or new.countdown_at is not null))
+     or (tg_op = 'UPDATE' and (new.countdown_enabled is distinct from old.countdown_enabled or new.countdown_at is distinct from old.countdown_at)) then
+    raise exception 'Only Super admin, Executive Editor or Managing editor can change the countdown page.' using errcode = '42501';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists sk_editions_countdown_guard on public.sk_editions;
+create trigger sk_editions_countdown_guard before insert or update on public.sk_editions
+for each row execute function app.sk_countdown_guard();
+
 -- Team changes are audited
 create or replace function app.sk_team_audit()
 returns trigger
@@ -526,6 +552,27 @@ $$;
 
 revoke execute on function public.sk_set_placements(uuid, jsonb) from public, anon;
 grant execute on function public.sk_set_placements(uuid, jsonb) to authenticated;
+
+-- -----------------------------------------------------------------------------
+-- RPC: the public countdown. Returns a row only while the current edition's
+-- countdown page is switched on (works before the edition itself is published).
+-- -----------------------------------------------------------------------------
+create or replace function public.sk_countdown()
+returns table (title text, subtitle text, starts_on date, countdown_at timestamptz)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select e.title, e.subtitle, e.starts_on,
+         coalesce(e.countdown_at, (e.starts_on + time '08:00') at time zone 'Asia/Manila')
+  from public.sk_editions e
+  where e.is_current and e.countdown_enabled
+  limit 1;
+$$;
+
+revoke execute on function public.sk_countdown() from public;
+grant execute on function public.sk_countdown() to anon, authenticated;
 
 -- -----------------------------------------------------------------------------
 -- RLS

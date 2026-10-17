@@ -15,6 +15,15 @@
 - Drawn with the Canvas API, so there is no new dependency. Fonts and token colours come from the page; photos load with CORS so the PNG can be exported.
 - Fixture: `/dev/admin/salingkusog-cards`.
 
+**Also done (2026-10-18):**
+- `fix/nested-dialog-close`: choosing an image in the media picker closed the form it was opened from, so faction logos (and venue map, athlete and board photos) were never saved. Dropped SVG/HEIC files now get a clear message.
+- `feature/salingkusog-countdown`:
+  - Public Hunger Games–style countdown at `/salingkusog-2026/countdown`: days, hours, minutes and seconds in Asia/Manila time, a "The games have begun" state, and a Continue button that goes to `/salingkusog-2026`, which redirects to `/salingkusog`.
+  - Link previews: OG/Twitter tags (middleware + client) with a 1200×630 image, `public/images/salingkusog/countdown-og.png`, built by `scripts/countdown-og.py`.
+  - Newsroom → Salingkusog → Edition: a **Countdown page** card (Show Countdown Page + target time) for the three managing roles. The DB trigger enforces this.
+  - When off, the page redirects to the hub. **The user must re-paste `supabase/v2/salingkusog.sql`** to add the new columns and function.
+  - Fixtures: `/dev/countdown` and `/dev/countdown/done`.
+
 **Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
 
 | # | Branch | Status |

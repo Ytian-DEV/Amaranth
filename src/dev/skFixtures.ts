@@ -18,6 +18,8 @@ const edition: SkEditionRow = {
   is_published: false,
   schedule_pdf_asset_id: null,
   map_asset_id: null,
+  countdown_enabled: false,
+  countdown_at: null,
   created_at: t,
   updated_at: t,
 };

@@ -174,6 +174,34 @@ select tests.login(null);
 select tests.expect_error('readers cannot call set_placements',
   $$select public.sk_set_placements('00000000-0000-0000-0000-0000000e0a01', '[]')$$);
 
+-- ---------------------------------------------------------------- countdown page (only the managing roles)
+select tests.login(null);
+select tests.expect_count('countdown is off by default: nothing public', 'select * from public.sk_countdown()', 0);
+select tests.login('me@test.local');
+select tests.expect_ok('managing editor adds a team member', $$insert into public.sk_team (profile_id) select id from public.profiles where email = 'writer2@test.local' on conflict do nothing$$);
+select tests.login('writer2@test.local');
+select tests.expect_ok('team member still edits the edition', $$update public.sk_editions set subtitle = 'VSU Intramural Games' where year = 2026$$);
+select tests.expect_error('team member cannot switch the countdown on',
+  $$update public.sk_editions set countdown_enabled = true where year = 2026$$, '%countdown%');
+select tests.expect_error('team member cannot move the countdown time',
+  $$update public.sk_editions set countdown_at = '2026-10-13 07:00+08' where year = 2026$$, '%countdown%');
+select tests.login('news.editor@test.local');
+select tests.expect_error('section editor cannot switch it either',
+  $$update public.sk_editions set countdown_enabled = true where year = 2026$$);
+select tests.login('eic@test.local');
+select tests.expect_ok('executive editor switches the countdown on', $$update public.sk_editions set countdown_enabled = true where year = 2026$$);
+select tests.login(null);
+select tests.expect_eq('readers get the default time: first day 8:00 AM Manila',
+  (select (countdown_at at time zone 'UTC')::text from public.sk_countdown()), '2026-10-13 00:00:00');
+select tests.login('admin@test.local');
+select tests.expect_ok('super admin sets the time', $$update public.sk_editions set countdown_at = '2026-10-13 07:30+08' where year = 2026$$);
+select tests.login(null);
+select tests.expect_eq('readers see the new time', (select (countdown_at at time zone 'UTC')::text from public.sk_countdown()), '2026-10-12 23:30:00');
+select tests.login('me@test.local');
+select tests.expect_ok('managing editor switches it off', $$update public.sk_editions set countdown_enabled = false where year = 2026$$);
+select tests.login(null);
+select tests.expect_count('off: nothing public', 'select * from public.sk_countdown()', 0);
+
 -- ---------------------------------------------------------------- one current edition
 select tests.login('me@test.local');
 select tests.expect_ok('a new current edition replaces the old one',

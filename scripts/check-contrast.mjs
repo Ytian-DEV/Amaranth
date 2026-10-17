@@ -52,6 +52,12 @@ export const pairs = [
   ['ink', 'gold', 4.5, 'gold medal count'],
   ['ink', 'silver', 4.5, 'silver medal count'],
   ['on-dark', 'bronze-deep', 4.5, 'bronze medal count'],
+  ['ash', 'charcoal', 4.5, 'countdown body text'],
+  ['ash', 'charcoal-2', 4.5, 'countdown labels on panels'],
+  ['gold-light', 'charcoal', 4.5, 'countdown kicker / tagline'],
+  ['on-dark', 'charcoal-2', 4.5, 'countdown digits'],
+  ['ember', 'charcoal', 3, 'countdown large headline accent'],
+  ['charcoal', 'gold-light', 4.5, 'countdown button'],
 ];
 
 export function check(tokens) {

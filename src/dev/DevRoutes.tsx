@@ -26,6 +26,7 @@ import { SportView } from '@/features/public/salingkusog/SportView';
 import { RecapView } from '@/features/public/salingkusog/RecapView';
 import { VenuesView } from '@/features/public/salingkusog/VenuesView';
 import { SportsLanding } from '@/features/public/section/SportsLanding';
+import { CountdownView } from '@/features/public/salingkusog/CountdownView';
 import { completedCount, winnerCards } from '@/features/public/salingkusog/winners';
 import type { SkCategory } from '@/lib/database.types';
 import type { ScheduleFilters } from '@/features/public/salingkusog/hub';
@@ -116,6 +117,8 @@ export default function DevRoutes() {
         }
       />
       <Route path="sports/no-salingkusog" element={<PublicShell><SportsLanding categories={[]} items={fixtureSection.items} hasMore={false} sk={null} /></PublicShell>} />
+      <Route path="countdown" element={<CountdownView title="Salingkusog 2026" target={new Date(Date.now() + 12 * 86_400_000 + 4 * 3600_000 + 37 * 60_000).toISOString()} />} />
+      <Route path="countdown/done" element={<CountdownView title="Salingkusog 2026" target="2020-01-01T08:00:00+08:00" />} />
       <Route path="salingkusog/*" element={<PublicShell><FixtureSalingkusog /></PublicShell>} />
       <Route
         path="editorial-board"
@@ -186,6 +189,8 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'home', label: 'Home (Figma content)' },
   { path: 'sports', label: 'Sports landing (with Salingkusog)' },
   { path: 'sports/no-salingkusog', label: 'Sports landing (no edition)' },
+  { path: 'countdown', label: 'Salingkusog countdown (ticking)' },
+  { path: 'countdown/done', label: 'Salingkusog countdown — the games have begun' },
   { path: 'salingkusog', label: 'Salingkusog — Medal Tally' },
   { path: 'salingkusog/schedule', label: 'Salingkusog — Schedule & Results (filters work)' },
   { path: 'salingkusog/winners', label: 'Salingkusog — Winners per game' },
