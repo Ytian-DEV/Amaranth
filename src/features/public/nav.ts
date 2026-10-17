@@ -3,7 +3,7 @@ import type { NavPlacement } from '@/lib/database.types';
 import { isSupabaseConfigured } from '@/lib/env';
 import { getSupabase, unwrap } from '@/lib/supabase';
 
-export type NavSection = { slug: string; name: string; nav_placement: NavPlacement; nav_order: number };
+export type NavSection = { slug: string; name: string; nav_placement: NavPlacement; nav_order: number; description?: string | null };
 
 /** Mirrors supabase/v2/seed.sql so navigation renders before (or without) the database. */
 export const defaultSections: NavSection[] = [
@@ -40,7 +40,7 @@ export function useNavSections() {
       unwrap(
         await getSupabase()
           .from('sections')
-          .select('slug, name, nav_placement, nav_order')
+          .select('slug, name, description, nav_placement, nav_order')
           .neq('nav_placement', 'hidden')
           .order('nav_order'),
       ),
