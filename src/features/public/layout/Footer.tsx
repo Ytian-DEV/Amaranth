@@ -27,8 +27,7 @@ export function SiteFooter() {
               <span className="font-serif text-[26px] font-bold leading-none tracking-[0.06em] md:text-[32px]">AMARANTH</span>
             </Link>
             <p className="hidden max-w-[340px] text-body-m text-on-dark-muted md:block">
-              The official student publication of Visayas State University, Baybay City, Leyte. Independent, student-run
-              and proudly campus-first.
+              The Official Student Media Organization of Visayas State University. 
             </p>
             <ul className="flex flex-wrap gap-x-3 gap-y-1 text-meta md:hidden">
               {social.map((s, i) => (
