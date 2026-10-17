@@ -77,12 +77,12 @@ set name = excluded.name,
 
 insert into public.department_contacts (name, email, sort_order)
 values
-  ('Editorial Team', 'editor@amaranth.vsu.edu.ph', 1),
-  ('News Department', 'news@amaranth.vsu.edu.ph', 2),
-  ('Sports Department', 'sports@amaranth.vsu.edu.ph', 3),
-  ('Features Department', 'features@amaranth.vsu.edu.ph', 4),
-  ('Opinion Department', 'opinion@amaranth.vsu.edu.ph', 5),
-  ('Technical Support', 'tech@amaranth.vsu.edu.ph', 6)
+  ('Editorial Board', 'amaranth@vsu.edu.ph', 1),
+  ('News Correspondents Section', 'amaranth@vsu.edu.ph', 2),
+  ('Sports Section', 'amaranth@vsu.edu.ph', 3),
+  ('Multimedia Section', 'amaranth@vsu.edu.ph', 4),
+  ('Creatives and Design Section', 'amaranth@vsu.edu.ph', 5),
+  ('Writers Section', 'amaranth@vsu.edu.ph', 6)
 on conflict (name) do nothing;
 
 insert into public.home_slots (slot) values ('lead'), ('folio') on conflict (slot) do nothing;

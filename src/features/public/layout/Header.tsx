@@ -43,7 +43,7 @@ function Masthead() {
             <span className="font-serif text-[40px] font-bold leading-none tracking-[0.06em] text-green-900 lg:text-[52px]">
               AMARANTH
             </span>
-            <span className="text-meta text-ink-muted">The Official Student Publication of Visayas State University</span>
+            <span className="text-meta text-ink-muted">The Official Student Media Organization of Visayas State University</span>
           </span>
         </Link>
         <div className="flex items-center justify-end gap-5">
