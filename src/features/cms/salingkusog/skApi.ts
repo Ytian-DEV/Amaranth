@@ -325,3 +325,13 @@ export function useRecapArticleOptions(search: string, selectedId: string | null
     },
   });
 }
+
+/** Countdown page switch and time (the database only lets the managing roles change them). */
+export function useSaveCountdown(editionId: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (p: { countdown_enabled: boolean; countdown_at: string | null }) =>
+      unwrap(await sb().from('sk_editions').update(p).eq('id', editionId).select('id').single()),
+    onSettled: () => void client.invalidateQueries({ queryKey: ['sk'] }),
+  });
+}

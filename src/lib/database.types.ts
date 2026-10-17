@@ -444,9 +444,14 @@ export type SkEditionRow = {
   is_published: boolean;
   schedule_pdf_asset_id: string | null;
   map_asset_id: string | null;
+  /** /salingkusog-2026/countdown is public while true (managing roles only) */
+  countdown_enabled: boolean;
+  /** null = first day, 8:00 AM Manila */
+  countdown_at: string | null;
   created_at: string;
   updated_at: string;
 };
+export type SkCountdownRow = { title: string; subtitle: string | null; starts_on: string; countdown_at: string };
 export type SkFactionRow = {
   id: string;
   edition_id: string;
@@ -709,6 +714,7 @@ export type Database = {
     Functions: {
       record_article_view: { Args: { p_article_id: string }; Returns: undefined };
       sk_set_placements: { Args: { p_event_id: string; p_rows: SkPlacementInput[] }; Returns: number };
+      sk_countdown: { Args: Record<string, never>; Returns: SkCountdownRow[] };
       most_read_articles: { Args: { p_days?: number; p_limit?: number }; Returns: MostReadRow[] };
       archive_months: { Args: Record<string, never>; Returns: { month: string; articles: number }[] };
       search_articles: {

@@ -175,3 +175,13 @@ export function useSpotlight(editionId: string | undefined) {
     },
   });
 }
+
+/** Public countdown (null while the newsroom has it switched off). */
+export function useCountdown() {
+  return useQuery({
+    queryKey: ['sk-public', 'countdown'],
+    staleTime: 60_000,
+    refetchInterval: 5 * 60_000,
+    queryFn: async () => (unwrap(await sb().rpc('sk_countdown')) ?? [])[0] ?? null,
+  });
+}

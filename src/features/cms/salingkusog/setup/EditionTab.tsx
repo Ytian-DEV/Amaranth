@@ -12,6 +12,7 @@ import { formatDate } from '@/lib/format';
 import { publicUrl } from '@/lib/media';
 import { Card, CardHeader } from '../../ui';
 import { skErrorText, uploadSchedulePdf, useMediaByIds, useSaveSkRow } from '../skApi';
+import { CountdownCard } from './CountdownCard';
 import { ImagePick, SetupNote } from './shared';
 
 /** Printable schedule (PDF). Only publishers may write the archives bucket, so only the managing roles see this. */
@@ -57,7 +58,7 @@ function SchedulePdfField({ year, pdf, onChange }: { year: number; pdf: MediaAss
   );
 }
 
-function EditionModal({ edition, map, pdf, canUploadPdf, onClose, onSaved }: { edition: SkEditionRow | null; map: MediaAssetRow | null; pdf: MediaAssetRow | null; canUploadPdf: boolean; onClose: () => void; onSaved: (id: string) => void }) {
+function EditionModal({ edition, map, pdf, canManage, onClose, onSaved }: { edition: SkEditionRow | null; map: MediaAssetRow | null; pdf: MediaAssetRow | null; canManage: boolean; onClose: () => void; onSaved: (id: string) => void }) {
   const save = useSaveSkRow('sk_editions');
   const year = new Date().getFullYear();
   const [f, setF] = useState({
@@ -124,7 +125,7 @@ function EditionModal({ edition, map, pdf, canUploadPdf, onClose, onSaved }: { e
           <SetupNote>The medal table and points race are worked out from results with these values.</SetupNote>
         </fieldset>
         <ImagePick label="Venue map" asset={mapAsset} onChange={setMapAsset} />
-        {canUploadPdf ? <SchedulePdfField year={f.year} pdf={pdfAsset} onChange={setPdfAsset} /> : pdfAsset && <SetupNote>Schedule PDF: {pdfAsset.caption ?? 'uploaded'} (only the managing roles can change it).</SetupNote>}
+        {canManage ? <SchedulePdfField year={f.year} pdf={pdfAsset} onChange={setPdfAsset} /> : pdfAsset && <SetupNote>Schedule PDF: {pdfAsset.caption ?? 'uploaded'} (only the managing roles can change it).</SetupNote>}
         <Checkbox label="Current edition (the one the site shows)" checked={f.is_current} onChange={(e) => set('is_current', e.target.checked)} />
         <Checkbox label="Published — readers can see it" checked={f.is_published} onChange={(e) => set('is_published', e.target.checked)} />
       </div>
@@ -132,7 +133,7 @@ function EditionModal({ edition, map, pdf, canUploadPdf, onClose, onSaved }: { e
   );
 }
 
-export function EditionTab({ edition, canUploadPdf = false, onSelect }: { edition: SkEditionRow | null; canUploadPdf?: boolean; onSelect: (id: string) => void }) {
+export function EditionTab({ edition, canManage = false, onSelect }: { edition: SkEditionRow | null; canManage?: boolean; onSelect: (id: string) => void }) {
   const [modal, setModal] = useState<'edit' | 'new' | null>(null);
   const media = useMediaByIds([edition?.map_asset_id, edition?.schedule_pdf_asset_id]);
   const map = media.data?.find((m) => m.id === edition?.map_asset_id) ?? null;
@@ -189,10 +190,11 @@ export function EditionTab({ edition, canUploadPdf = false, onSelect }: { editio
       ) : (
         <EmptyState title="No Salingkusog edition yet">Create one for this year’s intramurals to start adding factions, sports and the schedule.</EmptyState>
       )}
+      {edition && canManage && <CountdownCard key={`${edition.id}-${edition.updated_at}`} edition={edition} />}
       <Button variant={edition ? 'outline' : 'primary'} icon={<Plus className="size-4" aria-hidden />} className="self-start" onClick={() => setModal('new')}>
         New edition
       </Button>
-      {modal && <EditionModal edition={modal === 'edit' ? edition : null} map={modal === 'edit' ? map : null} pdf={modal === 'edit' ? pdf : null} canUploadPdf={canUploadPdf} onClose={() => setModal(null)} onSaved={onSelect} />}
+      {modal && <EditionModal edition={modal === 'edit' ? edition : null} map={modal === 'edit' ? map : null} pdf={modal === 'edit' ? pdf : null} canManage={canManage} onClose={() => setModal(null)} onSaved={onSelect} />}
     </div>
   );
 }

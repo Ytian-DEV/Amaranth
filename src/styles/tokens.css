@@ -48,6 +48,14 @@
   --color-bronze: #b87333;
   --color-bronze-deep: #8a5526;
 
+  /* Salingkusog countdown (Hunger Games homage): ember, charcoal, gold */
+  --color-charcoal: #120d0b;
+  --color-charcoal-2: #1f1612;
+  --color-ember: #ff6a1a;
+  --color-ember-deep: #9c2f0c;
+  --color-ash: #cdbcaa;
+  --color-gold-light: #f2c75c;
+
   /* CMS status pills */
   --color-status-review: #7a5200;
   --color-status-review-soft: #fff4d6;

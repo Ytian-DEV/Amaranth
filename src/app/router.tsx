@@ -55,9 +55,13 @@ const redirects: RouteObject[] = [
   ['s&t', '/science-technology'],
   ['submit-article', '/submit'],
   ['dashboard', '/admin'],
+  // the hub lives at /salingkusog; the 2026 address is what posters and the countdown link to
+  ['salingkusog-2026', '/salingkusog'],
 ].map(([path, to]) => ({ path, element: <Navigate to={to} replace /> }));
 
 const publicRoutes: RouteObject[] = [
+  // full-screen themed page, outside the site header/footer
+  { path: 'salingkusog-2026/countdown', lazy: async () => ({ Component: (await import('@/features/public/salingkusog/CountdownPage')).CountdownPage }) },
   {
     // eager: the public shell and front page are the first thing most visitors see
     Component: PublicLayout,

@@ -63,6 +63,7 @@ The v1 schema is kept at `supabase/legacy/schema-v1.sql` for reference only; don
   - **Who reads:** staff always; the public once the edition is published.
   - **Computed, never typed:** `sk_medal_table` (gold/silver/bronze/total/points/rank), `sk_points_by_day` (cumulative race), `sk_head_to_head`, `sk_event_status` (completed = gold awarded, live), `sk_event_leaders` (stat totals per athlete). `sk_matches.winner_side` is generated; `started_at` / `ended_at` are set when the status changes.
   - **Realtime:** `sk_matches` is in the `supabase_realtime` publication for live scores.
+  - **Countdown page:** `sk_editions.countdown_enabled` / `countdown_at` (null = first day 8:00 AM Manila). Trigger `sk_editions_countdown_guard` lets only super_admin, editor_in_chief and managing_editor change them; `public.sk_countdown()` (security definer) returns the current edition's title and time only while switched on, so the page works before the edition is published.
   - **RPC `sk_set_placements(event_id, rows)`** replaces an event's results in one transaction; the medal follows the place (1 gold, 2 silver, 3 bronze). It is security invoker, so the team rules apply.
 
 ## 4. How it's tested
