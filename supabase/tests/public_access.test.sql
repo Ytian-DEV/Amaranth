@@ -35,6 +35,8 @@ select tests.expect_count('most read lists live article', 'select * from public.
 select tests.expect_count('search finds live article', $$select * from public.search_articles('campus')$$, 1);
 select tests.expect_count('search hides drafts', $$select * from public.search_articles('draft')$$, 0);
 
+select tests.expect_count('archive months lists live months only', 'select * from public.archive_months()', 1);
+
 -- comments
 select tests.expect_ok('anon can comment',
   $$select public.submit_comment('00000000-0000-0000-0000-000000000001', 'Reader', 'r@example.com', 'Great story!')$$);

@@ -7,7 +7,10 @@ import { ComponentsPreview } from './ComponentsPreview';
 import { SectionSkeleton, SectionView } from '@/features/public/section/SectionView';
 import { ArticleSkeleton, ArticleView } from '@/features/public/article/ArticleView';
 import { Comments } from '@/features/public/article/Comments';
-import { fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureSection } from './fixtures';
+import { ArchivesView } from '@/features/public/archives/ArchivesView';
+import { SearchView } from '@/features/public/search/SearchView';
+import { defaultSections } from '@/features/public/nav';
+import { fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
 
 /** /dev/* — fixture screens for checking UI without production data (dev builds only). */
 export default function DevRoutes() {
@@ -43,6 +46,27 @@ export default function DevRoutes() {
         }
       />
       <Route path="article/loading" element={<PublicShell><ArticleSkeleton /></PublicShell>} />
+      <Route
+        path="search"
+        element={
+          <PublicShell>
+            <SearchView
+              draft="typhoon"
+              onDraftChange={() => undefined}
+              onSubmit={() => undefined}
+              filters={{ q: 'typhoon', section: null, from: null, to: null, tag: null, page: 1 }}
+              onFilter={() => undefined}
+              sections={defaultSections}
+              result={{ items: fixtureSection.items.slice(0, 6), total: 23, pageCount: 3 }}
+              loading={false}
+              fetching={false}
+              error={null}
+              onRetry={() => undefined}
+            />
+          </PublicShell>
+        }
+      />
+      <Route path="archives" element={<PublicShell><ArchivesView issues={fixtureIssues} months={fixtureMonths} /></PublicShell>} />
       <Route path="auth/pending" element={<AccessPending />} />
       <Route path="auth/forbidden" element={<main id="main" className="container-page"><Forbidden /></main>} />
     </Routes>
@@ -60,6 +84,8 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'article', label: 'Article' },
   { path: 'article/preview', label: 'Article — staff preview' },
   { path: 'article/loading', label: 'Article — loading' },
+  { path: 'search', label: 'Search results' },
+  { path: 'archives', label: 'Archives' },
   { path: '/admin/login', label: 'Staff sign in' },
   { path: '/admin/forgot-password', label: 'Forgot password' },
   { path: '/admin/set-password', label: 'Set password (expired link state)' },

@@ -2,6 +2,7 @@
 import type { StoryItem } from '@/components/story/types';
 import type { HomeData } from '@/features/public/home/homeData';
 import type { ArticleComment, ArticleDetail } from '@/features/public/article/articleData';
+import type { ArchiveMonth, Issue } from '@/features/public/archives/archivesData';
 
 const day = (d: number) => `2026-10-${String(d).padStart(2, '0')}T08:00:00+08:00`;
 
@@ -207,4 +208,18 @@ export const fixtureArticle: ArticleDetail = {
 export const fixtureComments: ArticleComment[] = [
   { id: 'c1', parentId: null, authorName: 'Ana', body: 'Thank you for covering this. My family farms near Brgy. Gabas and the water has changed in ten years.', createdAt: '2026-10-15T10:00:00+08:00' },
   { id: 'c2', parentId: 'c1', authorName: 'Rico', body: 'Same in our sitio. Would love a follow-up on the co-management plan.', createdAt: '2026-10-15T12:30:00+08:00' },
+];
+
+export const fixtureIssues: Issue[] = [
+  { id: 'i1', title: 'The Harvest Issue', slug: 'harvest-2026', volume: 52, issueNumber: 1, type: 'regular', date: '2026-09-30', description: null, cover: null, pdfUrl: '/documents/amaranth-charter.pdf' },
+  { id: 'i2', title: 'Graduation Special 2026', slug: 'graduation-2026', volume: 51, issueNumber: 4, type: 'graduation', date: '2026-06-20', description: null, cover: null, pdfUrl: null },
+  { id: 'i3', title: 'Typhoon Season', slug: 'typhoon-2025', volume: 51, issueNumber: 2, type: 'special', date: '2025-11-15', description: null, cover: null, pdfUrl: null },
+];
+
+export const fixtureMonths: ArchiveMonth[] = [
+  { month: '2026-10-01', articles: 18 },
+  { month: '2026-09-01', articles: 24 },
+  { month: '2026-08-01', articles: 21 },
+  { month: '2025-12-01', articles: 9 },
+  { month: '2025-11-01', articles: 15 },
 ];

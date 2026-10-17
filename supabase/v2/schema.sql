@@ -1254,6 +1254,21 @@ as $$
   offset greatest(0, coalesce(p_offset, 0));
 $$;
 
+-- Months that have live articles, newest first (archive browsing).
+create or replace function public.archive_months()
+returns table (month date, articles bigint)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select date_trunc('month', a.published_at at time zone 'Asia/Manila')::date as month, count(*) as articles
+  from public.articles a
+  where app.is_live(a.status, a.published_at)
+  group by 1
+  order by 1 desc;
+$$;
+
 create or replace function app.check_email(p_email text)
 returns text
 language plpgsql
@@ -1626,6 +1641,7 @@ grant execute on all functions in schema app to anon, authenticated, service_rol
 
 revoke execute on function public.record_article_view(uuid) from public, anon, authenticated;
 revoke execute on function public.most_read_articles(integer, integer) from public, anon, authenticated;
+revoke execute on function public.archive_months() from public, anon, authenticated;
 revoke execute on function public.search_articles(text, text, date, date, integer, integer, boolean) from public, anon, authenticated;
 revoke execute on function public.submit_comment(uuid, text, text, text, uuid, text) from public, anon, authenticated;
 revoke execute on function public.submit_article(text, text, text, text, text, text, text, jsonb, text) from public, anon, authenticated;
@@ -1639,6 +1655,7 @@ revoke execute on function public.media_usage(uuid) from public, anon, authentic
 
 grant execute on function public.record_article_view(uuid) to anon, authenticated;
 grant execute on function public.most_read_articles(integer, integer) to anon, authenticated;
+grant execute on function public.archive_months() to anon, authenticated;
 grant execute on function public.search_articles(text, text, date, date, integer, integer, boolean) to anon, authenticated;
 grant execute on function public.submit_comment(uuid, text, text, text, uuid, text) to anon, authenticated;
 grant execute on function public.submit_article(text, text, text, text, text, text, text, jsonb, text) to anon, authenticated;

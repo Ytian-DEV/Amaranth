@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { toStoryItem, type StoryItem } from '@/components/story/types';
 import type { CategoryRow, SectionRow } from '@/lib/database.types';
 import { getSupabase, unwrap, unwrapMaybe } from '@/lib/supabase';
+import { liveCards } from '../articles';
 
 export const PAGE_SIZE = 12;
 
@@ -42,11 +43,7 @@ export function useArticlePage({ section, category, page }: { section: string | 
     placeholderData: keepPreviousData,
     queryFn: async (): Promise<ArticlePage> => {
       const from = (page - 1) * PAGE_SIZE;
-      let query = getSupabase()
-        .from('article_cards')
-        .select('*', { count: 'exact' })
-        .in('status', ['published', 'scheduled'])
-        .lte('published_at', new Date().toISOString());
+      let query = liveCards({ count: 'exact' });
       if (section) query = query.eq('section_slug', section);
       if (category) query = query.eq('category_slug', category);
       const { data, error, count } = await query
