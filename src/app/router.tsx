@@ -12,7 +12,6 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
 const cmsPlaceholders: RouteObject[] = [
   ['submissions/*', 'Submissions', 'feature/cms-site-settings'],
   ['events/*', 'Events', 'feature/cms-site-settings'],
-  ['staff/*', 'Staff', 'feature/cms-people-board'],
   ['settings/*', 'Settings', 'feature/cms-site-settings'],
 ].map(([path, title, feature]) => ({
   path,
@@ -42,6 +41,7 @@ const adminRoutes: RouteObject[] = [
           { index: true, lazy: async () => ({ Component: (await import('@/features/cms/dashboard/DashboardPage')).DashboardPage }) },
           { path: 'articles', lazy: async () => ({ Component: (await import('@/features/cms/articles/ArticlesListPage')).ArticlesListPage }) },
           { path: 'articles/new', lazy: async () => ({ Component: (await import('@/features/cms/articles/editor/ArticleEditorPage')).ArticleEditorPage }) },
+          { path: 'staff/*', lazy: async () => ({ Component: (await import('@/features/cms/people/PeoplePage')).PeoplePage }) },
           { path: 'media', lazy: async () => ({ Component: (await import('@/features/cms/media/MediaLibraryPage')).MediaLibraryPage }) },
           { path: 'articles/:id', lazy: async () => ({ Component: (await import('@/features/cms/articles/editor/ArticleEditorPage')).ArticleEditorPage }) },
           ...cmsPlaceholders,
@@ -50,15 +50,6 @@ const adminRoutes: RouteObject[] = [
     ],
   },
 ];
-
-const legacy = async () => ({ Component: (await import('../legacy/App')).default });
-
-// v1 pages that haven't been rebuilt yet. Each feature removes its paths from here;
-// src/legacy is deleted in feature/v2-polish.
-const legacyRoutes: RouteObject[] = [
-  'about',
-  'editorial-board',
-].map((path) => ({ path, lazy: legacy }));
 
 // Old v1 URLs → v2 URLs
 const redirects: RouteObject[] = [
@@ -79,6 +70,8 @@ const publicRoutes: RouteObject[] = [
       { path: 'submit', lazy: async () => ({ Component: (await import('@/features/public/intake/SubmitArticlePage')).SubmitArticlePage }) },
       { path: 'submit/event', lazy: async () => ({ Component: (await import('@/features/public/intake/SubmitEventPage')).SubmitEventPage }) },
       { path: 'contact', lazy: async () => ({ Component: (await import('@/features/public/intake/ContactPage')).ContactPage }) },
+      { path: 'about', lazy: async () => ({ Component: (await import('@/features/public/about/AboutPage')).AboutPage }) },
+      { path: 'editorial-board', lazy: async () => ({ Component: (await import('@/features/public/about/EditorialBoardPage')).EditorialBoardPage }) },
       { path: 'search', lazy: async () => ({ Component: (await import('@/features/public/search/SearchPage')).SearchPage }) },
       { path: 'archives', lazy: async () => ({ Component: (await import('@/features/public/archives/ArchivesPage')).ArchivesPage }) },
       { path: 'archives/:month', lazy: async () => ({ Component: (await import('@/features/public/archives/ArchivesPage')).ArchiveMonthPage }) },
@@ -96,7 +89,6 @@ export const routes: RouteObject[] = [
     children: [
       ...devRoutes,
       ...adminRoutes,
-      ...legacyRoutes,
       ...redirects,
       ...publicRoutes,
     ],

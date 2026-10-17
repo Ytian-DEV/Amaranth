@@ -37,6 +37,8 @@ select tests.expect_count('search hides drafts', $$select * from public.search_a
 
 select tests.expect_count('archive months lists live months only', 'select * from public.archive_months()', 1);
 
+select tests.expect_count('board seed: one current term with 18 members', $$select 1 from public.team_members m join public.team_terms t on t.id = m.term_id where t.is_current$$, 18);
+
 -- comments
 select tests.expect_ok('anon can comment',
   $$select public.submit_comment('00000000-0000-0000-0000-000000000001', 'Reader', 'r@example.com', 'Great story!')$$);
