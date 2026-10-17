@@ -20,6 +20,7 @@ import { ActivityPanel, RevisionsPanel } from '@/features/cms/articles/editor/Hi
 import { ArticlesTable } from '@/features/cms/articles/ArticlesListPage';
 import { MediaGrid, MediaUploader } from '@/features/cms/media/MediaGrid';
 import { MediaDetails } from '@/features/cms/media/MediaDetails';
+import { IntakeDetailView } from '@/features/cms/intake/IntakePage';
 import type { MediaAssetRow } from '@/lib/database.types';
 import { AboutPage } from '@/features/public/about/AboutPage';
 import { EditorialBoardView } from '@/features/public/about/EditorialBoardPage';
@@ -192,6 +193,21 @@ export default function DevRoutes() {
           </PublicShell>
         }
       />
+      <Route
+        path="admin/intake"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <IntakeDetailView
+              item={{ id: 's1', kind: 'submission', title: 'A love letter to the Agri canteen', from: 'Juan Dela Cruz', email: 'juan@example.com', affiliation: 'BS Agriculture 3', section: 'Feature', summary: 'How the canteen behind the Agri building has fed four generations of students.', body: 'Every morning at six, before the first class bell, Manang Lita lights the stove. She has done this for thirty-one years.', eventDate: null, venue: null, status: 'reviewing', reviewNote: null, convertedArticleId: null, createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString() }}
+              files={[{ id: 'f1', name: 'agri-canteen-final.docx', mime: 'application/msword', size: 48000, path: 'submissions/x/1.docx' }]}
+              categories={[{ id: 'c1', name: 'Campus Feature', sectionName: 'Feature' }, { id: 'c2', name: 'Campus News', sectionName: 'News' }]}
+              busy={false}
+              onStatus={() => undefined}
+              onConvert={() => undefined}
+            />
+          </AdminShell>
+        }
+      />
       <Route path="auth/pending" element={<AccessPending />} />
       <Route path="auth/forbidden" element={<main id="main" className="container-page"><Forbidden /></main>} />
     </Routes>
@@ -242,6 +258,7 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'admin/articles', label: 'CMS articles table' },
   { path: 'admin/editor', label: 'CMS editor (body + workflow)' },
   { path: 'admin/media', label: 'CMS media library' },
+  { path: 'admin/intake', label: 'CMS submission review' },
   { path: '/admin/login', label: 'Staff sign in' },
   { path: '/admin/forgot-password', label: 'Forgot password' },
   { path: '/admin/set-password', label: 'Set password (expired link state)' },

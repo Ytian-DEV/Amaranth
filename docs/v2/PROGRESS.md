@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/cms-site-settings`)
-**Last done:** `feature/cms-people-board` merged — `/admin/staff` tabs: Accounts (role/active/sections, admins), Invites (`staff_invites`), Contributors (editors), Editorial board terms & members (publishers); public `/about` (charter-based) and `/editorial-board` (by term). Optional `seed_board.sql` with the v1 board. Legacy v1 app is no longer routed anywhere.
-**Next step:** `feature/cms-site-settings` — `/admin/submissions` + `/admin/events` (intake review: detail, files via signed URLs, status, convert to draft via `convert_intake_to_article`), `/admin/settings` tabs: Home page (lead + folio slots, ticker), Comments moderation, Contact inbox, Sections & categories, Department contacts, Site settings (social, contact info). Then remove the `cmsPlaceholders` list.
+**Current branch:** `develop` (next: create `feature/seo-sharing`)
+**Last done:** `feature/cms-site-settings` merged — `/admin/submissions` & `/admin/events` (open/accepted/converted/declined views, detail with signed file links, mark reviewing/accept/decline with note, convert to draft), `/admin/settings` tabs: Front page (lead + folio slots, ticker), Comments moderation (+ global toggle), Inbox, Sections & categories, Desks, General (contact info, social). All CMS placeholders gone. Schema: publishers may edit the `ticker` setting.
+**Next step:** `feature/seo-sharing` — per-route meta (description, canonical, OG/Twitter) client-side + Vercel Edge Middleware that injects OG tags into `index.html` for `/article/:slug` (and sections) for crawlers; `/sitemap.xml` and `/rss.xml` via Vercel functions reading Supabase with the anon key; `vercel.json` (rewrites, immutable `/assets` cache headers, security headers).
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -36,7 +36,7 @@
 | 11 | `feature/cms-editorial-workflow` | ✅ merged | Workflow rules live in the DB trigger; UI mirrors them |
 | 12 | `feature/cms-media-library` | ✅ merged | |
 | 13 | `feature/cms-people-board` | ✅ merged | Board photos in /public/images are 2048px JPEGs — compress in perf pass |
-| 14 | `feature/cms-site-settings` | ⬜ | |
+| 14 | `feature/cms-site-settings` | ✅ merged | |
 | 15 | `feature/seo-sharing` | ⬜ | |
 | 16 | `feature/content-migration` | ⬜ optional (old data import) | |
 | 17 | `feature/v2-polish` | ⬜ | |

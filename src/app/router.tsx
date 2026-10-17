@@ -8,19 +8,6 @@ const devRoutes: RouteObject[] = import.meta.env.DEV
   ? [{ path: 'dev/*', lazy: async () => ({ Component: (await import('../dev/DevRoutes')).default }) }]
   : [];
 
-// CMS screens still to be built (each later feature replaces its entry).
-const cmsPlaceholders: RouteObject[] = [
-  ['submissions/*', 'Submissions', 'feature/cms-site-settings'],
-  ['events/*', 'Events', 'feature/cms-site-settings'],
-  ['settings/*', 'Settings', 'feature/cms-site-settings'],
-].map(([path, title, feature]) => ({
-  path,
-  lazy: async () => {
-    const { ComingSoon } = await import('@/features/cms/ComingSoon');
-    return { Component: () => <ComingSoon title={title} feature={feature} /> };
-  },
-}));
-
 const adminRoutes: RouteObject[] = [
   { path: 'admin/login', lazy: async () => ({ Component: (await import('@/features/auth/LoginPage')).LoginPage }) },
   {
@@ -41,10 +28,15 @@ const adminRoutes: RouteObject[] = [
           { index: true, lazy: async () => ({ Component: (await import('@/features/cms/dashboard/DashboardPage')).DashboardPage }) },
           { path: 'articles', lazy: async () => ({ Component: (await import('@/features/cms/articles/ArticlesListPage')).ArticlesListPage }) },
           { path: 'articles/new', lazy: async () => ({ Component: (await import('@/features/cms/articles/editor/ArticleEditorPage')).ArticleEditorPage }) },
+          { path: 'submissions', lazy: async () => { const m = await import('@/features/cms/intake/IntakePage'); return { Component: () => <m.IntakeList kind="submission" /> }; } },
+          { path: 'submissions/:id', lazy: async () => { const m = await import('@/features/cms/intake/IntakePage'); return { Component: () => <m.IntakeDetail kind="submission" /> }; } },
+          { path: 'events', lazy: async () => { const m = await import('@/features/cms/intake/IntakePage'); return { Component: () => <m.IntakeList kind="event" /> }; } },
+          { path: 'events/:id', lazy: async () => { const m = await import('@/features/cms/intake/IntakePage'); return { Component: () => <m.IntakeDetail kind="event" /> }; } },
+          { path: 'settings/*', lazy: async () => ({ Component: (await import('@/features/cms/settings/SettingsPage')).SettingsPage }) },
+          { path: '*', element: <Navigate to="/admin" replace /> },
           { path: 'staff/*', lazy: async () => ({ Component: (await import('@/features/cms/people/PeoplePage')).PeoplePage }) },
           { path: 'media', lazy: async () => ({ Component: (await import('@/features/cms/media/MediaLibraryPage')).MediaLibraryPage }) },
           { path: 'articles/:id', lazy: async () => ({ Component: (await import('@/features/cms/articles/editor/ArticleEditorPage')).ArticleEditorPage }) },
-          ...cmsPlaceholders,
         ],
       },
     ],
