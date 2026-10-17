@@ -23,6 +23,7 @@ import { ScheduleView } from '@/features/public/salingkusog/ScheduleView';
 import { WinnersView } from '@/features/public/salingkusog/WinnersView';
 import { FactionView } from '@/features/public/salingkusog/FactionView';
 import { SportView } from '@/features/public/salingkusog/SportView';
+import { RecapView } from '@/features/public/salingkusog/RecapView';
 import { completedCount, winnerCards } from '@/features/public/salingkusog/winners';
 import type { SkCategory } from '@/lib/database.types';
 import type { ScheduleFilters } from '@/features/public/salingkusog/hub';
@@ -140,6 +141,7 @@ function FixtureSalingkusog() {
         <Route path="schedule" element={<FixtureSchedule />} />
         <Route path="winners" element={<FixtureWinners />} />
         <Route path="sports" element={<SportView sport={skFixture.sports[0]} event={skFixture.events[0]} hub={skHub} placements={skFixture.placements} athletes={skFixture.athletes} leaders={skFixture.leaders} />} />
+        <Route path="match" element={<RecapView match={skFixture.matches.find((m) => m.id === 'm8')!} hub={skHub} placements={skFixture.placements} athletes={skFixture.athletes} stats={skFixture.athleteStats} awards={skFixture.awards.filter((a) => a.match_id === 'm8')} article={{ ...fixtureArticle, title: 'Tiamat survive a late Vanguard surge to claim basketball gold' }} />} />
         <Route path="factions" element={<FactionView faction={skFixture.factions[0]} hub={skHub} table={skFixture.medalTable} placements={skFixture.placements} athletes={skFixture.athletes} />} />
       </Routes>
     </>
@@ -170,6 +172,7 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'salingkusog/winners', label: 'Salingkusog — Winners per game' },
   { path: 'salingkusog/factions', label: 'Salingkusog — Faction profile' },
   { path: 'salingkusog/sports', label: 'Salingkusog — Sport with bracket' },
+  { path: 'salingkusog/match', label: 'Salingkusog — Match recap' },
   { path: 'home/empty', label: 'Home — empty' },
   { path: 'home/loading', label: 'Home — loading' },
   { path: 'section', label: 'Section page' },

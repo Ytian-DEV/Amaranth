@@ -308,3 +308,20 @@ export async function uploadSchedulePdf(file: File, uploadedBy: string, year: nu
       .single(),
   );
 }
+
+/** Articles to link as a game recap: newest first, filtered by title. */
+export function useRecapArticleOptions(search: string, selectedId: string | null) {
+  return useQuery({
+    queryKey: ['sk', 'recap-articles', search, selectedId],
+    queryFn: async () => {
+      let q = sb().from('articles').select('id, title, status, published_at').order('updated_at', { ascending: false }).limit(20);
+      if (search.trim()) q = q.ilike('title', `%${search.trim().replace(/[%_]/g, '')}%`);
+      const list = unwrap(await q);
+      if (selectedId && !list.some((a) => a.id === selectedId)) {
+        const current = unwrapMaybe(await sb().from('articles').select('id, title, status, published_at').eq('id', selectedId).maybeSingle());
+        if (current) list.unshift(current);
+      }
+      return list;
+    },
+  });
+}

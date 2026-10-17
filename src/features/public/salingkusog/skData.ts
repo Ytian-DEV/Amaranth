@@ -131,3 +131,29 @@ export function useEventLeaders(eventId: string | undefined) {
     queryFn: async () => unwrap(await sb().from('sk_event_leaders').select('*').eq('event_id', eventId!)),
   });
 }
+
+/** Slug of the recap article linked to a game (live articles only, by RLS). */
+export function useArticleSlug(articleId: string | null | undefined) {
+  return useQuery({
+    queryKey: ['sk-public', 'article-slug', articleId],
+    enabled: !!articleId,
+    staleTime: 10 * 60_000,
+    queryFn: async () => unwrapMaybe(await sb().from('article_cards').select('slug').eq('id', articleId!).maybeSingle())?.slug ?? null,
+  });
+}
+
+/** Player box score and awards for one game. */
+export function useMatchExtras(matchId: string | undefined) {
+  return useQuery({
+    queryKey: ['sk-public', 'match-extras', matchId],
+    enabled: !!matchId,
+    refetchInterval: LIVE_REFRESH,
+    queryFn: async () => {
+      const [stats, awards] = await Promise.all([
+        sb().from('sk_athlete_stats').select('*').eq('match_id', matchId!).then(unwrap),
+        sb().from('sk_awards').select('*').eq('match_id', matchId!).then(unwrap),
+      ]);
+      return { stats, awards };
+    },
+  });
+}

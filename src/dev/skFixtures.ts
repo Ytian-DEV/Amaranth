@@ -1,5 +1,5 @@
 // Salingkusog sample data for /dev fixtures and tests. Faction names follow the Figma design (placeholders).
-import type { SkAthleteRow, SkAwardRow, SkEditionRow, SkEventLeaderRow, SkEventRow, SkFactionRow, SkMatchRow, SkMedalTableRow, SkPlacementRow, SkPointsByDayRow, SkSportRow, SkVenueRow } from '@/lib/database.types';
+import type { SkAthleteRow, SkAthleteStatsRow, SkAwardRow, SkEditionRow, SkEventLeaderRow, SkEventRow, SkFactionRow, SkMatchRow, SkMedalTableRow, SkPlacementRow, SkPointsByDayRow, SkSportRow, SkVenueRow } from '@/lib/database.types';
 
 const t = '2026-10-10T08:00:00+08:00';
 const base = { edition_id: 'ed26', created_at: t, updated_at: t };
@@ -102,7 +102,7 @@ const matches: SkMatchRow[] = [
   match('m4', { event_id: 'bb-w', side_a_id: null, side_b_id: null, scheduled_at: '2026-11-04T00:00:00Z', round: 'Final', round_order: 2 }),
   match('m5', { event_id: 'bb-w', side_a_id: 'sd', side_b_id: 'pt', status: 'final', score_a: 64, score_b: 58, winner_side: 'a', scheduled_at: '2026-11-02T23:30:00Z', round: 'Semifinal 1' }),
   match('m6', { event_id: 'vb-w', venue_id: 'annex', side_a_id: 'mm', side_b_id: 'pt', scheduled_at: '2026-11-03T09:00:00Z', round: 'Group A' }),
-  match('m8', { round: 'Final', round_order: 2, side_a_id: 'pt', side_b_id: 'cv', status: 'final', score_a: 78, score_b: 71, winner_side: 'a', scheduled_at: '2026-11-04T08:00:00Z', ended_at: '2026-11-04T09:40:00Z' }),
+  match('m8', { round: 'Final', round_order: 2, side_a_id: 'pt', side_b_id: 'cv', status: 'final', score_a: 78, score_b: 71, winner_side: 'a', scheduled_at: '2026-11-04T08:00:00Z', ended_at: '2026-11-04T09:40:00Z', periods: [{ label: 'Q1', a: 20, b: 16 }, { label: 'Q2', a: 18, b: 21 }, { label: 'Q3', a: 22, b: 15 }, { label: 'Q4', a: 18, b: 19 }], team_stats: [{ label: 'Field goal %', a: '46%', b: '41%' }, { label: 'Rebounds', a: '42', b: '35' }, { label: 'Turnovers', a: '11', b: '14' }], recap_article_id: 'art-1' }),
   match('m9', { round: 'Bronze game', round_order: 2, side_a_id: 'sd', side_b_id: 'mm', status: 'final', score_a: 66, score_b: 60, winner_side: 'a', scheduled_at: '2026-11-04T06:00:00Z' }),
   match('m7', { event_id: 'vb-w', venue_id: 'annex', side_a_id: 'cv', side_b_id: 'mm', status: 'postponed', scheduled_at: '2026-11-03T04:00:00Z', round: 'Group A' }),
 ];
@@ -119,6 +119,7 @@ const placements: SkPlacementRow[] = [
 
 const awards: SkAwardRow[] = [
   { ...base, id: 'aw1', kind: 'mvp_of_day', day: '2026-11-03', athlete_id: 'a1', match_id: 'm1', event_id: 'bb-m', headline: 'Semifinal 1', stat_line: [{ label: 'PTS', value: '24' }, { label: 'REB', value: '9' }], quote: null },
+  { ...base, id: 'aw3', kind: 'finals_mvp', day: '2026-11-04', athlete_id: 'a1', match_id: 'm8', event_id: 'bb-m', headline: 'Final', stat_line: [{ label: 'PTS', value: '24' }, { label: 'REB', value: '9' }, { label: 'AST', value: '5' }, { label: 'STL', value: '3' }], quote: 'We trusted each other in the last two minutes.' },
   { ...base, id: 'aw2', kind: 'athlete_of_day', day: '2026-11-03', athlete_id: 'a2', match_id: null, event_id: 'at-100w', headline: '12.84s', stat_line: [], quote: 'I ran for my block.' },
 ];
 
@@ -137,10 +138,15 @@ const pointsByDay: SkPointsByDayRow[] = tally.flatMap(([id, , , , race]) =>
   [1, 2, 3, 4, 5, 6].map((d) => ({ edition_id: 'ed26', faction_id: id, day: `2026-11-0${d + 1}`, day_number: d, points: race[Math.min(d, 4) - 1] })),
 );
 
+const athleteStats: SkAthleteStatsRow[] = [
+  { match_id: 'm8', athlete_id: 'a1', stats: { PTS: 24, REB: 9, AST: 5, STL: 3 } },
+  { match_id: 'm8', athlete_id: 'a3', stats: { PTS: 21, REB: 6, AST: 2, STL: 1 } },
+];
+
 const leaders: SkEventLeaderRow[] = [
   { edition_id: 'ed26', event_id: 'bb-m', athlete_id: 'a1', stat: 'PTS', total: 52, games: 2 },
   { edition_id: 'ed26', event_id: 'bb-m', athlete_id: 'a3', stat: 'PTS', total: 47, games: 2 },
   { edition_id: 'ed26', event_id: 'bb-m', athlete_id: 'a1', stat: 'REB', total: 18, games: 2 },
 ];
 
-export const skFixture = { edition, factions, venues, sports, events, athletes, matches, placements, awards, medalTable, pointsByDay, leaders };
+export const skFixture = { edition, factions, venues, sports, events, athletes, matches, placements, awards, medalTable, pointsByDay, leaders, athleteStats };

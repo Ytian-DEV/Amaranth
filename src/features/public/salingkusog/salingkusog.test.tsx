@@ -9,6 +9,9 @@ import { factionProfile } from './factions';
 import { FactionView } from './FactionView';
 import { bracketColumns, eventStatusLine, formatLine, leaderStat, roundRobinTable, roundTitle } from './sports';
 import { SportView } from './SportView';
+import { eventRecord, sideTitle, statShares } from './recap';
+import { RecapView } from './RecapView';
+import { fixtureArticle } from '@/dev/fixtures';
 import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
 
@@ -256,5 +259,36 @@ describe('Sports and bracket', () => {
     const [, first, second] = within(scorers).getAllByRole('row');
     expect(first).toHaveTextContent(/Marco Villanueva\s*52$/);
     expect(second).toHaveTextContent(/Rene Lagunzad\s*47$/);
+  });
+});
+
+describe('Match recap', () => {
+  const final = skFixture.matches.find((m) => m.id === 'm8')!;
+
+  it('helpers: record, title, stat bars', () => {
+    expect(eventRecord('pt', 'bb-m', skFixture.matches)).toBe('2–0 in tournament');
+    expect(eventRecord('cv', 'bb-m', skFixture.matches)).toBe('0–1 in tournament');
+    expect(sideTitle('pt', 'bb-m', skFixture.placements)).toBe('Champion');
+    expect(sideTitle('cv', 'bb-m', skFixture.placements)).toBe('Runner-up');
+    expect(statShares({ a: '46%', b: '54%' })).toEqual({ a: 0.46, b: 0.54 });
+    expect(statShares({ a: '—', b: '' })).toEqual({ a: 0.5, b: 0.5 });
+  });
+
+  it('renders the scoreboard, periods, MVP, team and player stats, and the article', () => {
+    render(
+      <MemoryRouter>
+        <RecapView match={final} hub={hub} placements={skFixture.placements} athletes={skFixture.athletes} stats={skFixture.athleteStats} awards={skFixture.awards.filter((a) => a.match_id === 'm8')} article={{ ...fixtureArticle, title: 'Tiamat claim gold' }} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('heading', { name: 'Primordial Tiamat 78 – 71 Centicore Vanguard' })).toBeInTheDocument();
+    expect(screen.getByText(/Champion\s+·\s+2–0 in tournament/)).toBeInTheDocument();
+    const periods = screen.getByRole('table', { name: 'Score by period' });
+    expect(within(periods).getAllByRole('row')[1]).toHaveTextContent('PT2018221878');
+    expect(screen.getByRole('heading', { name: 'Marco Villanueva' })).toBeInTheDocument();
+    expect(screen.getByText('Finals MVP')).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Team stats' })).getByText('Field goal %')).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Player stats' })).getAllByRole('row')).toHaveLength(3);
+    expect(screen.getByRole('link', { name: 'Tiamat claim gold' })).toHaveAttribute('href', `/article/${fixtureArticle.slug}`);
+    expect(screen.getByRole('navigation', { name: 'Breadcrumb' })).toHaveTextContent(/Schedule & Results \/\s*Basketball · Men \/\s*Final/);
   });
 });
