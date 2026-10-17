@@ -147,6 +147,19 @@ const samples: Record<string, Sample> = {
       ['investigative', 'The scholarship delays nobody explained'],
     ],
   },
+  explainer: {
+    section: { slug: 'explainer', name: 'Explainer', description: 'Confusing campus issues, explained simply. Short answers first, details after.', nav_placement: 'more' },
+    categories: [{ slug: 'explainer', name: 'Explainer' }],
+    stories: [
+      ['explainer', 'What does the new Latin honors rule actually mean for you?', 'Your grades from every semester now count, including summer classes. Failing grades that were retaken still appear in the computation.'],
+      ['explainer', 'What happens if you drop a subject after midterms?'],
+      ['explainer', 'Where does your org fee actually go?'],
+      ['explainer', 'How do you file a leave of absence?'],
+      ['explainer', 'Why does the water get cut every Thursday?'],
+      ['explainer', 'What can the USC actually decide on?'],
+      ['explainer', 'How are scholarship stipends scheduled?'],
+    ],
+  },
 };
 
 function build(sample: Sample): StoryItem[] {

@@ -57,7 +57,9 @@
 
 - B9 `feature/section-investigative` (2026-10-18): `/investigative` follows Figma 39:763: dark hero with the newest investigation ("Read the investigation", byline, date) and a "How we report" note, Our investigations by year, and the Investigations desk band linking to Contact. Reporting stats, the documents gallery and impact badges need per-story data the schema lacks.
 
-**Next:** B10 `feature/section-explainer`.
+- B10 `feature/section-explainer` (2026-10-18): `/explainer` follows Figma 40:721: intro, featured explainer with its dek as "The short answer" panel, More explainers as question cards ("Get the answer →"), and the Ask Amaranth band (links to Contact rather than a free-text box). The four-step "what changed / who it affects" cards need structured fields the schema lacks.
+
+**Next:** B11 `feature/section-bulletin`.
 
 | # | Branch | Status |
 |---|---|---|
@@ -83,7 +85,7 @@
 | B7 | `feature/section-views` | ✅ |
 | B8 | `feature/section-science-technology` | ✅ |
 | B9 | `feature/section-investigative` | ✅ |
-| B10 | `feature/section-explainer` | ⬜ |
+| B10 | `feature/section-explainer` | ✅ |
 | B11 | `feature/section-bulletin` | ⬜ |
 | B12 | `feature/section-stories` | ⬜ |
 
