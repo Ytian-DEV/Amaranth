@@ -171,7 +171,7 @@ export function IntakeDetailView({
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-      <Card className="flex flex-col gap-4 p-5 md:p-7">
+      <Card className="flex min-w-0 flex-col gap-4 break-words p-5 md:p-7">
         <div className="flex flex-wrap items-center gap-2">
           <Pill tone={statusTone[item.status]}>{statusLabel[item.status]}</Pill>
           <span className="text-meta text-ink-muted">Received {formatDateTime(item.createdAt)}</span>
@@ -229,7 +229,7 @@ export function IntakeDetailView({
         )}
       </Card>
 
-      <aside className="flex flex-col gap-4">
+      <aside className="flex min-w-0 flex-col gap-4">
         {item.convertedArticleId ? (
           <Card className="flex flex-col gap-3 p-4">
             <p className="text-body-m">This became an article draft.</p>

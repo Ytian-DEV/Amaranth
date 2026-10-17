@@ -232,6 +232,7 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
 
   return (
     <div className="flex flex-col gap-5">
+      <h1 className="sr-only">{row ? `Edit article: ${draft.title || 'Untitled'}` : 'New article'}</h1>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link to="/admin/articles" className="inline-flex items-center gap-1.5 text-button text-green-700 hover:underline">
           <ArrowLeft className="size-4" aria-hidden /> Articles

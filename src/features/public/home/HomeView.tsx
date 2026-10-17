@@ -157,6 +157,7 @@ export function HomeView({ data }: { data: HomeData }) {
   if (!data.lead) {
     return (
       <>
+        <h1 className="sr-only">Amaranth</h1>
         <div className="container-page py-16">
           <EmptyState title="The first stories are on their way">
             Nothing has been published yet. Check back soon — or send us a story.
@@ -238,6 +239,7 @@ export function HomeView({ data }: { data: HomeData }) {
 export function HomeSkeleton() {
   return (
     <div className="container-page grid gap-12 py-12 lg:grid-cols-[minmax(0,772fr)_minmax(0,380fr)]" aria-busy>
+      <h1 className="sr-only">Loading the front page</h1>
       <div className="flex flex-col gap-4">
         <Skeleton className="aspect-[772/430]" />
         <Skeleton className="h-3 w-40" />
