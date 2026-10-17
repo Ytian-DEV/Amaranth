@@ -1,4 +1,4 @@
-import { readEnv } from './_lib/supabaseRest';
+import { readEnv } from './_lib/supabaseRest.js';
 
 /** /robots.txt (rewritten here by vercel.json) — needs the absolute sitemap URL. */
 export function GET(request: Request) {

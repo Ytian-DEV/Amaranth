@@ -1,6 +1,6 @@
 // Traffic classification for /api/e: bots, device/browser/OS and the source of a visit.
 // Everything here works on the user-agent and the referrer's host only; neither is stored as-is.
-import { CRAWLER_UA } from './seo';
+import { CRAWLER_UA } from './seo.js';
 
 /** Crawlers, preview fetchers, headless browsers, monitors and scripts. */
 const BOT_UA =

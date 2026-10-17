@@ -1,5 +1,5 @@
-import { rssXml } from './_lib/seo';
-import { liveCardsQuery, readEnv, rest, type CardRow } from './_lib/supabaseRest';
+import { rssXml } from './_lib/seo.js';
+import { liveCardsQuery, readEnv, rest, type CardRow } from './_lib/supabaseRest.js';
 
 /** /rss.xml and /rss.xml?section=news (rewritten here by vercel.json) */
 export async function GET(request: Request) {
