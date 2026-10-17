@@ -20,7 +20,7 @@ export const cmsNav: CmsNavItem[] = [
   { to: '/admin/submissions', label: 'Submissions', icon: FolderInput, allow: isEditor, badge: 'submissions' },
   { to: '/admin/events', label: 'Events', icon: Megaphone, allow: isEditor },
   { to: '/admin/media', label: 'Media Library', icon: Images, allow: everyone },
-  { to: '/admin/staff', label: 'Staff', icon: Users, allow: isAdmin },
+  { to: '/admin/staff', label: 'Staff', icon: Users, allow: isEditor },
   { to: '/admin/settings', label: 'Settings', icon: Settings, allow: isAdmin },
 ];
 

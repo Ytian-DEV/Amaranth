@@ -8,6 +8,7 @@ The legacy file `supabase/schema.sql` is kept for reference only; don't paste it
 |---|---|
 | `supabase/v2/schema.sql` | Types, tables, indexes, triggers, helpers (`app` schema), RPCs, RLS, storage buckets + policies |
 | `supabase/v2/seed.sql` | Reference data: 12 sections, categories, department contacts, home slots, site settings |
+| `supabase/v2/seed_board.sql` | Optional: the current editorial board from the v1 site (18 people, photos from `/public/images`) |
 | `supabase/tests/00_supabase_stub.sql` | Local stand-in for `auth`, `storage`, roles (never run on Supabase) |
 | `supabase/tests/01_helpers.sql` | `tests.login`, `tests.expect_error`, `tests.expect_count`, `tests.expect_ok`, `tests.expect_eq` |
 | `supabase/tests/02_fixtures.sql` | Test staff (one per role), articles in each state |
@@ -28,6 +29,7 @@ The legacy file `supabase/schema.sql` is kept for reference only; don't paste it
    (Empty or delete the old storage buckets from the Storage page if you don't need the files.)
 2. Paste **`supabase/v2/schema.sql`** → Run.
 3. Paste **`supabase/v2/seed.sql`** → Run.
+   Optional: edit the term label/date at the top of **`supabase/v2/seed_board.sql`**, then paste → Run (fills the Editorial Board page).
 4. **Invite the first admin** (role comes only from this table; nobody can make themselves admin):
    ```sql
    insert into public.staff_invites (email, role) values ('you@vsu.edu.ph', 'super_admin');

@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/cms-people-board`)
-**Last done:** `feature/cms-media-library` merged — `/admin/media` (multi-upload with compression + variants, search, my uploads, alt/caption/credit editing, usage count, delete only when unused) and `MediaPickerDialog` used by the editor cover field.
-**Next step:** `feature/cms-people-board` — `/admin/staff` (profiles: roles, active, section assignments; invites via `staff_invites`), contributors (bylines, bios, avatars), editorial board terms/members; public `/about` and `/editorial-board` pages from `team_terms`/`team_members` (remove from legacy routes).
+**Current branch:** `develop` (next: create `feature/cms-site-settings`)
+**Last done:** `feature/cms-people-board` merged — `/admin/staff` tabs: Accounts (role/active/sections, admins), Invites (`staff_invites`), Contributors (editors), Editorial board terms & members (publishers); public `/about` (charter-based) and `/editorial-board` (by term). Optional `seed_board.sql` with the v1 board. Legacy v1 app is no longer routed anywhere.
+**Next step:** `feature/cms-site-settings` — `/admin/submissions` + `/admin/events` (intake review: detail, files via signed URLs, status, convert to draft via `convert_intake_to_article`), `/admin/settings` tabs: Home page (lead + folio slots, ticker), Comments moderation, Contact inbox, Sections & categories, Department contacts, Site settings (social, contact info). Then remove the `cmsPlaceholders` list.
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -35,7 +35,7 @@
 | 10 | `feature/cms-article-editor` | ✅ merged | Not exercised against a live v2 project yet |
 | 11 | `feature/cms-editorial-workflow` | ✅ merged | Workflow rules live in the DB trigger; UI mirrors them |
 | 12 | `feature/cms-media-library` | ✅ merged | |
-| 13 | `feature/cms-people-board` | ⬜ | |
+| 13 | `feature/cms-people-board` | ✅ merged | Board photos in /public/images are 2048px JPEGs — compress in perf pass |
 | 14 | `feature/cms-site-settings` | ⬜ | |
 | 15 | `feature/seo-sharing` | ⬜ | |
 | 16 | `feature/content-migration` | ⬜ optional (old data import) | |

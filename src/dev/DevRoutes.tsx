@@ -21,6 +21,8 @@ import { ArticlesTable } from '@/features/cms/articles/ArticlesListPage';
 import { MediaGrid, MediaUploader } from '@/features/cms/media/MediaGrid';
 import { MediaDetails } from '@/features/cms/media/MediaDetails';
 import type { MediaAssetRow } from '@/lib/database.types';
+import { AboutPage } from '@/features/public/about/AboutPage';
+import { EditorialBoardView } from '@/features/public/about/EditorialBoardPage';
 import { defaultSections } from '@/features/public/nav';
 import { fixtureEditor, fixtureQueue, fixtureRecent, fixtureStats, fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
 
@@ -169,6 +171,27 @@ export default function DevRoutes() {
           </AdminShell>
         }
       />
+      <Route path="about" element={<PublicShell><AboutPage /></PublicShell>} />
+      <Route
+        path="editorial-board"
+        element={
+          <PublicShell>
+            <EditorialBoardView
+              data={{
+                term: '2025–2026',
+                terms: [{ label: '2025–2026', is_current: true }, { label: '2024–2025', is_current: false }],
+                people: [
+                  { id: 'p1', name: 'Dr. Ulderico A. Alviola', position: 'Adviser', group: 'adviser', photo: { bucket: 'media', path: '/images/advisers/ulderico-alviola.jpg' } },
+                  { id: 'p2', name: 'Anna Marie Naagas', position: 'Executive Editor', group: 'editorial_board', photo: { bucket: 'media', path: '/images/editorial-board/anna-naagas.jpg' } },
+                  { id: 'p3', name: 'Jelly Mondejar', position: 'Managing Editor', group: 'editorial_board', photo: { bucket: 'media', path: '/images/editorial-board/jelly-mondejar.jpg' } },
+                  { id: 'p4', name: 'Fred Vincent Marfori', position: 'News Editor', group: 'section_head', photo: { bucket: 'media', path: '/images/section-heads/fred-marfori.jpg' } },
+                  { id: 'p5', name: 'Frances Ibo', position: 'Sports Editor', group: 'section_head', photo: { bucket: 'media', path: '/images/section-heads/frances-ibo.jpg' } },
+                ],
+              }}
+            />
+          </PublicShell>
+        }
+      />
       <Route path="auth/pending" element={<AccessPending />} />
       <Route path="auth/forbidden" element={<main id="main" className="container-page"><Forbidden /></main>} />
     </Routes>
@@ -211,6 +234,8 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'submit', label: 'Submit a story' },
   { path: 'submit/event', label: 'Report an event' },
   { path: 'contact', label: 'Contact' },
+  { path: 'about', label: 'About' },
+  { path: 'editorial-board', label: 'Editorial Board' },
   { path: 'admin', label: 'CMS dashboard (editor)' },
   { path: 'admin/writer', label: 'CMS dashboard (writer)' },
   { path: 'admin/loading', label: 'CMS dashboard — loading' },
