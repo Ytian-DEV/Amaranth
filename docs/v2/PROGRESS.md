@@ -8,15 +8,13 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A7 `feature/salingkusog-winners` merged: `/salingkusog/winners` (Figma 15:901).
-- One card per event with results, newest first.
-- Rows: place chip, faction, athlete or faction name, and a note ("Champion · beat CV in the final", "Runner-up", "Won the bronze game"; the faction for individual events).
-- Each row's result is the typed result, or else the deciding game's score.
-- Category chips (`?category=`) and an "x of y events completed" bar.
-- A "Read the game recap" link goes to `/salingkusog/match/:id`, which shows coming soon until A10.
-
-Labels moved to `src/lib/skLabels.ts`. Fixture: `/dev/salingkusog/winners`.
-**Next:** A8 `feature/salingkusog-factions` (awaiting go).
+**Last done:** A8 `feature/salingkusog-factions` merged: `/salingkusog/factions/:slug` (Figma 17:1248).
+- `/salingkusog/factions` opens the leader's profile; a switcher strip of all factions is the list.
+- Hero in the faction colour (text colour picked for contrast): emblem, motto, and rank / points / medals.
+- Recent results (W/L), with "Full history" linking to the schedule filtered by faction.
+- Medals by sport, medal count, head-to-head bars and top athletes.
+- Everything is computed from data already loaded. Fixture: `/dev/salingkusog/factions`.
+**Next:** A9 `feature/salingkusog-sports-bracket` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
@@ -27,7 +25,7 @@ Labels moved to `src/lib/skLabels.ts`. Fixture: `/dev/salingkusog/winners`.
 | A5 | `feature/salingkusog-medal-tally` | ✅ |
 | A6 | `feature/salingkusog-schedule` | ✅ |
 | A7 | `feature/salingkusog-winners` | ✅ |
-| A8 | `feature/salingkusog-factions` | ⬜ |
+| A8 | `feature/salingkusog-factions` | ✅ |
 | A9 | `feature/salingkusog-sports-bracket` | ⬜ |
 | A10 | `feature/salingkusog-match-recap` | ⬜ |
 | A11 | `feature/salingkusog-venues` | ⬜ |

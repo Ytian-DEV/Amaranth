@@ -5,6 +5,8 @@ import { dateSpan, hubPhase, liveAndNext, phasePill, podiumOrder, raceSeries, re
 import { ScheduleView } from './ScheduleView';
 import { completedCount, winnerCards } from './winners';
 import { WinnersView } from './WinnersView';
+import { factionProfile } from './factions';
+import { FactionView } from './FactionView';
 import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
 
@@ -164,5 +166,43 @@ describe('Winners per game', () => {
     const card = screen.getByRole('article', { name: 'Basketball · Men' });
     expect(within(card).getByRole('link', { name: /Read the game recap/ })).toHaveAttribute('href', '/salingkusog/match/m8');
     expect(within(card).getByLabelText('gold, place 1')).toBeInTheDocument();
+  });
+});
+
+describe('Faction profile', () => {
+  it('computes recent results, head-to-head, medals and top athletes', () => {
+    const p = factionProfile('pt', hub, skFixture.placements, skFixture.athletes);
+    expect(p.recent.map((r) => [r.outcome, r.label, r.opponentId, r.score])).toEqual([
+      ['W', 'Basketball · Men · Final', 'cv', '78–71'],
+      ['W', 'Basketball · Men · Semifinal 1', 'sd', '78–71'],
+      ['L', 'Basketball · Women · Semifinal 1', 'sd', '58–64'],
+    ]);
+    expect(p.headToHead).toEqual([
+      { opponentId: 'cv', wins: 1, losses: 0 },
+      { opponentId: 'sd', wins: 1, losses: 1 },
+      { opponentId: 'mm', wins: 0, losses: 0 },
+    ]);
+    expect(p.medalsBySport).toEqual([
+      { label: 'Basketball · Men', medal: 'gold' },
+      { label: '100m Dash · Women', medal: 'silver' },
+    ]);
+    expect(p.topAthletes.map((t) => [t.athlete.name, t.line])).toEqual([['Marco Villanueva', 'Athletics · 1 silver']]);
+  });
+
+  it('renders the hero, switcher and panels', () => {
+    render(
+      <MemoryRouter initialEntries={['/salingkusog/factions/primordial-tiamat']}>
+        <FactionView faction={skFixture.factions[0]} hub={hub} table={skFixture.medalTable} placements={skFixture.placements} athletes={skFixture.athletes} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('heading', { name: 'Primordial Tiamat' })).toBeInTheDocument();
+    expect(screen.getByText('“From the deep, we rise.”')).toBeInTheDocument();
+    const hero = screen.getByRole('region', { name: 'Primordial Tiamat' });
+    expect(within(hero).getByText('1st')).toBeInTheDocument();
+    expect(within(hero).getByText('90')).toBeInTheDocument();
+    expect(within(screen.getByRole('navigation', { name: 'Factions' })).getByRole('link', { name: /Primordial Tiamat/ })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: /Full history/ })).toHaveAttribute('href', '/salingkusog/schedule?faction=pt&show=results');
+    expect(within(screen.getByRole('region', { name: 'Head-to-head' })).getByText('1W – 1L')).toBeInTheDocument();
+    expect(screen.getAllByLabelText('Won')).toHaveLength(2);
   });
 });
