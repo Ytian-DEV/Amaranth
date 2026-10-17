@@ -21,11 +21,9 @@ from (values
 ) as x(email, name)
 where not exists (select 1 from auth.users u where u.email = x.email);
 
-insert into public.contributors (profile_id, name, slug, type)
-select p.id, p.display_name, app.slugify(p.display_name), 'staff'
-from public.profiles p
-where p.email in ('writer@test.local', 'writer2@test.local')
-on conflict (slug) do nothing;
+-- invited staff get contributors automatically; give the fixture writer a stable slug
+update public.contributors set slug = 'wes-writer'
+where profile_id = (select id from public.profiles where email = 'writer@test.local') and slug <> 'wes-writer';
 
 insert into public.media_assets (id, bucket, path, mime_type, size_bytes, width, height, alt_text)
 values ('00000000-0000-0000-0000-0000000000a1', 'media', 'fixtures/cover.jpg', 'image/jpeg', 1000, 1600, 900, 'Forest')

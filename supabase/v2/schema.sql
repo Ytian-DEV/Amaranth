@@ -781,6 +781,17 @@ begin
     on conflict do nothing;
 
     update public.staff_invites set accepted_at = now() where email = v_email;
+
+    -- every staff member gets a public byline they can be credited with
+    insert into public.contributors (profile_id, name, slug, type)
+    values (
+      new.id,
+      coalesce(nullif(btrim(new.raw_user_meta_data ->> 'display_name'), ''), split_part(v_email, '@', 1)),
+      coalesce(nullif(app.slugify(coalesce(new.raw_user_meta_data ->> 'display_name', split_part(v_email, '@', 1))), ''), 'staff')
+        || '-' || left(new.id::text, 6),
+      'staff'
+    )
+    on conflict do nothing;
   end if;
 
   return new;
@@ -1033,6 +1044,11 @@ begin
   if tg_op = 'INSERT' then
     insert into public.article_activity (article_id, actor_id, action, to_status)
     values (new.id, auth.uid(), 'created', new.status);
+
+    -- the creator is credited by default (and so counts as an owner)
+    insert into public.article_authors (article_id, contributor_id)
+    select new.id, c.id from public.contributors c where c.profile_id = new.created_by
+    on conflict do nothing;
   elsif new.status is distinct from old.status then
     insert into public.article_activity (article_id, actor_id, action, from_status, to_status, note)
     values (new.id, auth.uid(), 'status', old.status, new.status, v_note);

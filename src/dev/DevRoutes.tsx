@@ -14,6 +14,9 @@ import { SubmitEventForm, SubmitEventLayout } from '@/features/public/intake/Sub
 import { ContactForm, ContactLayout } from '@/features/public/intake/ContactPage';
 import { AdminShell } from '@/features/cms/layout/AdminLayout';
 import { DashboardView } from '@/features/cms/dashboard/DashboardView';
+import { RichText } from '@/features/cms/articles/editor/RichText';
+import { WorkflowPanel } from '@/features/cms/articles/editor/WorkflowPanel';
+import { ArticlesTable } from '@/features/cms/articles/ArticlesListPage';
 import { defaultSections } from '@/features/public/nav';
 import { fixtureEditor, fixtureQueue, fixtureRecent, fixtureStats, fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
 
@@ -110,6 +113,29 @@ export default function DevRoutes() {
           </AdminShell>
         }
       />
+      <Route
+        path="admin/articles"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <div className="rounded-[12px] border border-line bg-surface">
+              <ArticlesTable rows={fixtureRecent.map((r) => ({ id: r.id, title: r.title, slug: r.slug, status: r.status, section: r.category, category: r.category, byline: 'Maria Santos', updatedAt: r.date, publishedAt: r.date }))} />
+            </div>
+          </AdminShell>
+        }
+      />
+      <Route
+        path="admin/editor"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+              <RichText initial={fixtureArticle.bodyHtml} onChange={() => undefined} uploadImage={async () => ({ bucket: 'media', path: '/images/x.jpg' })} />
+              <div className="rounded-[12px] border border-line bg-surface p-4">
+                <WorkflowPanel status="in_review" publishedAt={null} options={['published', 'scheduled', 'draft', 'rejected']} busy={false} onTransition={() => undefined} />
+              </div>
+            </div>
+          </AdminShell>
+        }
+      />
       <Route path="auth/pending" element={<AccessPending />} />
       <Route path="auth/forbidden" element={<main id="main" className="container-page"><Forbidden /></main>} />
     </Routes>
@@ -137,6 +163,8 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'admin', label: 'CMS dashboard (editor)' },
   { path: 'admin/writer', label: 'CMS dashboard (writer)' },
   { path: 'admin/loading', label: 'CMS dashboard — loading' },
+  { path: 'admin/articles', label: 'CMS articles table' },
+  { path: 'admin/editor', label: 'CMS editor (body + workflow)' },
   { path: '/admin/login', label: 'Staff sign in' },
   { path: '/admin/forgot-password', label: 'Forgot password' },
   { path: '/admin/set-password', label: 'Set password (expired link state)' },
