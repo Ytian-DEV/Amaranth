@@ -110,3 +110,14 @@ export function useResults(editionId: string | undefined) {
     },
   });
 }
+
+/** Several media assets by id (athlete photos). */
+export function useMediaList(ids: (string | null | undefined)[]) {
+  const list = [...new Set(ids.filter((x): x is string => !!x))].sort();
+  return useQuery({
+    queryKey: ['sk-public', 'media', list],
+    enabled: list.length > 0,
+    staleTime: 10 * 60_000,
+    queryFn: async () => unwrap(await sb().from('media_assets').select('*').in('id', list)),
+  });
+}

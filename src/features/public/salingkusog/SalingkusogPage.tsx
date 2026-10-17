@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation, useSearchParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback';
 import { usePageMeta } from '@/lib/usePageMeta';
 import type { SkCategory, SkEditionRow } from '@/lib/database.types';
@@ -7,7 +7,8 @@ import { hubPhase, hubTabs, scheduleDay, type ScheduleFilters, type ScheduleShow
 import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
 import { ScheduleView } from './ScheduleView';
-import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useResults, useStandings, type HubData } from './skData';
+import { FactionView } from './FactionView';
+import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useMediaList, useResults, useStandings, type HubData } from './skData';
 import { completedCount, winnerCards } from './winners';
 import { WinnersView } from './WinnersView';
 
@@ -90,6 +91,20 @@ function WinnersPage({ edition, hub }: { edition: SkEditionRow; hub: HubData }) 
   );
 }
 
+/** /salingkusog/factions/:slug (the bare /factions opens the leader). */
+function FactionPage({ hub, table, editionId }: { hub: HubData; table: Parameters<typeof FactionView>[0]['table']; editionId: string }) {
+  const { slug } = useParams();
+  const results = useResults(editionId);
+  const photos = useMediaList((results.data?.athletes ?? []).map((a) => a.photo_asset_id));
+  const leader = table[0] ? hub.factions.find((f) => f.id === table[0].faction_id) : hub.factions[0];
+  const faction = hub.factions.find((f) => f.slug === slug);
+  if (!slug) return leader ? <Navigate to={`/salingkusog/factions/${leader.slug}`} replace /> : <ComingSoon title="Factions" />;
+  if (!faction) return <Navigate to="/salingkusog/factions" replace />;
+  if (results.error) return <div className="container-page py-12"><ErrorState error={results.error} onRetry={() => void results.refetch()} /></div>;
+  if (!results.data) return <div className="container-page py-12"><Skeleton className="h-96" /></div>;
+  return <FactionView faction={faction} hub={hub} table={table} placements={results.data.placements} athletes={results.data.athletes} photos={photos.data ?? []} />;
+}
+
 /** /salingkusog/* — the intramurals hub. */
 export function SalingkusogPage() {
   const edition = useCurrentEdition();
@@ -99,7 +114,8 @@ export function SalingkusogPage() {
   useLiveGames(ed?.id);
   // one place sets the meta for every hub tab (a child's effect would run first and be overwritten)
   const { pathname } = useLocation();
-  const tab = hubTabs.find((t) => t.to === pathname.replace(/\/$/, '')) ?? hubTabs[0];
+  const path = pathname.replace(/\/$/, '');
+  const tab = hubTabs.find((t) => t.to === path) ?? hubTabs.find((t) => t.to !== '/salingkusog' && path.startsWith(`${t.to}/`)) ?? hubTabs[0];
   usePageMeta({
     title: ed ? `${ed.title} ${tab.label}` : edition.data === null ? 'Salingkusog' : undefined,
     description: ed
@@ -138,7 +154,9 @@ export function SalingkusogPage() {
         <Route index element={<MedalTallyView edition={ed} hub={hub.data} table={standings.data.table} race={standings.data.race} phase={phase} />} />
         <Route path="schedule" element={<SchedulePage edition={ed} hub={hub.data} />} />
         <Route path="winners" element={<WinnersPage edition={ed} hub={hub.data} />} />
-        {hubTabs.slice(3).map((t) => (
+        <Route path="factions" element={<FactionPage hub={hub.data} table={standings.data.table} editionId={ed.id} />} />
+        <Route path="factions/:slug" element={<FactionPage hub={hub.data} table={standings.data.table} editionId={ed.id} />} />
+        {hubTabs.slice(4).map((t) => (
           <Route key={t.to} path={t.to.replace('/salingkusog/', '')} element={<ComingSoon title={t.label} />} />
         ))}
         <Route path="*" element={<ComingSoon title="This page" />} />
