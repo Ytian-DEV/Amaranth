@@ -69,6 +69,15 @@ export function ArticlesTable({ rows, loading }: { rows: ArticleListRow[]; loadi
 
 const statuses = Object.keys(statusInfo) as ArticleStatus[];
 
+const quickViews: { label: string; status: ArticleListFilters['status']; mine: boolean }[] = [
+  { label: 'All', status: '', mine: false },
+  { label: 'Mine', status: '', mine: true },
+  { label: 'Needs review', status: 'review', mine: false },
+  { label: 'Drafts', status: 'draft', mine: false },
+  { label: 'Scheduled', status: 'scheduled', mine: false },
+  { label: 'Published', status: 'published', mine: false },
+];
+
 export function ArticlesListPage() {
   useDocumentTitle('Articles');
   const { session } = useAuth();
@@ -76,7 +85,7 @@ export function ArticlesListPage() {
   const filters: ArticleListFilters = useMemo(
     () => ({
       q: params.get('q') ?? '',
-      status: (params.get('status') as ArticleStatus | null) ?? '',
+      status: (params.get('status') as ArticleListFilters['status'] | null) ?? '',
       section: params.get('section') ?? '',
       mine: params.get('mine') === '1',
       page: parsePage(params.get('page')),
@@ -116,13 +125,37 @@ export function ArticlesListPage() {
         }
       />
 
+      <nav aria-label="Article views" className="-mx-4 md:mx-0">
+        <ul data-scroll-x className="no-scrollbar flex gap-1 overflow-x-auto border-b border-line px-4 md:px-0">
+          {quickViews.map((v) => {
+            const active = filters.status === v.status && filters.mine === v.mine;
+            return (
+              <li key={v.label} className="shrink-0">
+                <button
+                  type="button"
+                  aria-current={active ? 'page' : undefined}
+                  onClick={() => update({ status: v.status, mine: v.mine })}
+                  className={cn(
+                    '-mb-px border-b-2 px-3 py-2.5 text-button',
+                    active ? 'border-green-700 text-green-700' : 'border-transparent text-ink-muted hover:text-ink',
+                  )}
+                >
+                  {v.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_200px_auto] md:items-center">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-muted" aria-hidden />
           <Input type="search" aria-label="Search by title" placeholder="Search by title…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-10" />
         </div>
-        <Select aria-label="Filter by status" value={filters.status} onChange={(e) => update({ status: e.target.value as ArticleStatus | '' })}>
+        <Select aria-label="Filter by status" value={filters.status} onChange={(e) => update({ status: e.target.value as ArticleListFilters['status'] })}>
           <option value="">All statuses</option>
+          <option value="review">Needs review</option>
           {statuses.map((s) => (
             <option key={s} value={s}>
               {statusInfo[s].label}

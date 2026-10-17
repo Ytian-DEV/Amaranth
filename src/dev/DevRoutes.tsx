@@ -16,6 +16,7 @@ import { AdminShell } from '@/features/cms/layout/AdminLayout';
 import { DashboardView } from '@/features/cms/dashboard/DashboardView';
 import { RichText } from '@/features/cms/articles/editor/RichText';
 import { WorkflowPanel } from '@/features/cms/articles/editor/WorkflowPanel';
+import { ActivityPanel, RevisionsPanel } from '@/features/cms/articles/editor/HistoryPanels';
 import { ArticlesTable } from '@/features/cms/articles/ArticlesListPage';
 import { defaultSections } from '@/features/public/nav';
 import { fixtureEditor, fixtureQueue, fixtureRecent, fixtureStats, fixtureArticle, fixtureComments, fixtureHome, fixtureHomeEmpty, fixtureIssues, fixtureMonths, fixtureSection } from './fixtures';
@@ -131,6 +132,19 @@ export default function DevRoutes() {
               <RichText initial={fixtureArticle.bodyHtml} onChange={() => undefined} uploadImage={async () => ({ bucket: 'media', path: '/images/x.jpg' })} />
               <div className="rounded-[12px] border border-line bg-surface p-4">
                 <WorkflowPanel status="in_review" publishedAt={null} options={['published', 'scheduled', 'draft', 'rejected']} busy={false} onTransition={() => undefined} />
+                <div className="mt-6 border-t border-line pt-4">
+                  <ActivityPanel
+                    onAddNote={async () => undefined}
+                    items={[
+                      { id: 3, action: 'note', from: null, to: null, note: 'Can we get a quote from the forest rangers?', actor: 'Nora News', createdAt: new Date(Date.now() - 3_600_000).toISOString() },
+                      { id: 2, action: 'status', from: 'draft', to: 'submitted', note: 'Ready for review', actor: 'Wes Writer', createdAt: new Date(Date.now() - 86_400_000).toISOString() },
+                      { id: 1, action: 'created', from: null, to: 'draft', note: null, actor: 'Wes Writer', createdAt: new Date(Date.now() - 3 * 86_400_000).toISOString() },
+                    ]}
+                  />
+                </div>
+                <div className="mt-6 border-t border-line pt-4">
+                  <RevisionsPanel canRestore onRestore={() => undefined} items={[{ id: 2, kind: 'autosave', title: 'x', savedBy: 'Wes Writer', createdAt: new Date(Date.now() - 600_000).toISOString() }, { id: 1, kind: 'status', title: 'x', savedBy: 'Wes Writer', createdAt: new Date(Date.now() - 86_400_000).toISOString() }]} />
+                </div>
               </div>
             </div>
           </AdminShell>

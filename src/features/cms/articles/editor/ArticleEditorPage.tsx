@@ -25,6 +25,8 @@ import {
   type EditorDraft,
 } from '../api';
 import { AuthorsField, CategorySelect, CoverField, Label, Panel, SeoFields, TagsField } from './fields';
+import { ActivityPanel, RevisionsPanel } from './HistoryPanels';
+import { loadRevision, useActivity, useAddNote, useRevisions } from './history';
 import { RichText } from './RichText';
 import { useMySections } from './useMySections';
 import { WorkflowPanel } from './WorkflowPanel';
@@ -70,6 +72,7 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
   const [save, setSave] = useState<SaveState>({ kind: 'idle' });
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [body, setBody] = useState({ key: 0, initial: initialDraft.bodyJson ?? initialDraft.bodyHtml });
   const lastSaved = useRef(snapshot(initialDraft));
   const saving = useRef(false);
   useDocumentTitle(draft.title ? `Edit: ${draft.title}` : 'New article');
@@ -86,6 +89,17 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
   const writesLive = !['draft', 'rejected'].includes(status); // changes to live/locked articles need an explicit update
   const dirty = snapshot(draft) !== lastSaved.current;
   const transitions = row ? allowedTransitions(role, ctx) : [];
+  const activity = useActivity(row?.id);
+  const revisions = useRevisions(row?.id);
+  const addNote = useAddNote(row?.id ?? '');
+
+  async function restore(revisionId: number) {
+    const rev = await loadRevision(revisionId);
+    if (!rev) return;
+    setDraft((d) => ({ ...d, title: rev.title, bodyJson: rev.bodyJson, bodyHtml: rev.bodyHtml }));
+    setBody((b) => ({ key: b.key + 1, initial: rev.bodyJson ?? rev.bodyHtml }));
+    setNotice('Revision restored into the editor. Save to keep it.');
+  }
 
   const patch = useCallback((p: Partial<EditorDraft>) => setDraft((d) => ({ ...d, ...p })), []);
 
@@ -103,6 +117,7 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
         if (mode === 'auto' && writesLive && current.id) {
           await saveRevision(current.id, current, userId, 'autosave');
           setSave({ kind: 'saved', at: new Date(), message: 'Autosaved a revision — use “Update article” to publish changes.' });
+          void queryClient.invalidateQueries({ queryKey: ['article-revisions', current.id] });
           return row;
         }
         const withExcerpt = current.excerpt.trim() ? current : { ...current, excerpt: autoExcerpt(current.bodyText) };
@@ -118,6 +133,7 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
         setSave({ kind: 'saved', at: new Date() });
         void queryClient.invalidateQueries({ queryKey: ['cms-articles'] });
         void queryClient.invalidateQueries({ queryKey: ['recent-articles'] });
+        void queryClient.invalidateQueries({ queryKey: ['article-revisions', saved.id] });
         if (!current.id) navigate(`/admin/articles/${saved.id}`, { replace: true });
         return saved;
       } catch (err) {
@@ -267,7 +283,8 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
             className="w-full resize-none bg-transparent text-[18px] leading-[1.5] text-ink-muted outline-none placeholder:text-ink-muted/60"
           />
           <RichText
-            initial={initialDraft.bodyJson ?? initialDraft.bodyHtml}
+            key={body.key}
+            initial={body.initial}
             editable={editable}
             uploadImage={uploadForBody}
             onChange={(v) => patch({ bodyJson: v.json, bodyHtml: v.html, bodyText: v.text })}
@@ -338,6 +355,16 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
               onChange={patch}
             />
           </Panel>
+          {row && (
+            <Panel title="Notes & activity">
+              <ActivityPanel items={activity.data} loading={activity.isPending} onAddNote={(note) => addNote.mutateAsync(note)} />
+            </Panel>
+          )}
+          {row && (
+            <Panel title="Revisions">
+              <RevisionsPanel items={revisions.data} loading={revisions.isPending} canRestore={editable} onRestore={(rid) => void restore(rid)} />
+            </Panel>
+          )}
           {row && status === 'draft' && (row.created_by === userId || isEditor(role)) && (
             <Button variant="ghost" className="self-start text-alert" onClick={() => void remove()}>
               Delete draft
