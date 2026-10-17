@@ -3,6 +3,8 @@ import type { StoryItem } from '@/components/story/types';
 import type { HomeData } from '@/features/public/home/homeData';
 import type { ArticleComment, ArticleDetail } from '@/features/public/article/articleData';
 import type { ArchiveMonth, Issue } from '@/features/public/archives/archivesData';
+import type { QueueItem, RecentArticle } from '@/features/cms/dashboard/dashboardData';
+import type { DashboardStats } from '@/lib/database.types';
 
 const day = (d: number) => `2026-10-${String(d).padStart(2, '0')}T08:00:00+08:00`;
 
@@ -223,3 +225,33 @@ export const fixtureMonths: ArchiveMonth[] = [
   { month: '2025-12-01', articles: 9 },
   { month: '2025-11-01', articles: 15 },
 ];
+
+export const fixtureStats: DashboardStats = {
+  published: 128,
+  published_this_week: 6,
+  scheduled: 2,
+  drafts: 12,
+  in_review: 4,
+  pending_submissions: 3,
+  oldest_pending_at: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+  unread_messages: 5,
+  pending_comments: 7,
+  views_this_month: 8400,
+  views_last_month: 7100,
+};
+
+export const fixtureRecent: RecentArticle[] = [
+  { id: 'r1', title: 'Inside the campus fight to protect the forests of Mt. Pangasugan', slug: 'x', category: 'News', status: 'published', date: day(15) },
+  { id: 'r2', title: 'The night shift: a week with dorm working scholars', slug: 'x', category: 'Feature', status: 'published', date: day(12) },
+  { id: 'r3', title: 'Climate-ready campus before the next typhoon', slug: 'x', category: 'Specials', status: 'draft', date: day(10) },
+  { id: 'r4', title: 'Vipers reach the regional semifinals', slug: 'x', category: 'Sports', status: 'in_review', date: day(13) },
+  { id: 'r5', title: 'Notes from the Fourth Floor', slug: 'x', category: 'Views', status: 'scheduled', date: day(9) },
+];
+
+export const fixtureQueue: QueueItem[] = [
+  { id: 'q1', kind: 'submission', title: 'A love letter to the Agri canteen', from: 'a BS Agriculture student', createdAt: new Date(Date.now() - 2 * 86_400_000).toISOString() },
+  { id: 'q2', kind: 'event', title: 'Event: Org Fair 2026 photo report', from: 'the Student Council', createdAt: new Date(Date.now() - 86_400_000).toISOString() },
+  { id: 'q3', kind: 'submission', title: 'Poem: Rain over the Lower Campus', from: 'a BSED student', createdAt: new Date(Date.now() - 5 * 3_600_000).toISOString() },
+];
+
+export const fixtureEditor = { display_name: 'Administrator', role: 'editor_in_chief' as const, avatar_url: null, email: 'editor@amaranth.vsu.edu.ph' };
