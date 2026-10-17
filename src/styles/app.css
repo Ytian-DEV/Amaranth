@@ -1,8 +1,7 @@
 @import 'tailwindcss';
 @import './tokens.css';
 
-/* Scan only v2 sources; src/legacy brings its own compiled CSS. */
-@source not '../legacy';
+/* Keep Tailwind's scan to this app's sources. */
 @source not '../../Amaranth';
 @source not '../../supabase';
 

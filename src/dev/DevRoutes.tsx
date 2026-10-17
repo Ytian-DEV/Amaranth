@@ -124,6 +124,7 @@ export default function DevRoutes() {
         path="admin/articles"
         element={
           <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <h1 className="sr-only">Articles</h1>
             <div className="rounded-[12px] border border-line bg-surface">
               <ArticlesTable rows={fixtureRecent.map((r) => ({ id: r.id, title: r.title, slug: r.slug, status: r.status, section: r.category, category: r.category, byline: 'Maria Santos', updatedAt: r.date, publishedAt: r.date }))} />
             </div>
@@ -134,6 +135,7 @@ export default function DevRoutes() {
         path="admin/editor"
         element={
           <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <h1 className="sr-only">Edit article</h1>
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
               <RichText initial={fixtureArticle.bodyHtml} onChange={() => undefined} uploadImage={async () => ({ bucket: 'media', path: '/images/x.jpg' })} />
               <div className="rounded-[12px] border border-line bg-surface p-4">
@@ -161,6 +163,7 @@ export default function DevRoutes() {
         element={
           <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
             <div className="flex flex-col gap-6">
+              <h1 className="sr-only">Media library</h1>
               <MediaUploader onFiles={() => undefined} busy={false} />
               <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
                 <MediaGrid items={fixtureMedia} selectedId="m2" onSelect={() => undefined} />
@@ -268,6 +271,7 @@ const devScreens: { path: string; label: string }[] = [
 
 function DevIndex() {
   useDocumentTitle('Dev screens');
+  (window as unknown as { __devPaths?: string[] }).__devPaths = devScreens.map((s) => (s.path.startsWith('/') ? s.path : `/dev/${s.path}`));
   return (
     <main id="main" className="container-page py-12">
       <h1 className="font-serif text-headline-l">Dev screens</h1>

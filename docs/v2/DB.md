@@ -1,7 +1,7 @@
 # AMARANTH v2 — Database
 
 **Decision (2026-10-17): option B — fresh schema** pasted into a new or emptied Supabase project.
-The legacy file `supabase/schema.sql` is kept for reference only; don't paste it.
+The v1 schema is kept at `supabase/legacy/schema-v1.sql` for reference only; don't paste it.
 
 ## 1. Files
 | File | What |

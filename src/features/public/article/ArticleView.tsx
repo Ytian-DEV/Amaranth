@@ -175,6 +175,7 @@ export function ArticleView({
 export function ArticleSkeleton() {
   return (
     <div className="container-page flex max-w-[860px] flex-col gap-4 py-14" aria-busy>
+      <h1 className="sr-only">Loading the article</h1>
       <Skeleton className="h-3 w-24" />
       <Skeleton className="h-12 w-full" />
       <Skeleton className="h-12 w-4/5" />

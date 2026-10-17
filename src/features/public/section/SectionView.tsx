@@ -134,6 +134,7 @@ export function SectionView({
 export function SectionSkeleton() {
   return (
     <div className="pb-16" aria-busy>
+      <h1 className="sr-only">Loading</h1>
       <div className="border-b border-line bg-surface">
         <div className="container-page flex flex-col gap-4 py-12">
           <Skeleton className="h-10 w-56" />

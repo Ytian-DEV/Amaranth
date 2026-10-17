@@ -8,6 +8,7 @@ function domCheck() {
     .slice(0, 10)
     .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).slice(0, 60)}`);
   const unnamed = [...document.querySelectorAll<HTMLElement>('button, a[href], input, select, textarea, [role="button"]')]
+    .filter((e) => !e.closest('[aria-hidden="true"]'))
     .filter(
       (e) =>
         !(
@@ -35,4 +36,31 @@ function domCheck() {
   };
 }
 
-(window as unknown as { __domCheck: typeof domCheck }).__domCheck = domCheck;
+type SweepResult = { checked: number; width: number; issues: Record<string, string[]> };
+type DevWindow = Window & { __domCheck: typeof domCheck; __startSweep: (paths?: string[]) => void; __sweepResult: SweepResult | null; __devPaths?: string[] };
+
+/** Visits every /dev screen with client-side navigation and records problems in window.__sweepResult. */
+async function sweep(paths: string[]) {
+  const w = window as unknown as DevWindow;
+  w.__sweepResult = null;
+  const issues: Record<string, string[]> = {};
+  for (const p of paths) {
+    history.pushState({}, '', p);
+    dispatchEvent(new PopStateEvent('popstate'));
+    await new Promise((r) => setTimeout(r, 1500));
+    const c = domCheck();
+    const found: string[] = [];
+    if (c.pageOverflow) found.push(`overflow: ${c.offenders.slice(0, 3).join(' | ')}`);
+    if (c.unnamed.length) found.push(`unnamed: ${c.unnamed.slice(0, 2).join(' | ')}`);
+    if (c.h1Count !== 1) found.push(`h1=${c.h1Count}`);
+    if (c.headingSkips) found.push(`heading skips=${c.headingSkips}`);
+    if (c.imagesWithoutAlt) found.push(`images without alt=${c.imagesWithoutAlt}`);
+    if (found.length) issues[p] = found;
+  }
+  w.__sweepResult = { checked: paths.length, width: document.documentElement.clientWidth, issues };
+}
+
+const w = window as unknown as DevWindow;
+w.__domCheck = domCheck;
+w.__sweepResult = null;
+w.__startSweep = (paths) => void sweep(paths ?? w.__devPaths ?? []);
