@@ -415,6 +415,183 @@ export type DashboardStats = {
   views_last_month: number;
 };
 
+// ---------------------------------------------------------------- Salingkusog (supabase/v2/salingkusog.sql)
+
+export type SkCategory = 'ball_games' | 'athletics' | 'racket_sports' | 'aquatics' | 'mind_games' | 'esports' | 'dance_cheer';
+export type SkDivision = 'men' | 'women' | 'mixed' | 'open';
+export type SkFormat = 'bracket' | 'round_robin' | 'timed' | 'judged';
+export type SkMatchStatus = 'upcoming' | 'live' | 'final' | 'postponed' | 'cancelled';
+export type SkMedal = 'gold' | 'silver' | 'bronze';
+export type SkAwardKind = 'mvp_of_day' | 'athlete_of_day' | 'finals_mvp';
+// sk_matches.periods: [{ "label": "Q1", "a": 18, "b": 21 }]
+export type SkPeriod = { label: string; a: number | null; b: number | null };
+// sk_matches.team_stats: [{ "label": "Rebounds", "a": "42", "b": "38" }]
+export type SkStatPair = { label: string; a: string; b: string };
+// sk_awards.stat_line: [{ "label": "PTS", "value": "24" }]
+export type SkStatValue = { label: string; value: string };
+
+export type SkEditionRow = {
+  id: string;
+  year: number;
+  title: string;
+  subtitle: string | null;
+  starts_on: string;
+  ends_on: string;
+  points_gold: number;
+  points_silver: number;
+  points_bronze: number;
+  is_current: boolean;
+  is_published: boolean;
+  schedule_pdf_asset_id: string | null;
+  map_asset_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type SkFactionRow = {
+  id: string;
+  edition_id: string;
+  name: string;
+  slug: string;
+  short_name: string | null;
+  motto: string | null;
+  color: string;
+  logo_asset_id: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+export type SkVenueRow = {
+  id: string;
+  edition_id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  map_number: number | null;
+  map_x: number | null;
+  map_y: number | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+export type SkSportRow = {
+  id: string;
+  edition_id: string;
+  name: string;
+  slug: string;
+  category: SkCategory;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+export type SkEventRow = {
+  id: string;
+  edition_id: string;
+  sport_id: string;
+  name: string;
+  slug: string;
+  division: SkDivision;
+  format: SkFormat;
+  is_team: boolean;
+  result_unit: string | null;
+  venue_id: string | null;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+export type SkAthleteRow = {
+  id: string;
+  edition_id: string;
+  faction_id: string;
+  name: string;
+  slug: string;
+  program: string | null;
+  photo_asset_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type SkMatchRow = {
+  id: string;
+  edition_id: string;
+  event_id: string;
+  round: string | null;
+  round_order: number;
+  bracket_slot: number | null;
+  venue_id: string | null;
+  scheduled_at: string;
+  status: SkMatchStatus;
+  side_a_id: string | null;
+  side_b_id: string | null;
+  score_a: number | null;
+  score_b: number | null;
+  periods: SkPeriod[];
+  team_stats: SkStatPair[];
+  live_note: string | null;
+  started_at: string | null;
+  ended_at: string | null;
+  recap_article_id: string | null;
+  winner_side: 'a' | 'b' | null; // generated
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type SkAthleteStatsRow = { match_id: string; athlete_id: string; stats: Record<string, number | string> };
+export type SkPlacementRow = {
+  id: string;
+  edition_id: string;
+  event_id: string;
+  place: number;
+  medal: SkMedal | null;
+  faction_id: string;
+  athlete_id: string | null;
+  result: string | null;
+  awarded_on: string;
+  created_at: string;
+  updated_at: string;
+};
+export type SkAwardRow = {
+  id: string;
+  edition_id: string;
+  kind: SkAwardKind;
+  day: string;
+  athlete_id: string;
+  match_id: string | null;
+  event_id: string | null;
+  headline: string | null;
+  stat_line: SkStatValue[];
+  quote: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type SkTeamRow = { profile_id: string; added_by: string | null; created_at: string };
+
+export type SkMedalTableRow = {
+  edition_id: string;
+  faction_id: string;
+  name: string;
+  slug: string;
+  short_name: string | null;
+  color: string;
+  logo_asset_id: string | null;
+  gold: number;
+  silver: number;
+  bronze: number;
+  total: number;
+  points: number;
+  rank: number;
+};
+export type SkPointsByDayRow = { edition_id: string; faction_id: string; day: string; day_number: number; points: number };
+export type SkHeadToHeadRow = { edition_id: string; faction_id: string; opponent_id: string; wins: number; losses: number };
+export type SkEventStatusRow = {
+  edition_id: string;
+  event_id: string;
+  sport_id: string;
+  completed: boolean;
+  first_match_at: string | null;
+  last_match_at: string | null;
+  live: boolean;
+};
+export type SkEventLeaderRow = { edition_id: string; event_id: string; athlete_id: string; stat: string; total: number; games: number };
+
 export type Database = {
   public: {
     Tables: {
@@ -499,9 +676,33 @@ export type Database = {
       department_contacts: Table<DepartmentContactRow, 'name'>;
       site_settings: Table<SiteSettingRow, 'key' | 'value'>;
       audit_log: Table<AuditLogRow, 'action' | 'entity'>;
+      sk_editions: Table<SkEditionRow, 'year' | 'title' | 'starts_on' | 'ends_on'>;
+      sk_factions: Table<SkFactionRow, 'edition_id' | 'name' | 'slug', [FK<'sk_factions', 'logo_asset_id', 'media_assets'>]>;
+      sk_venues: Table<SkVenueRow, 'edition_id' | 'name' | 'slug'>;
+      sk_sports: Table<SkSportRow, 'edition_id' | 'name' | 'slug' | 'category'>;
+      sk_events: Table<SkEventRow, 'sport_id' | 'name' | 'slug'>;
+      sk_athletes: Table<SkAthleteRow, 'faction_id' | 'name' | 'slug', [FK<'sk_athletes', 'photo_asset_id', 'media_assets'>]>;
+      sk_matches: Table<SkMatchRow, 'event_id' | 'scheduled_at', [FK<'sk_matches', 'recap_article_id', 'articles'>]>;
+      sk_athlete_stats: Table<
+        SkAthleteStatsRow,
+        'match_id' | 'athlete_id',
+        [FK<'sk_athlete_stats', 'match_id', 'sk_matches'>, FK<'sk_athlete_stats', 'athlete_id', 'sk_athletes'>]
+      >;
+      sk_placements: Table<SkPlacementRow, 'event_id' | 'place' | 'faction_id'>;
+      sk_awards: Table<
+        SkAwardRow,
+        'edition_id' | 'kind' | 'day' | 'athlete_id',
+        [FK<'sk_awards', 'match_id', 'sk_matches'>, FK<'sk_awards', 'event_id', 'sk_events'>]
+      >;
+      sk_team: Table<SkTeamRow, 'profile_id', [FK<'sk_team', 'profile_id', 'profiles', true>]>;
     };
     Views: {
       article_cards: { Row: ArticleCardRow; Relationships: [] };
+      sk_medal_table: { Row: SkMedalTableRow; Relationships: [] };
+      sk_points_by_day: { Row: SkPointsByDayRow; Relationships: [] };
+      sk_head_to_head: { Row: SkHeadToHeadRow; Relationships: [] };
+      sk_event_status: { Row: SkEventStatusRow; Relationships: [] };
+      sk_event_leaders: { Row: SkEventLeaderRow; Relationships: [] };
     };
     Functions: {
       record_article_view: { Args: { p_article_id: string }; Returns: undefined };
@@ -595,6 +796,12 @@ export type Database = {
       contact_status: ContactStatus;
       issue_type: IssueType;
       team_role_group: TeamRoleGroup;
+      sk_category: SkCategory;
+      sk_division: SkDivision;
+      sk_format: SkFormat;
+      sk_match_status: SkMatchStatus;
+      sk_medal: SkMedal;
+      sk_award_kind: SkAwardKind;
     };
     CompositeTypes: Record<string, never>;
   };

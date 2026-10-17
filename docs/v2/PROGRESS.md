@@ -8,11 +8,12 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Next:** A1 `feature/salingkusog-db` (awaiting go).
+**Last done:** A1 `feature/salingkusog-db` merged — `supabase/v2/salingkusog.sql` (user pastes it after `schema.sql`), 47 SQL checks (148 total), TS types in `src/lib/database.types.ts`.
+**Next:** A2 `feature/salingkusog-team-access` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
-| A1 | `feature/salingkusog-db` | ⬜ |
+| A1 | `feature/salingkusog-db` | ✅ |
 | A2 | `feature/salingkusog-team-access` | ⬜ |
 | A3 | `feature/salingkusog-cms-setup` | ⬜ |
 | A4 | `feature/salingkusog-scorekeeper` | ⬜ |
