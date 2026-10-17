@@ -1,7 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { ErrorState } from '@/components/ui/Feedback';
 import { env } from '@/lib/env';
-import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import { publicUrl } from '@/lib/media';
+import { usePageMeta } from '@/lib/usePageMeta';
 import { NotFoundPage } from '../NotFoundPage';
 import { useSiteSettings } from '../settings';
 import { ArticleSkeleton, ArticleView } from './ArticleView';
@@ -19,7 +20,13 @@ export function ArticlePage() {
   const comments = useComments(data?.id, Boolean(data?.isLive));
   const submit = useSubmitComment(data?.id ?? '');
   useRecordView(data?.id, Boolean(data?.isLive));
-  useDocumentTitle(data ? data.seoTitle || data.title : article.data === null ? 'Page not found' : undefined);
+  usePageMeta({
+    title: data ? data.seoTitle || data.title : article.data === null ? 'Page not found' : undefined,
+    description: data ? data.seoDescription || data.dek || data.excerpt : undefined,
+    path: `/article/${slug}`,
+    image: data?.cover ? publicUrl(data.cover.bucket, data.cover.path) : null,
+    type: 'article',
+  });
 
   if (article.isPending) return <ArticleSkeleton />;
   if (article.error) {

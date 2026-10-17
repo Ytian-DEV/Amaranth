@@ -2,6 +2,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { ErrorState } from '@/components/ui/Feedback';
 import { parsePage } from '@/components/ui/pageWindow';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import { usePageMeta } from '@/lib/usePageMeta';
 import { NotFoundPage } from '../NotFoundPage';
 import { SectionSkeleton, SectionView } from './SectionView';
 import { useArticlePage, useSectionInfo } from './sectionData';
@@ -20,7 +21,11 @@ export function SectionPage() {
   const info = useSectionInfo(slug);
   const articles = useArticlePage({ section: slug, category, page });
   const activeCategory = info.data?.categories.some((c) => c.slug === category) ? category : null;
-  useDocumentTitle(info.data?.section.name ?? (info.data === null ? 'Page not found' : undefined));
+  usePageMeta({
+    title: info.data?.section.name ?? (info.data === null ? 'Page not found' : undefined),
+    description: info.data?.section.description,
+    path: `/${slug}`,
+  });
 
   if (info.isPending || (articles.isPending && !articles.data)) return <SectionSkeleton />;
   if (info.error || articles.error) {

@@ -1,10 +1,10 @@
 import { ErrorState } from '@/components/ui/Feedback';
-import { useDocumentTitle } from '@/lib/useDocumentTitle';
+import { usePageMeta } from '@/lib/usePageMeta';
 import { HomeSkeleton, HomeView } from './HomeView';
 import { useHomeData } from './homeData';
 
 export function HomePage() {
-  useDocumentTitle(null);
+  usePageMeta({ title: null, path: '/' });
   const { data, error, isPending, refetch } = useHomeData();
 
   if (isPending) return <HomeSkeleton />;
