@@ -32,6 +32,8 @@ A ground-up rebuild of the Amaranth website and its staff CMS on the "Amaranth R
 | 16 | `feature/content-migration` | Skipped — fresh database chosen |
 | 17 | `feature/v2-polish` | Legacy removal, dependency cleanup, a11y sweep, README |
 | 18 | `feature/perf-pass` | Eager shell, CLS 0, chunks, image compression, Lighthouse report |
+| — | `feature/upgrade-tiptap-3` | TipTap 3.32 (fixes `@tiptap/core` advisory) |
+| — | `feature/upgrade-vite-7` | Vite 7.3, Vitest 5, Tailwind 4.3 — `npm audit` 0 vulnerabilities |
 | — | `fix/router-test-timeout` | Test timing fix + `npm run check` gate |
 
 ## Database — apply in this order (fresh / emptied project)
@@ -66,6 +68,7 @@ Never set `VITE_ENABLE_FIXTURES` on Vercel.
 - **Staff access is invite-only.** Old v1 logins don't carry over; add each person in Staff → Invites (or `staff_invites`) and invite them from Supabase Auth.
 - **URLs:** `/dashboard` → `/admin`; `/features` → `/feature`; `/blog` → `/blogs`; `/s&t` → `/science-technology`; `/submit-article` → `/submit` (all redirect). Articles move from `/article/:id` to `/article/:slug`.
 - Fonts are now Fraunces + Inter (Montserrat/Trajan removed).
+- Build requires Node ≥ 20.19 (Vite 7); Vercel's default Node 22 is fine.
 
 ## Deploy day
 
@@ -128,7 +131,6 @@ Never set `VITE_ENABLE_FIXTURES` on Vercel.
 
 ## Known follow-ups
 
-- TipTap 2 → 3 (moderate npm advisory in `@tiptap/core`) and Vite 6 → 7 (dev-server advisory).
 - Optional export/import of v1 articles if they should live in the new database.
 - Katalon test project in the untracked `Amaranth/` folder: keep in its own repo or delete.
 
