@@ -8,16 +8,14 @@
 
 ## Phase 2 (Salingkusog + section layouts) — see `docs/v2/PLAN-PHASE2.md`
 **Rule:** one feature at a time; wait for the user's go before starting the next.
-**Last done:** A12 `feature/sports-landing` merged: `/sports` page 1 with all categories (Figma 21:1963 / 22:2645).
-- Latest-results strip: live games first, then recent finals, each linking to the recap.
-- Chips: All Sports, a "Salingkusog 2026" chip that opens the hub, and the section's categories.
-- Lead story beside a Salingkusog block: top 4 and "Open the Salingkusog hub".
-- Latest in Sports.
-- Athlete spotlight, from the newest award with a quote.
-- More from the courts.
+**Last done:** A13 `feature/salingkusog-social-cards` merged (Figma 20:2036 / 20:2067). **Track A (Salingkusog) is complete.**
+- In the newsroom, Salingkusog → Awards → **Card** on each award opens a preview with **Download PNG**.
+- MVP of the Day and Finals MVP use the 1080×1350 card: photo, name, faction, stat line, faction stripe, game footer.
+- Athlete of the Day uses the 1080×1080 card: name, medal and event, big result, faction colour panel with the photo.
+- Drawn with the Canvas API, so there is no new dependency. Fonts and token colours come from the page; photos load with CORS so the PNG can be exported.
+- Fixture: `/dev/admin/salingkusog-cards`.
 
-With no visible edition, the Salingkusog parts are left out. Category or page views keep the old section list. Fixtures: `/dev/sports` and `/dev/sports/no-salingkusog`.
-**Next:** A13 `feature/salingkusog-social-cards` (awaiting go).
+**Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
 
 | # | Branch | Status |
 |---|---|---|
@@ -33,7 +31,7 @@ With no visible edition, the Salingkusog parts are left out. Category or page vi
 | A10 | `feature/salingkusog-match-recap` | ✅ |
 | A11 | `feature/salingkusog-venues` | ✅ |
 | A12 | `feature/sports-landing` | ✅ |
-| A13 | `feature/salingkusog-social-cards` | ⬜ |
+| A13 | `feature/salingkusog-social-cards` | ✅ |
 | B1 | `feature/nav-more-menu` | ⬜ |
 | B2–B12 | `feature/section-<slug>` (News, Feature, Literary, Blogs, Specials, Views, S&T, Investigative, Explainer, Bulletin, Stories) | ⬜ |
 

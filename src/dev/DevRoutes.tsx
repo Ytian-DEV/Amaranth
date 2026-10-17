@@ -222,6 +222,7 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'admin/salingkusog-scorekeeper', label: 'CMS Salingkusog scorekeeper (live, buttons work)' },
   { path: 'admin/salingkusog-results', label: 'CMS Salingkusog results & medals' },
   { path: 'admin/salingkusog-awards', label: 'CMS Salingkusog awards + athletes' },
+  { path: 'admin/salingkusog-cards', label: 'CMS Salingkusog social cards (MVP, Athlete of the Day)' },
   { path: '/admin/login', label: 'Staff sign in' },
   { path: '/admin/forgot-password', label: 'Forgot password' },
   { path: '/admin/set-password', label: 'Set password (expired link state)' },

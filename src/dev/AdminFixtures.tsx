@@ -16,7 +16,7 @@ import { ImportView } from '@/features/cms/salingkusog/setup/ImportTab';
 import { SportsView } from '@/features/cms/salingkusog/setup/SportsTab';
 import type { MediaAssetRow } from '@/lib/database.types';
 import { fixtureArticle, fixtureEditor, fixtureQueue, fixtureRecent, fixtureStats } from './fixtures';
-import { FixtureAwardsAthletes, FixtureResults, FixtureScorekeeper, FixtureScores } from './SkFixturePages';
+import { FixtureAwardsAthletes, FixtureResults, FixtureScorekeeper, FixtureScores, FixtureSocialCards } from './SkFixturePages';
 import { skFixture } from './skFixtures';
 
 const fixtureMedia: MediaAssetRow[] = Array.from({ length: 8 }, (_, i) => ({
@@ -217,6 +217,17 @@ export default function AdminFixtures() {
             <div className="flex flex-col gap-6">
               <h1 className="font-serif text-headline-l text-ink">Awards and athletes</h1>
               <FixtureAwardsAthletes />
+            </div>
+          </AdminShell>
+        }
+      />
+      <Route
+        path="salingkusog-cards"
+        element={
+          <AdminShell profile={fixtureEditor} pending={3} onSignOut={() => undefined}>
+            <div className="flex flex-col gap-6">
+              <h1 className="font-serif text-headline-l text-ink">Social cards</h1>
+              <FixtureSocialCards />
             </div>
           </AdminShell>
         }

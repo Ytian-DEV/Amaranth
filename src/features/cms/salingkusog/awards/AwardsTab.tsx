@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { Image as ImageIcon, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Field, Input, Select, Textarea } from '@/components/ui/Field';
@@ -11,7 +11,9 @@ import { Card, CardHeader } from '../../ui';
 import { awardKindLabels, awardKinds } from '@/lib/skLabels';
 import { namer, useSkLookups, type SkLookups } from '../scores/lookups';
 import { defaultDay, editionDays, manilaDate, manilaTime } from '../scoring';
-import { skErrorText, useDeleteSkRow, useSaveSkRow, useSkAwards, useSkMatches } from '../skApi';
+import { skErrorText, useDeleteSkRow, useMediaByIds, useSaveSkRow, useSkAwards, useSkMatches, useSkPlacements } from '../skApi';
+import { socialCardData, type SocialCardData } from './socialCard';
+import { SocialCardModal } from './SocialCardModal';
 import { RowActions } from '../setup/shared';
 
 const statText = (s: SkStatValue[]) => s.map((x) => `${x.label} ${x.value}`).join(', ');
@@ -125,13 +127,14 @@ function AwardModal({ edition, award, lookups, matches, onClose }: { edition: Sk
   );
 }
 
-export function AwardsView({ edition, awards, lookups, onAdd, onEdit, onDelete }: {
+export function AwardsView({ edition, awards, lookups, onAdd, onEdit, onDelete, onCard }: {
   edition: SkEditionRow;
   awards: SkAwardRow[];
   lookups: SkLookups;
   onAdd: () => void;
   onEdit: (a: SkAwardRow) => void;
   onDelete: (a: SkAwardRow) => void;
+  onCard?: (a: SkAwardRow) => void;
 }) {
   const n = namer(lookups);
   const days = editionDays(edition).reverse();
@@ -166,6 +169,11 @@ export function AwardsView({ edition, awards, lookups, onAdd, onEdit, onDelete }
                           {[a.event_id && n.eventName(a.event_id), a.headline, statText(a.stat_line)].filter(Boolean).join(' · ')}
                         </p>
                       </div>
+                      {onCard && (
+                        <Button size="sm" variant="outline" icon={<ImageIcon className="size-4" aria-hidden />} onClick={() => onCard(a)}>
+                          Card<span className="sr-only"> for {ath?.name}</span>
+                        </Button>
+                      )}
                       <RowActions label={`${awardKindLabels[a.kind]} ${ath?.name ?? ''}`} onEdit={() => onEdit(a)} onDelete={() => onDelete(a)} />
                     </li>
                   );
@@ -184,7 +192,10 @@ export function AwardsTab({ edition }: { edition: SkEditionRow }) {
   const lookups = useSkLookups(edition.id);
   const matches = useSkMatches(edition.id);
   const del = useDeleteSkRow('sk_awards');
+  const placements = useSkPlacements(edition.id);
+  const media = useMediaByIds([...(lookups.data?.athletes ?? []).map((a) => a.photo_asset_id), ...(lookups.data?.factions ?? []).map((f) => f.logo_asset_id)]);
   const [modal, setModal] = useState<SkAwardRow | 'new' | null>(null);
+  const [card, setCard] = useState<SocialCardData | null>(null);
 
   const error = awards.error ?? lookups.error ?? matches.error;
   if (error) return <ErrorState error={error} onRetry={() => (void awards.refetch(), lookups.refetch(), void matches.refetch())} />;
@@ -193,7 +204,16 @@ export function AwardsTab({ edition }: { edition: SkEditionRow }) {
   return (
     <>
       {del.error && <Alert tone="error">{skErrorText(del.error)}</Alert>}
-      <AwardsView edition={edition} awards={awards.data} lookups={lookups.data} onAdd={() => setModal('new')} onEdit={setModal} onDelete={(a) => window.confirm('Delete this award?') && del.mutate(a.id)} />
+      <AwardsView
+        edition={edition}
+        awards={awards.data}
+        lookups={lookups.data}
+        onAdd={() => setModal('new')}
+        onEdit={setModal}
+        onDelete={(a) => window.confirm('Delete this award?') && del.mutate(a.id)}
+        onCard={(a) => setCard(socialCardData(a, lookups.data!, edition, matches.data!, placements.data ?? [], media.data ?? []))}
+      />
+      {card && <SocialCardModal data={card} onClose={() => setCard(null)} />}
       {modal && <AwardModal edition={edition} award={modal === 'new' ? null : modal} lookups={lookups.data} matches={matches.data} onClose={() => setModal(null)} />}
     </>
   );
