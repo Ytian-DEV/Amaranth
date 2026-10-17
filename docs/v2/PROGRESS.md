@@ -32,7 +32,7 @@
   - Tracker → Vercel route `/api/e` (bot filter, same-origin, no IP) → `stats_ingest` (service role only). Daily-rotating hashed ids, DNT/GPC counted without an id, staff and previews excluded.
   - Retention: raw 13 months, daily totals forever, staff activity 24 months (nightly pg_cron job).
   - Public `/privacy` page (footer link; `#staff` section linked from the newsroom sidebar).
-  - **The user must** paste `supabase/v2/stats.sql` (and re-paste `schema.sql` once), and add `SUPABASE_SERVICE_ROLE_KEY` on Vercel Production. Open question: keep or remove Vercel Web Analytics (`@vercel/analytics`).
+  - **The user must** paste `supabase/v2/stats.sql` (and re-paste `schema.sql` once), and add `SUPABASE_SERVICE_ROLE_KEY` on Vercel Production.
   - Fixtures: `/dev/admin/statistics`, `/dev/admin/statistics/empty`, `/dev/admin/statistics/loading`, `/dev/privacy`.
 
 **Next:** Track B, starting with B1 `feature/nav-more-menu` (awaiting go).
@@ -56,6 +56,7 @@
 | B2–B12 | `feature/section-<slug>` (News, Feature, Literary, Blogs, Specials, Views, S&T, Investigative, Explainer, Bulletin, Stories) | ⬜ |
 
 ## Decisions log
+- 2026-10-18 Statistics: keep Vercel Web Analytics (`@vercel/analytics`) alongside the first-party statistics (user's choice). The privacy page mentions it.
 - 2026-10-17 Upgrades: TipTap 3 and Vite 7. Vitest went to 5 (not 4): npm 11.2 crashes (`edgesOut`) resolving Vitest 4's optional peers; Vitest 5 installs cleanly and `npm ci` from the lockfile was verified in a scratch copy. Vite 7 needs Node ≥ 20.19.
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
 - 2026-10-17 Pre-v2 uncommitted Dashboard/index.css saved as WIP commit on `feature/edit-article-restructure` (not merged).
