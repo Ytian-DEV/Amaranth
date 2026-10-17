@@ -20,14 +20,16 @@ export function getSupabase(): Supabase {
   return client;
 }
 
+type Response = { data: unknown; error: unknown };
+
 /** Unwraps a Supabase list/RPC response, throwing its error (data is never null on success). */
-export function unwrap<T>(result: { data: T | null; error: unknown }): T {
+export function unwrap<R extends Response>(result: R): NonNullable<R['data']> {
   if (result.error) throw result.error;
-  return result.data as T;
+  return result.data as NonNullable<R['data']>;
 }
 
 /** Unwraps a `.maybeSingle()` response: the row or null. */
-export function unwrapMaybe<T>(result: { data: T | null; error: unknown }): T | null {
+export function unwrapMaybe<R extends Response>(result: R): NonNullable<R['data']> | null {
   if (result.error) throw result.error;
-  return result.data;
+  return (result.data ?? null) as NonNullable<R['data']> | null;
 }

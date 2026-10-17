@@ -2,9 +2,9 @@
 
 > **Resume ("continue"):** read this file → `git status` → check out the branch in "Current branch" → finish uncommitted work → continue from the first unchecked item. Plan: `docs/v2/PLAN.md`. DB: `docs/v2/DB.md`. Figma file `jpKBeBp37twnW7eXj0Nk2S` (frames: Components 3:28, Home desktop 4:2, Home mobile 7:64, Admin dashboard 8:101).
 
-**Current branch:** `develop` (next: create `feature/section-pages`)
-**Last done:** `feature/public-shell-home` merged — public header (utility bar, masthead, nav + More, mobile header/chips/drawer), footer, home page per Figma (`/`), fixtures at `/dev/home`.
-**Next step:** `feature/section-pages` — one `/:section` template (lead + grid + category filter + pagination) for all 12 sections, redirects for old URLs (`/features`→`/feature`, `/blog`→`/blogs`), `/latest`.
+**Current branch:** `develop` (next: create `feature/article-page`)
+**Last done:** `feature/section-pages` merged — `/:section` template (lead + grid, category chips, pagination), `/latest`, public 404, old-URL redirects, explicit legacy route list in `src/app/router.tsx`.
+**Next step:** `feature/article-page` — `/article/:slug` reading layout, authors, tags, related, share, view counting, moderated comments; remove `article/:id` from `legacyRoutes`.
 
 ## Decisions log
 - 2026-10-17 DB option **B** (fresh schema, user pastes `supabase/v2/schema.sql` then `seed.sql`).
@@ -27,7 +27,7 @@
 | 1 | `feature/tooling-design-system` | ✅ merged | — |
 | 3 | `feature/auth-staff` | ✅ merged | Login not exercised against a live v2 project yet (needs schema pasted + invited user) |
 | 4 | `feature/public-shell-home` | ✅ merged | Header links to `/submit`, `/search`, `/about` … still served by legacy until their features land |
-| 5 | `feature/section-pages` | ⬜ | |
+| 5 | `feature/section-pages` | ✅ merged | Legacy pages still routed: see `legacyRoutes` in router.tsx |
 | 6 | `feature/article-page` | ⬜ | |
 | 7 | `feature/search-archives` | ⬜ | |
 | 8 | `feature/submissions-contact` | ⬜ | |

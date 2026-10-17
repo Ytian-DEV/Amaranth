@@ -147,3 +147,18 @@ export const fixtureHomeEmpty: HomeData = {
   sports: [],
   views: [],
 };
+
+export const fixtureSection = {
+  title: 'News',
+  description: 'Campus, community, regional, national and global reporting.',
+  categories: [
+    { slug: 'campus-news', name: 'Campus News' },
+    { slug: 'community-news', name: 'Community News' },
+    { slug: 'regional-news', name: 'Regional News' },
+    { slug: 'environment', name: 'Environment' },
+  ],
+  items: [...fixtureStories, ...fixtureStories.slice(1, 5).map((s) => ({ ...s, id: `${s.id}-b`, slug: `${s.slug}-b` }))],
+  page: 1,
+  pageCount: 7,
+  total: 80,
+};
