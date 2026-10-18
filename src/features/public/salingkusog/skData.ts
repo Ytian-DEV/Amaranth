@@ -63,6 +63,16 @@ export function useStandings(editionId: string | undefined) {
   });
 }
 
+/** Points race in 1/3/6/12-hour steps (null = day by day, which comes with the standings). */
+export function useTimeline(editionId: string | undefined, hours: number | null) {
+  return useQuery({
+    queryKey: ['sk-public', 'timeline', editionId, hours],
+    enabled: !!editionId && hours !== null,
+    refetchInterval: LIVE_REFRESH,
+    queryFn: async () => unwrap(await sb().rpc('sk_points_timeline', { p_edition_id: editionId!, p_hours: hours! })),
+  });
+}
+
 /** Live scores: refresh the hub when any game of the edition changes (Supabase Realtime). */
 export function useLiveGames(editionId: string | undefined) {
   const client = useQueryClient();

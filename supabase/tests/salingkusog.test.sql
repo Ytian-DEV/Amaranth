@@ -130,6 +130,13 @@ select tests.expect_eq('medal table: Vanguard 3 pts, rank 3',
 select tests.expect_eq('points race is cumulative by day (Tiamat: 0,3,8,8,8,8)',
   (select string_agg(points::text, ',' order by day) from public.sk_points_by_day where faction_id = '00000000-0000-0000-0000-00000000f001'), '0,3,8,8,8,8');
 select tests.expect_count('points race has 6 days for each of 3 factions', 'select 1 from public.sk_points_by_day', 18);
+-- results here were entered after the day they were won, so they count at the end of that day
+select tests.expect_eq('timeline 1 h: latest day with results, 24 steps, Tiamat 3 → 8',
+  (select count(*) || '|' || min(points) || '|' || max(points) from public.sk_points_timeline('00000000-0000-0000-0000-00000000e001', 1) where faction_id = '00000000-0000-0000-0000-00000000f001'), '24|3|8');
+select tests.expect_eq('timeline 6 h: 4 steps', (select count(*)::text from public.sk_points_timeline('00000000-0000-0000-0000-00000000e001', 6) where faction_id = '00000000-0000-0000-0000-00000000f001'), '4');
+select tests.expect_eq('timeline 12 h: whole edition, 12 steps for Tiamat (0,0,0,3,3,8,8,8,8,8,8,8)',
+  (select string_agg(points::text, ',' order by bucket_end) from public.sk_points_timeline('00000000-0000-0000-0000-00000000e001', 12) where faction_id = '00000000-0000-0000-0000-00000000f001'), '0,0,0,3,3,8,8,8,8,8,8,8');
+select tests.expect_error('timeline: only 1, 3, 6 or 12 hours', $$select * from public.sk_points_timeline('00000000-0000-0000-0000-00000000e001', 2)$$);
 select tests.expect_eq('head-to-head: Tiamat beat Vanguard once',
   (select wins || '-' || losses from public.sk_head_to_head where faction_id = '00000000-0000-0000-0000-00000000f001' and opponent_id = '00000000-0000-0000-0000-00000000f002'), '1-0');
 select tests.expect_count('events completed (gold awarded)', 'select 1 from public.sk_event_status where completed', 2);

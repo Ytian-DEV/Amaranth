@@ -1,8 +1,9 @@
 import { SectionHeader } from '@/components/story/Story';
-import type { SkEditionRow, SkMedalTableRow, SkPointsByDayRow } from '@/lib/database.types';
+import { LogoLoader } from '@/components/ui/LogoLoader';
+import type { SkEditionRow, SkMedalTableRow, SkPointsByDayRow, SkPointsTimelineRow } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
 import { useTweenedNumber, useTweenedNumbers } from '@/lib/useTween';
-import { liveAndNext, podiumOrder, raceSeries, readableOn, standingsDay, standingsHeadline, type HubPhase } from './hub';
+import { liveAndNext, podiumOrder, raceRanges, raceSeries, readableOn, standingsDay, standingsHeadline, stepLabel, timelineSeries, type HubPhase, type RaceRange } from './hub';
 import { FactionBadge, MatchCard, MedalChip } from './SkBits';
 import type { HubData } from './skData';
 
@@ -130,73 +131,136 @@ function MedalTable({ rows, hub, edition }: { rows: SkMedalTableRow[]; hub: HubD
   );
 }
 
-/** Cumulative points per day as an SVG line chart, with the numbers as a hidden table. */
-function PointsRace({ race, hub, upto, total }: { race: SkPointsByDayRow[]; hub: HubData; upto: number; total: number }) {
-  const shown = Math.max(1, Math.min(upto || 1, total));
-  const target = raceSeries(race, shown);
-  // lines rise from 0 on load and move to new totals when results come in
-  const flat = hub.factions.flatMap((f) => (target.get(f.id) ?? []).map((p) => p.points));
-  const tweened = useTweenedNumbers(flat, 1200);
-  const series = new Map<string, { day: number; points: number }[]>();
-  let k = 0;
-  for (const f of hub.factions) series.set(f.id, (target.get(f.id) ?? []).map((p) => ({ ...p, points: tweened[k++] ?? p.points })));
-  const W = 640;
-  const H = 290;
-  const pad = { l: 30, r: 20, t: 16, b: 16 };
-  const max = Math.max(5, ...[...target.values()].flat().map((p) => p.points));
-  const x = (day: number) => (shown === 1 ? (pad.l + W - pad.r) / 2 : pad.l + ((day - 1) / (shown - 1)) * (W - pad.l - pad.r));
-  const y = (pts: number) => H - pad.b - (pts / max) * (H - pad.t - pad.b);
-  const days = Array.from({ length: shown }, (_, i) => i + 1);
+/** Cumulative points as an SVG line chart (day by day, or in 1/3/6/12-hour steps), with the numbers as a hidden table. */
+function PointsRace({ race, hub, upto, total, range = 'day', onRange, timeline, timelineLoading }: {
+  race: SkPointsByDayRow[];
+  hub: HubData;
+  upto: number;
+  total: number;
+  range?: RaceRange;
+  onRange?: (r: RaceRange) => void;
+  timeline?: SkPointsTimelineRow[];
+  timelineLoading?: boolean;
+}) {
+  const hourly = range !== 'day';
   const factions = hub.factions;
+  let labels: string[];
+  let target: Map<string, number[]>;
+  if (hourly) {
+    const t = timelineSeries(timeline ?? []);
+    labels = t.steps.map((st) => stepLabel(st, range === 12));
+    target = t.series;
+  } else {
+    const shown = Math.max(1, Math.min(upto || 1, total));
+    const rs = raceSeries(race, shown);
+    labels = Array.from({ length: shown }, (_, i) => `Day ${i + 1}`);
+    target = new Map([...rs].map(([key, v]) => [key, v.map((p) => p.points)]));
+  }
+  const n = labels.length;
+  // lines rise from 0 on load and move to new totals when results come in
+  const flat = factions.flatMap((f) => target.get(f.id) ?? []);
+  const tweened = useTweenedNumbers(flat, 1200);
+  const series = new Map<string, number[]>();
+  let k = 0;
+  for (const f of factions) series.set(f.id, (target.get(f.id) ?? []).map((v) => tweened[k++] ?? v));
+
+  const W = 640;
+  const H = 312;
+  const pad = { l: 30, r: 20, t: 16, b: 38 };
+  const max = Math.max(5, ...flat);
+  const x = (i: number) => (n <= 1 ? (pad.l + W - pad.r) / 2 : pad.l + (i / (n - 1)) * (W - pad.l - pad.r));
+  const y = (pts: number) => H - pad.b - (pts / max) * (H - pad.t - pad.b);
+  const every = Math.max(1, Math.ceil(n / 6)); // at most ~6 time labels
+  const showLabel = (i: number) => i === n - 1 || (i % every === 0 && n - 1 - i >= every / 2);
+  const dots = n <= 14;
+  const firstStep = timeline?.[0]?.bucket_end;
+  const subtitle = !hourly
+    ? 'Cumulative points at the end of each competition day'
+    : range === 12
+      ? 'Cumulative points every 12 hours across the games'
+      : `Cumulative points every ${range === 1 ? 'hour' : `${range} hours`}${firstStep ? `, ${stepLabel(firstStep, true).split(',')[0]}` : ''}`;
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-[14px] border border-line bg-surface p-4 md:p-7">
-      <div>
-        <h3 className="font-serif text-[20px] font-semibold md:text-[24px]">Points race<span className="hidden md:inline">, day by day</span></h3>
-        <p className="mt-1 text-meta text-ink-muted">Cumulative points at the end of each competition day</p>
-      </div>
-      <figure className="flex flex-col gap-1.5">
-        <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`Points by day for ${factions.map((f) => f.name).join(', ')}. The table below has the numbers.`}>
-          {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-            <line key={t} x1={pad.l} x2={W - pad.r} y1={y(max * t)} y2={y(max * t)} stroke="var(--color-line)" strokeWidth={1} />
-          ))}
-          {factions.map((f) => {
-            const pts = series.get(f.id) ?? [];
-            if (!pts.length) return null;
-            return (
-              <g key={f.id}>
-                <polyline points={pts.map((p) => `${x(p.day)},${y(p.points)}`).join(' ')} fill="none" stroke={f.color} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
-                {pts.map((p) => (
-                  <circle key={p.day} cx={x(p.day)} cy={y(p.points)} r={p.day === shown ? 6 : 3.5} fill={p.day === shown ? f.color : 'var(--color-surface)'} stroke={f.color} strokeWidth={2} />
-                ))}
-              </g>
-            );
-          })}
-        </svg>
-        <div className="flex justify-between pl-[4.7%] pr-[3%] text-meta text-ink-muted" aria-hidden>
-          {days.map((d) => (
-            <span key={d}>Day {d}</span>
-          ))}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="font-serif text-[20px] font-semibold md:text-[24px]">Points race</h3>
+          <p className="mt-1 text-meta text-ink-muted">{subtitle}</p>
         </div>
-        <figcaption className="sr-only">
-          <table aria-label="Points by day">
-            <thead>
-              <tr>
-                <th scope="col">Faction</th>
-                {days.map((d) => <th key={d} scope="col">Day {d}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {factions.map((f) => (
-                <tr key={f.id}>
-                  <th scope="row">{f.name}</th>
-                  {days.map((d) => <td key={d}>{target.get(f.id)?.find((p) => p.day === d)?.points ?? 0}</td>)}
+        {onRange && (
+          <div role="group" aria-label="Time steps" className="inline-flex rounded-full border border-line bg-paper p-1">
+            {raceRanges.map((r) => (
+              <button
+                key={r.label}
+                type="button"
+                aria-pressed={range === r.value}
+                onClick={() => onRange(r.value)}
+                className={cn('h-8 rounded-full px-3 text-[13px] font-bold transition-colors', range === r.value ? 'bg-green-900 text-lime' : 'text-ink-muted hover:text-ink')}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {hourly && timelineLoading && !timeline ? (
+        <LogoLoader label="Loading the points race" className="min-h-[260px]" />
+      ) : hourly && n === 0 ? (
+        <p className="grid min-h-[200px] place-items-center text-body-m text-ink-muted">No results yet for this view.</p>
+      ) : (
+        <figure className="flex flex-col gap-1.5">
+          <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`Points race for ${factions.map((f) => f.name).join(', ')}. The table below has the numbers.`}>
+            {[0, 0.25, 0.5, 0.75, 1].map((t) => (
+              <line key={t} x1={pad.l} x2={W - pad.r} y1={y(max * t)} y2={y(max * t)} stroke="var(--color-line)" strokeWidth={1} />
+            ))}
+            {factions.map((f) => {
+              const pts = series.get(f.id) ?? [];
+              if (!pts.length) return null;
+              return (
+                <g key={f.id}>
+                  <polyline points={pts.map((v, i) => `${x(i)},${y(v)}`).join(' ')} fill="none" stroke={f.color} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
+                  {pts.map((v, i) =>
+                    dots || i === pts.length - 1 ? (
+                      <circle key={i} cx={x(i)} cy={y(v)} r={i === pts.length - 1 ? 6 : 3.5} fill={i === pts.length - 1 ? f.color : 'var(--color-surface)'} stroke={f.color} strokeWidth={2} />
+                    ) : null,
+                  )}
+                </g>
+              );
+            })}
+            {labels.map((l, i) =>
+              showLabel(i) ? (
+                <text key={i} x={x(i)} y={H - 12} textAnchor={n === 1 ? 'middle' : i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'} fontSize="12" fill="var(--color-ink-muted)">
+                  {l}
+                </text>
+              ) : null,
+            )}
+          </svg>
+          <figcaption className="sr-only">
+            <table aria-label="Points race">
+              <thead>
+                <tr>
+                  <th scope="col">Faction</th>
+                  {labels.map((l, i) => (
+                    <th key={i} scope="col">
+                      {l}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </figcaption>
-      </figure>
+              </thead>
+              <tbody>
+                {factions.map((f) => (
+                  <tr key={f.id}>
+                    <th scope="row">{f.name}</th>
+                    {labels.map((_, i) => (
+                      <td key={i}>{target.get(f.id)?.[i] ?? 0}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </figcaption>
+        </figure>
+      )}
       <ul className="hidden flex-wrap gap-x-5 gap-y-2 md:flex" aria-hidden>
         {factions.map((f) => (
           <li key={f.id}>
@@ -241,13 +305,17 @@ function MedalBreakdown({ rows, hub }: { rows: SkMedalTableRow[]; hub: HubData }
   );
 }
 
-export function MedalTallyView({ edition, hub, table, race, phase, now = new Date() }: {
+export function MedalTallyView({ edition, hub, table, race, phase, now = new Date(), range, onRange, timeline, timelineLoading }: {
   edition: SkEditionRow;
   hub: HubData;
   table: SkMedalTableRow[];
   race: SkPointsByDayRow[];
   phase: HubPhase;
   now?: Date;
+  range?: RaceRange;
+  onRange?: (r: RaceRange) => void;
+  timeline?: SkPointsTimelineRow[];
+  timelineLoading?: boolean;
 }) {
   const games = liveAndNext(hub.matches, now);
   const totalDays = phase.kind === 'before' ? 1 : phase.of;
@@ -257,7 +325,7 @@ export function MedalTallyView({ edition, hub, table, race, phase, now = new Dat
       <MedalTable rows={table} hub={hub} edition={edition} />
       <section aria-label="Charts" className="container-page pt-8 md:pt-10">
         <div className="flex flex-col gap-6 lg:flex-row">
-          <PointsRace race={race} hub={hub} upto={standingsDay(phase)} total={totalDays} />
+          <PointsRace race={race} hub={hub} upto={standingsDay(phase)} total={totalDays} range={range} onRange={onRange} timeline={timeline} timelineLoading={timelineLoading} />
           <MedalBreakdown rows={table} hub={hub} />
         </div>
       </section>
