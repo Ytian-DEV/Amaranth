@@ -31,7 +31,7 @@ export function SectionHeader({
   return (
     <div className={cn('flex items-center gap-4', className)}>
       <span className={cn('w-1.5 shrink-0 rounded-[2px] bg-lime', size === 'l' ? 'h-7' : 'h-6')} aria-hidden />
-      <Heading id={id} className={cn('min-w-0 font-serif text-ink', size === 'l' ? 'text-[26px] font-semibold leading-tight tracking-[-0.5px] md:text-headline-l' : 'text-headline-m')}>
+      <Heading id={id} className={cn('min-w-0 font-serif uppercase text-ink', size === 'l' ? 'text-[22px] font-extrabold leading-tight tracking-[0.01em] md:text-[28px]' : 'text-headline-m tracking-[0.01em]')}>
         {title}
       </Heading>
       {rule && <span className="h-px min-w-0 flex-1 bg-line" aria-hidden />}
@@ -112,7 +112,7 @@ export function StoryRow({
 }) {
   return (
     <article className={cn('group relative flex items-start gap-4 border-b border-line py-4', className)}>
-      <span className="w-9 shrink-0 font-serif text-numeral italic text-lime-dark" aria-hidden>
+      <span className="w-9 shrink-0 font-serif text-numeral font-black italic text-lime-dark" aria-hidden>
         {String(index).padStart(2, '0')}
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
