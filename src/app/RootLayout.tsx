@@ -1,5 +1,6 @@
 import { Analytics } from '@vercel/analytics/react';
 import { Outlet, ScrollRestoration } from 'react-router-dom';
+import { NavigationLoader } from '@/components/ui/LogoLoader';
 import { AuthProvider } from '@/features/auth/AuthProvider';
 import { usePageTracking } from '@/features/public/analytics/usePageTracking';
 
@@ -14,6 +15,7 @@ export function RootLayout() {
     <AuthProvider>
       <PageTracking />
       <Outlet />
+      <NavigationLoader />
       <ScrollRestoration getKey={(location) => location.pathname} />
       {!import.meta.env.DEV && <Analytics />}
     </AuthProvider>

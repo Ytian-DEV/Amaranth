@@ -1,10 +1,11 @@
+import { LogoLoader } from '@/components/ui/LogoLoader';
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { SectionHeader, StoryCard } from '@/components/story/Story';
 import type { StoryItem } from '@/components/story/types';
 import { ButtonLink } from '@/components/ui/Button';
-import { Alert, Skeleton } from '@/components/ui/Feedback';
+import { Alert } from '@/components/ui/Feedback';
 import { Img } from '@/components/ui/Img';
 import { statusInfo } from '@/components/ui/status';
 import { CategoryPill, Kicker } from '@/components/ui/Tag';
@@ -190,16 +191,9 @@ export function ArticleView({
 
 export function ArticleSkeleton() {
   return (
-    <div className="container-page flex max-w-[860px] flex-col gap-4 py-14" aria-busy>
+    <div aria-busy>
       <h1 className="sr-only">Loading the article</h1>
-      <Skeleton className="h-3 w-24" />
-      <Skeleton className="h-12 w-full" />
-      <Skeleton className="h-12 w-4/5" />
-      <Skeleton className="h-5 w-2/3" />
-      <Skeleton className="mt-6 aspect-video w-full" />
-      {[0, 1, 2, 3].map((i) => (
-        <Skeleton key={i} className="h-4 w-full" />
-      ))}
+      <LogoLoader label="Loading the article" />
     </div>
   );
 }
