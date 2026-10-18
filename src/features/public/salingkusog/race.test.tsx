@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { skFixture } from '@/dev/skFixtures';
-import { stepLabel, timelineSeries } from './hub';
+import { finalHeadline, resultsProgress, stepLabel, timelineSeries } from './hub';
 import { MedalTallyView } from './MedalTallyView';
 import type { HubData } from './skData';
 
@@ -40,5 +40,40 @@ describe('points race steps', () => {
     expect(screen.getByRole('button', { name: 'Day' })).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(screen.getByRole('button', { name: '3h' }));
     expect(onRange).toHaveBeenCalledWith(3);
+  });
+});
+
+describe('official tally', () => {
+  const rows = skFixture.medalTable;
+
+  it('counts finished matches, leaving cancelled ones out', () => {
+    expect(resultsProgress([{ status: 'final' }, { status: 'live' }, { status: 'cancelled' }, { status: 'postponed' }])).toEqual({ done: 1, total: 3, final: false });
+    expect(resultsProgress([{ status: 'final' }, { status: 'cancelled' }])).toEqual({ done: 1, total: 1, final: true });
+    expect(resultsProgress([]).final).toBe(false);
+  });
+
+  it('declares the champions once every match is final', () => {
+    const top = [...rows].sort((a, b) => a.rank - b.rank)[0];
+    expect(finalHeadline(rows)).toBe(`${top.name} are the overall champions`);
+    expect(finalHeadline([{ ...top, rank: 1 }, { ...top, name: 'Other', rank: 1 }])).toBe(`${top.name} and Other share the overall title`);
+    const hub = { factions: skFixture.factions, sports: [], events: [], venues: [], logos: [], matches: [{ id: 'x', status: 'final' }] } as unknown as HubData;
+    render(
+      <MemoryRouter>
+        <MedalTallyView edition={skFixture.edition} hub={hub} table={rows} race={skFixture.pointsByDay} phase={{ kind: 'after' } as never} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText('Official and final medal tally')).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Winners' })).toHaveTextContent('Overall champion');
+  });
+
+  it('shows results in while matches are left', () => {
+    const hub = { factions: skFixture.factions, sports: [], events: [], venues: [], logos: [], matches: [{ id: 'x', status: 'final' }, { id: 'y', status: 'upcoming' }] } as unknown as HubData;
+    render(
+      <MemoryRouter>
+        <MedalTallyView edition={skFixture.edition} hub={hub} table={rows} race={skFixture.pointsByDay} phase={{ kind: 'during', day: 2, of: 5 } as never} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('progressbar', { name: 'Matches finished' })).toHaveAttribute('aria-valuenow', '1');
+    expect(screen.queryByText('Official and final medal tally')).not.toBeInTheDocument();
   });
 });

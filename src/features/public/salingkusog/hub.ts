@@ -41,6 +41,23 @@ export function standingsHeadline(rows: SkMedalTableRow[]) {
   return `${first.name} leads by ${gap === 1 ? 'a single point' : pts(gap)}`;
 }
 
+/** Results in: finished matches over all matches (cancelled ones don't count). Final once every match is done. */
+export function resultsProgress<T extends Pick<SkMatchRow, 'status'>>(matches: T[]) {
+  const counted = matches.filter((m) => m.status !== 'cancelled');
+  const done = counted.filter((m) => m.status === 'final').length;
+  return { done, total: counted.length, final: counted.length > 0 && done === counted.length };
+}
+
+/** Once the tally is official: the champion (or co-champions on a tie), then the runners-up. */
+export function finalHeadline(rows: SkMedalTableRow[]) {
+  const top = rows.filter((r) => r.rank === 1);
+  if (!top.length || top[0].points === 0) return 'The games are over';
+  if (top.length > 1) return `${top.map((r) => r.name).join(' and ')} share the overall title`;
+  return `${top[0].name} are the overall champions`;
+}
+
+export const placeTitle = (rank: number) => ['', 'Overall champion', '1st runner-up', '2nd runner-up'][rank] ?? '';
+
 /** Podium order for display: 2nd, 1st, 3rd, then the rest. */
 export function podiumOrder<T extends { rank: number }>(rows: T[]) {
   const sorted = [...rows].sort((a, b) => a.rank - b.rank);
