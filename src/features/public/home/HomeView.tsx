@@ -11,7 +11,7 @@ import type { HomeData, TickerItem } from './homeData';
 export function Ticker({ items }: { items: TickerItem[] }) {
   if (!items.length) return null;
   return (
-    <section aria-label="Latest headlines" className="bg-lime-soft">
+    <section aria-label="Latest headlines" className="border-b border-line bg-surface">
       <div className="container-page flex items-center gap-4 py-2.5 md:py-3">
         <span className="shrink-0 rounded-sm bg-alert px-2 py-1 text-kicker uppercase text-on-dark">Latest</span>
         <ul data-scroll-x className="flex min-w-0 flex-1 gap-2 overflow-hidden text-[14px] md:text-body-m md:[mask-image:linear-gradient(to_right,black_92%,transparent)]">
