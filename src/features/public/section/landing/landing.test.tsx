@@ -54,6 +54,26 @@ const categories = [
   { slug: 'environment', name: 'Environment' },
 ];
 
+describe('literary folio cover', () => {
+  const section = { slug: 'literary', name: 'Literary', description: null, nav_placement: 'primary' };
+  it('shows the featured work’s photo in the green cover, or the drawn art without one', () => {
+    const Landing = sectionLandings.literary;
+    const withPhoto = render(
+      <MemoryRouter>
+        <Landing section={section} categories={[]} items={[story(1, { image: { bucket: 'media', path: '/images/folio.jpg', width: 800, height: 800, alt: '' } })]} mostRead={[]} />
+      </MemoryRouter>,
+    );
+    expect(withPhoto.container.querySelector('img[src="/images/folio.jpg"]')).not.toBeNull();
+    withPhoto.unmount();
+    const without = render(
+      <MemoryRouter>
+        <Landing section={section} categories={[]} items={[story(1)]} mostRead={[]} />
+      </MemoryRouter>,
+    );
+    expect(without.container.querySelector('svg circle')).not.toBeNull();
+  });
+});
+
 describe('bulletin calendar', () => {
   it('lays out the month with today and posting days marked', () => {
     render(<MonthCalendar today="2026-10-16" marked={new Set(['2026-10-20', '2026-10-31'])} />);
