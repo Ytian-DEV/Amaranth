@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
+import { edgeCacheEnabled, edgeCachedFetch } from './edgeCache';
 import { env, isSupabaseConfigured } from './env';
 
 export type Supabase = SupabaseClient<Database>;
@@ -16,6 +17,8 @@ export function getSupabase(): Supabase {
   }
   client ??= createClient<Database>(env.supabaseUrl!, env.supabaseAnonKey!, {
     auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
+    // signed-out public reads go through the CDN-cached /api/r on deployed sites
+    ...(edgeCacheEnabled() ? { global: { fetch: edgeCachedFetch(env.supabaseUrl!, env.supabaseAnonKey!) } } : {}),
   });
   return client;
 }

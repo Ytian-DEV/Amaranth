@@ -16,7 +16,7 @@ export function useSectionLanding(slug: string, sectionName: string | undefined,
     queryFn: async (): Promise<LandingData> => {
       const [rows, read] = await Promise.all([
         liveCards().eq('section_slug', slug).order('published_at', { ascending: false }).limit(LANDING_SIZE).then(unwrap),
-        getSupabase().rpc('most_read_articles', { p_days: 30, p_limit: 40 }).then(unwrap),
+        getSupabase().rpc('most_read_articles', { p_days: 30, p_limit: 40 }, { get: true }).then(unwrap),
       ]);
       return {
         items: rows.map(toStoryItem),

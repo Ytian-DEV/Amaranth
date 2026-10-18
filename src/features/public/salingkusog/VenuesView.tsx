@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { MediaAssetRow } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
-import { publicUrl } from '@/lib/media';
+import { publicUrl, srcSet } from '@/lib/media';
 import type { HubData } from './skData';
 import { venueGuide } from './venues';
 
@@ -36,7 +36,7 @@ export function VenuesView({ hub, map, now }: { hub: HubData; map: Pick<MediaAss
           {(mapUrl || pins.length > 0) && (
             <figure className="flex flex-col gap-2.5">
               <div className={cn('relative overflow-hidden rounded-[14px]', !mapUrl && 'aspect-[19/15] bg-green-soft')}>
-                {mapUrl && <img src={mapUrl} width={map?.width ?? undefined} height={map?.height ?? undefined} alt={map?.alt_text || 'Map of the Salingkusog venues on the VSU campus'} className="block h-auto w-full" />}
+                {mapUrl && <img src={mapUrl} srcSet={map ? srcSet(map) : undefined} sizes="(min-width: 1024px) 760px, 100vw" width={map?.width ?? undefined} height={map?.height ?? undefined} alt={map?.alt_text || 'Map of the Salingkusog venues on the VSU campus'} className="block h-auto w-full" />}
                 {pins.map((r) => (
                   <a
                     key={r.venue.id}

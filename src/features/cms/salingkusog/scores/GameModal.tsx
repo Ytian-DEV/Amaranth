@@ -4,6 +4,7 @@ import { Field, Input, Select } from '@/components/ui/Field';
 import { Alert } from '@/components/ui/Feedback';
 import { Modal } from '@/components/ui/Modal';
 import type { SkMatchRow } from '@/lib/database.types';
+import { useDebounced } from '@/lib/useDebounced';
 import { numOrNull } from '../setup/form';
 import { fromLocalInput, toLocalInput } from '../scoring';
 import { skErrorText, useCreateMatch, useRecapArticleOptions, useUpdateMatch } from '../skApi';
@@ -43,7 +44,8 @@ function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: 
     recap_article_id: match?.recap_article_id ?? '',
   });
   const [articleSearch, setArticleSearch] = useState('');
-  const articles = useRecapArticleOptions(articleSearch, f.recap_article_id || null);
+  // wait for a pause in typing before asking the database
+  const articles = useRecapArticleOptions(useDebounced(articleSearch, 300), f.recap_article_id || null);
   const [error, setError] = useState<string | null>(null);
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((x) => ({ ...x, [k]: e.target.value }));
 
