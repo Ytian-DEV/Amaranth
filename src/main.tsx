@@ -1,6 +1,6 @@
-import '@fontsource-variable/inter/wght.css';
-import '@fontsource-variable/fraunces/wght.css';
-import '@fontsource-variable/fraunces/wght-italic.css';
+import '@fontsource-variable/montserrat/wght.css';
+import '@fontsource-variable/montserrat/wght-italic.css';
+import '@fontsource/cinzel/latin-700.css';
 import './styles/app.css';
 
 import { StrictMode } from 'react';

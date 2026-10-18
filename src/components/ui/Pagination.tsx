@@ -22,7 +22,7 @@ export function Pagination({ page, pageCount, className }: { page: number; pageC
       <ul className="flex flex-wrap items-center justify-center gap-1">
         <li>
           {page > 1 ? (
-            <Link to={href(page - 1)} className={cn(item, 'gap-1 text-green-700 hover:bg-green-soft')} rel="prev">
+            <Link to={href(page - 1)} className={cn(item, 'gap-1 text-green-700 hover:bg-lime-soft')} rel="prev">
               <ChevronLeft className="size-4" aria-hidden />
               <span className="sr-only sm:not-sr-only">Newer</span>
             </Link>
@@ -39,7 +39,7 @@ export function Pagination({ page, pageCount, className }: { page: number; pageC
                 to={href(p)}
                 aria-current={p === page ? 'page' : undefined}
                 aria-label={`Page ${p}`}
-                className={cn(item, p === page ? 'bg-green-700 text-on-dark' : 'text-ink hover:bg-green-soft')}
+                className={cn(item, p === page ? 'bg-green-700 text-on-dark' : 'text-ink hover:bg-lime-soft')}
               >
                 {p}
               </Link>
@@ -48,7 +48,7 @@ export function Pagination({ page, pageCount, className }: { page: number; pageC
         )}
         <li>
           {page < pageCount ? (
-            <Link to={href(page + 1)} className={cn(item, 'gap-1 text-green-700 hover:bg-green-soft')} rel="next">
+            <Link to={href(page + 1)} className={cn(item, 'gap-1 text-green-700 hover:bg-lime-soft')} rel="next">
               <span className="sr-only sm:not-sr-only">Older</span>
               <ChevronRight className="size-4" aria-hidden />
             </Link>

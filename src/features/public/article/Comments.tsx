@@ -4,6 +4,7 @@ import { Field, Input, Textarea } from '@/components/ui/Field';
 import { Alert, Spinner } from '@/components/ui/Feedback';
 import { errorText } from '@/lib/errors';
 import { formatRelative } from '@/lib/format';
+import { Turnstile } from '@/components/ui/Turnstile';
 import type { ArticleComment, CommentInput } from './articleData';
 
 type Props = {
@@ -132,6 +133,7 @@ export function Comments({ comments, loading, open, onSubmit }: Props) {
               <input tabIndex={-1} autoComplete="off" value={form.website} onChange={set('website')} />
             </label>
           </div>
+          <Turnstile />
           <p className="text-meta font-normal text-ink-muted">
             Comments are moderated. Be kind, stay on topic, and don’t share personal information.
           </p>

@@ -17,7 +17,7 @@ export function ResultItem({ story }: { story: StoryItem }) {
     <article className="group relative flex gap-4 border-b border-line py-5 md:gap-6">
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <Kicker>{story.label}</Kicker>
-        <h2 className="font-serif text-headline-s text-ink group-hover:text-green-700 md:text-headline-m">
+        <h2 className="font-serif text-headline-s text-ink group-hover-lime md:text-headline-m">
           <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
             {story.title}
           </Link>

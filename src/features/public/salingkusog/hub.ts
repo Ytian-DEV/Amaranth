@@ -1,5 +1,5 @@
 // Pure helpers for the public Salingkusog pages.
-import type { SkEditionRow, SkMatchRow, SkMedalTableRow, SkPointsByDayRow } from '@/lib/database.types';
+import type { SkEditionRow, SkMatchRow, SkMedalTableRow, SkPointsByDayRow, SkPointsTimelineRow } from '@/lib/database.types';
 import { dayRange, manilaDate, manilaTime } from '@/lib/manila';
 
 export type HubPhase = { kind: 'before'; startsIn: number } | { kind: 'during'; day: number; of: number } | { kind: 'after'; of: number };
@@ -40,6 +40,23 @@ export function standingsHeadline(rows: SkMedalTableRow[]) {
   if (gap === 0) return `${first.name} and ${second.name} are tied at the top`;
   return `${first.name} leads by ${gap === 1 ? 'a single point' : pts(gap)}`;
 }
+
+/** Results in: finished matches over all matches (cancelled ones don't count). Final once every match is done. */
+export function resultsProgress<T extends Pick<SkMatchRow, 'status'>>(matches: T[]) {
+  const counted = matches.filter((m) => m.status !== 'cancelled');
+  const done = counted.filter((m) => m.status === 'final').length;
+  return { done, total: counted.length, final: counted.length > 0 && done === counted.length };
+}
+
+/** Once the tally is official: the champion (or co-champions on a tie), then the runners-up. */
+export function finalHeadline(rows: SkMedalTableRow[]) {
+  const top = rows.filter((r) => r.rank === 1);
+  if (!top.length || top[0].points === 0) return 'The games are over';
+  if (top.length > 1) return `${top.map((r) => r.name).join(' and ')} share the overall title`;
+  return `${top[0].name} are the overall champions`;
+}
+
+export const placeTitle = (rank: number) => ['', 'Overall champion', '1st runner-up', '2nd runner-up'][rank] ?? '';
 
 /** Podium order for display: 2nd, 1st, 3rd, then the rest. */
 export function podiumOrder<T extends { rank: number }>(rows: T[]) {
@@ -128,18 +145,20 @@ export function scheduleDay(edition: Pick<SkEditionRow, 'starts_on' | 'ends_on'>
 }
 
 /** One day's games, filtered and grouped into live / later / completed / postponed. */
-export function scheduleGroups<T extends Pick<SkMatchRow, 'status' | 'scheduled_at' | 'event_id' | 'side_a_id' | 'side_b_id' | 'venue_id'>>(
+export function scheduleGroups<T extends Pick<SkMatchRow, 'status' | 'scheduled_at' | 'event_id' | 'side_a_id' | 'side_b_id' | 'venue_id'> & { id?: string; is_contest?: boolean }>(
   matches: T[],
   day: string,
   filters: ScheduleFilters,
   sportOf: (eventId: string) => string | undefined,
   today = manilaDate(),
+  /** contests: the factions in a session's line-up */
+  lineUp: (matchId: string) => string[] = () => [],
 ): ScheduleGroup<T>[] {
   const isToday = day === today;
   const list = matches
     .filter((m) => manilaDate(m.scheduled_at) === day)
     .filter((m) => !filters.sport || sportOf(m.event_id) === filters.sport)
-    .filter((m) => !filters.faction || m.side_a_id === filters.faction || m.side_b_id === filters.faction)
+    .filter((m) => !filters.faction || m.side_a_id === filters.faction || m.side_b_id === filters.faction || (!!m.is_contest && !!m.id && lineUp(m.id).includes(filters.faction)))
     .filter((m) => !filters.venue || m.venue_id === filters.venue)
     .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
   const groups: ScheduleGroup<T>[] = [
@@ -171,4 +190,34 @@ export function shortEventLabel(sportName: string, event: { name: string; divisi
   const isDivisionName = /^(men|women|mixed|open)$/i.test(event.name.trim());
   if (isDivisionName && divisions[event.division]) return `${sportName} ${divisions[event.division]}`;
   return event.name.includes('·') ? event.name : `${sportName} · ${event.name}`;
+}
+
+export type RaceRange = 'day' | 1 | 3 | 6 | 12;
+export const raceRanges: { value: RaceRange; label: string }[] = [
+  { value: 1, label: '1h' },
+  { value: 3, label: '3h' },
+  { value: 6, label: '6h' },
+  { value: 12, label: '12h' },
+  { value: 'day', label: 'Day' },
+];
+
+/** "2 PM" (or "Oct 14, 2 PM") in Manila time for the end of a points-race step. */
+export function stepLabel(at: string, withDate: boolean) {
+  const [h, m] = manilaTime(at).split(':').map(Number);
+  const hour = h === 0 && m === 0 ? 'midnight' : `${h % 12 || 12}${m ? `:${String(m).padStart(2, '0')}` : ''} ${h < 12 ? 'AM' : 'PM'}`;
+  if (!withDate) return hour;
+  const d = new Date(`${manilaDate(new Date(Date.parse(at) - 1000))}T00:00:00Z`);
+  return `${d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', timeZone: 'UTC' })}, ${hour}`;
+}
+
+/** Hour-step rows → step ends (in order) and each faction's points per step. */
+export function timelineSeries(rows: SkPointsTimelineRow[]) {
+  const steps = [...new Set(rows.map((r) => r.bucket_end))].sort();
+  const series = new Map<string, number[]>();
+  for (const r of rows) {
+    const list = series.get(r.faction_id) ?? Array<number>(steps.length).fill(0);
+    list[steps.indexOf(r.bucket_end)] = r.points;
+    series.set(r.faction_id, list);
+  }
+  return { steps, series };
 }

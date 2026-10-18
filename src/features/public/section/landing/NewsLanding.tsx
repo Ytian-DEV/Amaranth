@@ -32,7 +32,7 @@ export function NewsLanding({ section, categories, items, mostRead }: LandingPro
                   {briefs.map((s) => (
                     <li key={s.id} className="flex gap-3.5 border-b border-line py-3.5 last:border-0">
                       <span className="w-[72px] shrink-0 text-meta text-green-500-text">{briefTime(s.publishedAt)}</span>
-                      <Link to={articlePath(s.slug)} className="font-serif text-[16px] font-semibold leading-snug text-ink hover:text-green-700">
+                      <Link to={articlePath(s.slug)} className="font-serif text-[16px] font-semibold leading-snug text-ink hover-lime">
                         {s.title}
                       </Link>
                     </li>

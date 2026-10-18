@@ -15,7 +15,7 @@ function PhotoHero({ story, section }: { story: StoryItem; section: LandingProps
   const src = story.image ? publicUrl(story.image.bucket, story.image.path) : null;
   return (
     <header className="relative isolate overflow-hidden bg-green-900 text-on-dark">
-      {src && <img src={src} srcSet={story.image ? srcSet(story.image) : undefined} sizes="100vw" alt="" className="absolute inset-0 -z-10 size-full object-cover" fetchPriority="high" />}
+      {src && <img src={src} srcSet={story.image ? srcSet(story.image) : undefined} sizes="100vw" alt="" className="absolute inset-0 -z-10 size-full object-cover" {...{ fetchpriority: 'high' }} />}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-green-900/30 via-green-900/60 to-ink/95" aria-hidden />
       <div className="container-page flex min-h-[420px] flex-col justify-end gap-3.5 pb-10 pt-24 md:min-h-[560px] md:pb-14">
         <p className="text-kicker uppercase text-lime">
@@ -125,7 +125,7 @@ export function FeatureLanding({ section, categories, items }: LandingProps) {
             {photos.map((s, i) => (
               <li key={s.id} className="group relative flex flex-col gap-2">
                 <Img {...s.image} ratio={i === 0 ? '400/260' : '200/260'} sizes="(min-width: 768px) 400px, 100vw" className="rounded-md bg-green-700" />
-                <Link to={articlePath(s.slug)} className="text-meta text-on-dark-muted after:absolute after:inset-0 hover:text-on-dark">
+                <Link to={articlePath(s.slug)} className="text-meta text-on-dark-muted after:absolute after:inset-0 hover:text-lime">
                   {s.title}
                 </Link>
               </li>

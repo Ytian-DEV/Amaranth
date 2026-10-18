@@ -9,7 +9,7 @@ import { inCategory, picker } from './data';
 import { allHref, categoryHref } from './links';
 
 // tile colours when a story has no photo (from the design's sample tiles)
-const tileBg = ['bg-green-700', 'bg-lime-dark', 'bg-green-900', 'bg-green-500', 'bg-night'];
+const tileBg = ['bg-green-700', 'bg-lime-dark', 'bg-green-900', 'bg-green-500', 'bg-green-800'];
 
 function StoryTile({ story, i }: { story: StoryItem; i: number }) {
   const src = story.image ? publicUrl(story.image.bucket, story.image.path) : null;
@@ -37,7 +37,7 @@ function QuoteCard({ story }: { story: StoryItem }) {
     <article className="group relative flex h-full flex-col gap-3 rounded-[12px] bg-paper p-3.5 pb-5">
       <Img {...story.image} ratio="4/3" sizes="(min-width: 768px) 380px, 100vw" className="rounded-lg" />
       <h3 className="px-1.5 font-serif text-[17px] italic leading-snug text-ink">
-        <Link to={articlePath(story.slug)} className="after:absolute after:inset-0 group-hover:text-green-700">
+        <Link to={articlePath(story.slug)} className="after:absolute after:inset-0 group-hover-lime">
           {story.excerpt ? (
             <>
               <span className="sr-only">{story.title}: </span>“{story.excerpt}”
@@ -74,7 +74,7 @@ export function StoriesLanding({ section, categories, items }: LandingProps) {
                   <li key={c.slug} className="shrink-0">
                     <Link to={categoryHref(section.slug, c.slug)} className="group flex w-[76px] flex-col items-center gap-2 text-center">
                       <span className={cn('size-16 rounded-full border-[3px] border-paper ring-2 ring-lime', tileBg[i % tileBg.length])} aria-hidden />
-                      <span className="text-[13px] font-semibold text-ink group-hover:text-green-700">{c.name}</span>
+                      <span className="text-[13px] font-semibold text-ink group-hover-lime">{c.name}</span>
                     </Link>
                   </li>
                 ))}

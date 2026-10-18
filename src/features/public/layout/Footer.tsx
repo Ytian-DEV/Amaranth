@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { LogoMark } from '@/components/ui/Logo';
+import { env } from '@/lib/env';
 import { publicationLinks, sectionPath, useNavSections } from '../nav';
 import { useSocialLinks } from '../settings';
 
@@ -13,6 +14,7 @@ function Column({ title, children }: { title: string; children: React.ReactNode 
 }
 
 export function SiteFooter() {
+  const siteHost = new URL(env.siteUrl).host.replace(/^www\./, '');
   const { primary } = useNavSections();
   const social = useSocialLinks();
   const year = new Date().getFullYear();
@@ -24,7 +26,7 @@ export function SiteFooter() {
           <div className="flex flex-col gap-4">
             <Link to="/" className="flex items-center gap-3" aria-label="Amaranth — front page">
               <LogoMark className="hidden h-10 md:block" />
-              <span className="font-serif text-[26px] font-bold leading-none tracking-[0.06em] md:text-[32px]">AMARANTH</span>
+              <span className="font-wordmark text-[26px] font-bold leading-none tracking-[0.08em] text-lime md:text-[32px]">AMARANTH</span>
             </Link>
             <p className="hidden max-w-[340px] text-body-m text-on-dark-muted md:block">
               The Official Student Media Organization of Visayas State University. 
@@ -74,13 +76,16 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between border-green-700 pt-0 text-meta text-on-dark-muted md:mt-12 md:border-t md:pt-6">
-          <p>© {year} Amaranth · Visayas State University</p>
-          <div className="flex gap-5">
-            <Link to="/privacy" className="hover:text-on-dark">
+        <div className="mt-6 flex flex-col gap-3 border-on-dark/15 pt-0 text-meta text-on-dark-muted md:mt-12 md:flex-row md:items-center md:justify-between md:border-t md:pt-6">
+          <p>
+            <span className="font-bold text-on-dark">@AMARANTHVSU</span> <span aria-hidden>·</span> © {year} Amaranth · Visayas State University
+          </p>
+          <div className="flex items-center gap-5">
+            <span className="hidden font-bold uppercase tracking-[0.04em] text-on-dark md:inline">{siteHost}</span>
+            <Link to="/privacy" className="hover:text-lime">
               Privacy
             </Link>
-            <Link to="/admin/login" className="hidden hover:text-on-dark md:inline">
+            <Link to="/admin/login" className="hidden hover:text-lime md:inline">
               Staff login
             </Link>
           </div>

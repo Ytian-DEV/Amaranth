@@ -94,7 +94,8 @@ export function winnerCards(hub: HubData, placements: SkPlacementRow[], athletes
         note: note(p),
         result: scoreFor(p),
       })),
-      recapMatchId: (finalGame ?? last)?.id ?? null,
+      // contests have no two-sided recap page; their results are on the sport page
+      recapMatchId: [finalGame ?? last].find((g) => g && !g.is_contest)?.id ?? null,
       awardedOn: rows.reduce((max, r) => (r.awarded_on > max ? r.awarded_on : max), ''),
     });
   }

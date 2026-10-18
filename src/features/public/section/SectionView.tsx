@@ -1,7 +1,8 @@
+import { LogoLoader } from '@/components/ui/LogoLoader';
 import { Link } from 'react-router-dom';
 import { StoryCard, StoryCompact } from '@/components/story/Story';
 import { articlePath, storyMeta, type StoryItem } from '@/components/story/types';
-import { EmptyState, Skeleton } from '@/components/ui/Feedback';
+import { EmptyState } from '@/components/ui/Feedback';
 import { Img } from '@/components/ui/Img';
 import { Pagination } from '@/components/ui/Pagination';
 import { Kicker } from '@/components/ui/Tag';
@@ -27,7 +28,7 @@ function LeadCard({ story }: { story: StoryItem }) {
       <Img {...story.image} ratio="16/10" priority sizes="(min-width: 1024px) 700px, 100vw" />
       <div className="flex flex-col gap-3">
         <Kicker>{story.label}</Kicker>
-        <h2 className="font-serif text-[28px] font-semibold leading-[1.15] tracking-[-0.5px] text-ink group-hover:text-green-700 md:text-headline-l">
+        <h2 className="font-serif text-[28px] font-semibold leading-[1.15] tracking-[-0.5px] text-ink group-hover-lime md:text-headline-l">
           <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
             {story.title}
           </Link>
@@ -76,7 +77,7 @@ export function SectionView({
                         aria-current={active ? 'page' : undefined}
                         className={cn(
                           'inline-flex h-9 items-center rounded-full border px-4 text-[14px] font-semibold transition-colors',
-                          active ? 'border-green-700 bg-green-700 text-on-dark' : 'border-line text-ink hover:border-green-700',
+                          active ? 'border-green-700 bg-green-700 text-on-dark' : 'border-line text-ink hover:border-lime',
                         )}
                       >
                         {c.name}
@@ -133,24 +134,9 @@ export function SectionView({
 
 export function SectionSkeleton() {
   return (
-    <div className="pb-16" aria-busy>
+    <div aria-busy>
       <h1 className="sr-only">Loading</h1>
-      <div className="border-b border-line bg-surface">
-        <div className="container-page flex flex-col gap-4 py-12">
-          <Skeleton className="h-10 w-56" />
-          <Skeleton className="h-4 w-96 max-w-full" />
-        </div>
-      </div>
-      <div className="container-page grid gap-12 pt-12 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="flex flex-col gap-3">
-            <Skeleton className="aspect-[360/220]" />
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
-        ))}
-      </div>
+      <LogoLoader />
     </div>
   );
 }

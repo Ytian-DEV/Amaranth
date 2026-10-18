@@ -33,7 +33,7 @@ export function Img({ bucket, path, width, height, alt, variants, className, siz
           alt={alt ?? ''}
           loading={priority ? 'eager' : 'lazy'}
           decoding={priority ? 'sync' : 'async'}
-          fetchPriority={priority ? 'high' : 'auto'}
+          {...{ fetchpriority: priority ? 'high' : 'auto' }} // lowercase: React 18 doesn't know fetchPriority yet
           onError={() => setFailed(true)}
           className="absolute inset-0 size-full object-cover"
         />

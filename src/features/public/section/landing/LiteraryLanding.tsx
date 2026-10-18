@@ -2,24 +2,30 @@ import { Link } from 'react-router-dom';
 import { SectionHeader } from '@/components/story/Story';
 import { articlePath, type StoryItem } from '@/components/story/types';
 import { ButtonLink } from '@/components/ui/Button';
+import { Img } from '@/components/ui/Img';
 import { Kicker } from '@/components/ui/Tag';
 import { cn } from '@/lib/cn';
 import { formatReadingTime } from '@/lib/format';
+import type { ImageSource } from '@/lib/media';
 import { CtaBand, LandingEmpty, SeeAll, type LandingProps } from './blocks';
 import { inCategory, picker } from './data';
 import { allHref, categoryHref } from './links';
 
-/** The Folio cover from the design: lime sun over green waves. */
-function FolioCover({ title }: { title: string }) {
+/** The Folio cover: the featured work's photo in the green cover (lime sun over green waves when it has none). */
+function FolioCover({ title, image }: { title: string; image?: ImageSource | null }) {
   return (
-    <div className="flex aspect-[3/4] w-full max-w-[320px] flex-col justify-between rounded-[6px] bg-green-900 p-6 text-on-dark shadow-[0_24px_48px_rgb(10_46_31/0.28)]" aria-hidden>
+    <div className="flex aspect-[3/4] w-full max-w-[320px] flex-col justify-between gap-5 rounded-[6px] bg-green-900 p-6 text-on-dark shadow-[0_24px_48px_rgb(10_46_31/0.28)]" aria-hidden>
       <p className="text-kicker uppercase text-lime">Amaranth Literary Folio</p>
+      {image?.path ? (
+        <Img {...image} ratio="1/1" sizes="272px" className="w-full rounded-[4px] bg-green-800" />
+      ) : (
       <svg viewBox="0 0 240 150" className="w-full">
         <circle cx="150" cy="50" r="42" fill="var(--color-lime)" />
         <path d="M0 80 Q60 55 120 80 T240 78 V150 H0Z" fill="var(--color-green-500)" />
         <path d="M0 100 Q60 80 120 102 T240 98 V150 H0Z" fill="var(--color-green-700)" />
         <path d="M0 120 Q60 104 120 122 T240 118 V150 H0Z" fill="var(--color-green-500)" opacity="0.6" />
       </svg>
+      )}
       <p className="line-clamp-3 font-serif text-[28px] italic leading-tight">{title}</p>
     </div>
   );
@@ -74,7 +80,7 @@ export function LiteraryLanding({ section, categories, items }: LandingProps) {
             </div>
           </div>
           <div className="hidden md:flex md:justify-end">
-            <FolioCover title={lead?.title ?? 'The Literary Folio'} />
+            <FolioCover title={lead?.title ?? 'The Literary Folio'} image={lead?.image} />
           </div>
         </div>
       </header>

@@ -90,7 +90,7 @@ export function WinnersView({ cards, hub, completed, category, onCategory }: {
                 type="button"
                 aria-pressed={active}
                 onClick={() => onCategory(c)}
-                className={cn('shrink-0 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold', active ? 'border-green-900 bg-green-900 text-on-dark' : 'border-line bg-surface text-ink hover:border-green-700')}
+                className={cn('shrink-0 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold', active ? 'border-green-900 bg-green-900 text-on-dark' : 'border-line bg-surface text-ink hover:border-lime')}
               >
                 {c ? categoryLabels[c] : 'All events'}
               </button>

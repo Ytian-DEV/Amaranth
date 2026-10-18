@@ -42,7 +42,7 @@ export function FileField({
           e.preventDefault();
           add(e.dataTransfer.files);
         }}
-        className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 border-dashed border-line bg-surface px-4 py-6 text-center hover:border-green-700"
+        className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 border-dashed border-line bg-surface px-4 py-6 text-center hover:border-lime"
       >
         <Paperclip className="size-5 text-green-700" aria-hidden />
         <span className="text-button text-green-700">Choose files</span>

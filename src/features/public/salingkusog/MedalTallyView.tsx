@@ -1,56 +1,105 @@
 import { SectionHeader } from '@/components/story/Story';
-import type { SkEditionRow, SkMedalTableRow, SkPointsByDayRow } from '@/lib/database.types';
+import { LogoLoader } from '@/components/ui/LogoLoader';
+import type { SkEditionRow, SkMedalTableRow, SkPointsByDayRow, SkPointsTimelineRow } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
-import { liveAndNext, podiumOrder, raceSeries, readableOn, standingsDay, standingsHeadline, type HubPhase } from './hub';
+import { useTweenedNumber, useTweenedNumbers } from '@/lib/useTween';
+import { finalHeadline, liveAndNext, placeTitle, podiumOrder, raceRanges, resultsProgress, raceSeries, readableOn, standingsDay, standingsHeadline, stepLabel, timelineSeries, type HubPhase, type RaceRange } from './hub';
 import { FactionBadge, MatchCard, MedalChip } from './SkBits';
 import type { HubData } from './skData';
 
 const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? 'st' : n % 10 === 2 && n % 100 !== 12 ? 'nd' : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th'}`;
 const blockHeight = (rank: number) => ['', 'h-[150px] md:h-[240px]', 'h-[110px] md:h-[180px]', 'h-[85px] md:h-[140px]'][rank] ?? 'h-[65px] md:h-[100px]';
 
+/** One podium block: the points and medals count up from 0 and the block grows from the floor. */
+function PodiumStep({ r, hub }: { r: SkMedalTableRow; hub: HubData }) {
+  const [points, gold, silver, bronze, grow] = useTweenedNumbers([r.points, r.gold, r.silver, r.bronze, 1], 1100);
+  const f = hub.factions.find((x) => x.id === r.faction_id);
+  const textTone = readableOn(r.color, 3) === 'light' ? 'text-on-dark' : 'text-ink';
+  return (
+    <li className="flex min-w-0 max-w-[250px] flex-1 flex-col items-center gap-2 md:gap-3.5" aria-label={`${ordinal(r.rank)}: ${r.name}, ${r.points} points`}>
+      <FactionBadge faction={f} logos={hub.logos} theme="dark" nameClassName="hidden md:inline" />
+      <p className={cn('font-serif font-semibold leading-none tabular-nums', r.rank === 1 ? 'text-[24px] md:text-[40px]' : 'text-[20px] md:text-[30px]')}>
+        {Math.round(points)}
+        <span className="hidden md:inline"> pts</span>
+      </p>
+      <div className="hidden gap-2 md:flex">
+        <MedalChip medal="gold" count={Math.round(gold)} />
+        <MedalChip medal="silver" count={Math.round(silver)} />
+        <MedalChip medal="bronze" count={Math.round(bronze)} />
+      </div>
+      <div className={cn('grid w-full origin-bottom place-items-center rounded-t-[10px]', blockHeight(r.rank))} style={{ backgroundColor: r.color, transform: `scaleY(${grow})` }}>
+        <span className={cn('font-serif font-bold uppercase leading-none', textTone, r.rank === 1 ? 'text-[36px] md:text-[56px]' : 'text-[32px] md:text-[44px]')}>
+          <span className="md:hidden">{r.rank}</span>
+          <span className="hidden md:inline">{ordinal(r.rank)}</span>
+        </span>
+      </div>
+    </li>
+  );
+}
+
 function Podium({ rows, hub, phase }: { rows: SkMedalTableRow[]; hub: HubData; phase: HubPhase }) {
   const day = standingsDay(phase);
-  const faction = (id: string) => hub.factions.find((f) => f.id === id);
+  const progress = resultsProgress(hub.matches);
+  const official = progress.final;
+  const winners = official ? [...rows].filter((r) => r.rank <= 3 && r.points > 0).sort((a, b) => a.rank - b.rank) : [];
   return (
     <section aria-labelledby="sk-podium" className="bg-night-2 text-on-dark">
       <div className="container-page flex flex-col items-center gap-6 pt-8 md:gap-9 md:pt-12">
         <div className="flex flex-col items-center gap-1.5 text-center">
           <p className="text-[11px] font-bold uppercase tracking-[0.99px] text-lime">
-            {phase.kind === 'after' ? 'Final standings' : day ? `Overall standings after Day ${day}` : 'Overall standings'}
+            {official ? 'Official and final medal tally' : phase.kind === 'after' ? 'Final standings' : day ? `Overall standings after Day ${day}` : 'Overall standings'}
           </p>
           <h2 id="sk-podium" className="font-serif text-[22px] font-semibold leading-tight tracking-[-0.36px] md:text-[36px]">
-            {standingsHeadline(rows)}
+            {official ? finalHeadline(rows) : standingsHeadline(rows)}
           </h2>
+          {progress.total > 0 && !official && (
+            <div className="mt-2 flex w-full max-w-[320px] flex-col items-center gap-2">
+              <p className="text-meta text-on-dark-muted">
+                Results in: <span className="font-semibold tabular-nums text-on-dark">{progress.done}</span> of <span className="tabular-nums">{progress.total}</span> matches
+              </p>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-on-dark)_14%,transparent)]" role="progressbar" aria-label="Matches finished" aria-valuemin={0} aria-valuemax={progress.total} aria-valuenow={progress.done}>
+                <div className="h-full rounded-full bg-lime" style={{ width: `${(progress.done / progress.total) * 100}%` }} />
+              </div>
+            </div>
+          )}
+          {official && (
+            <>
+              <p className="mt-1 text-meta text-on-dark-muted">All {progress.total} matches are finished. These results are official.</p>
+              {winners.length > 0 && (
+                <ul aria-label="Winners" className="mt-3 flex flex-wrap justify-center gap-x-6 gap-y-2">
+                  {winners.map((r) => (
+                    <li key={r.faction_id} className="flex items-baseline gap-2">
+                      <span className="text-[11px] font-bold uppercase tracking-[0.99px] text-on-dark-muted">{placeTitle(r.rank)}</span>
+                      <span className="font-semibold">{r.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
         </div>
         <ol className="flex w-full max-w-[1060px] items-end justify-center gap-1.5 md:gap-5">
-          {podiumOrder(rows).map((r) => {
-            const f = faction(r.faction_id);
-            const textTone = readableOn(r.color, 3) === 'light' ? 'text-on-dark' : 'text-ink';
-            return (
-              <li key={r.faction_id} className="flex min-w-0 max-w-[250px] flex-1 flex-col items-center gap-2 md:gap-3.5" aria-label={`${ordinal(r.rank)}: ${r.name}, ${r.points} points`}>
-                <FactionBadge faction={f} logos={hub.logos} theme="dark" nameClassName="hidden md:inline" />
-                <p className={cn('font-serif font-semibold leading-none', r.rank === 1 ? 'text-[24px] md:text-[40px]' : 'text-[20px] md:text-[30px]')}>
-                  {r.points}
-                  <span className="hidden md:inline"> pts</span>
-                </p>
-                <div className="hidden gap-2 md:flex">
-                  <MedalChip medal="gold" count={r.gold} />
-                  <MedalChip medal="silver" count={r.silver} />
-                  <MedalChip medal="bronze" count={r.bronze} />
-                </div>
-                <div className={cn('grid w-full place-items-center rounded-t-[10px]', blockHeight(r.rank))} style={{ backgroundColor: r.color }}>
-                  <span className={cn('font-serif font-bold uppercase leading-none', textTone, r.rank === 1 ? 'text-[36px] md:text-[56px]' : 'text-[32px] md:text-[44px]')}>
-                    <span className="md:hidden">{r.rank}</span>
-                    <span className="hidden md:inline">{ordinal(r.rank)}</span>
-                  </span>
-                </div>
-              </li>
-            );
-          })}
+          {podiumOrder(rows).map((r) => (
+            <PodiumStep key={r.faction_id} r={r} hub={hub} />
+          ))}
         </ol>
       </div>
     </section>
   );
+}
+
+/** Gold, silver and bronze tints for the top three rows (ties share the tint); the rest stay white. */
+const placeTint = (rank: number) =>
+  [
+    '',
+    'bg-[color-mix(in_srgb,var(--color-gold)_16%,var(--color-surface))]',
+    'bg-[color-mix(in_srgb,var(--color-silver)_20%,var(--color-surface))]',
+    'bg-[color-mix(in_srgb,var(--color-bronze)_16%,var(--color-surface))]',
+  ][rank] ?? '';
+
+/** Whole number that counts up to `value`. */
+function CountUp({ value }: { value: number }) {
+  return <>{Math.round(useTweenedNumber(value))}</>;
 }
 
 function MedalTable({ rows, hub, edition }: { rows: SkMedalTableRow[]; hub: HubData; edition: Pick<SkEditionRow, 'points_gold' | 'points_silver' | 'points_bronze'> }) {
@@ -78,7 +127,7 @@ function MedalTable({ rows, hub, edition }: { rows: SkMedalTableRow[]; hub: HubD
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.faction_id} className="border-t border-line">
+              <tr key={r.faction_id} className={cn('border-t border-line', placeTint(r.rank))}>
                 <td className="py-4 pl-6 font-serif text-[30px] italic leading-none text-lime-dark">{r.rank}</td>
                 <th scope="row" className="py-4 font-normal">
                   <FactionBadge faction={faction(r.faction_id)} logos={hub.logos} />
@@ -97,14 +146,14 @@ function MedalTable({ rows, hub, edition }: { rows: SkMedalTableRow[]; hub: HubD
       {/* phone: cards */}
       <ol className="flex flex-col gap-2.5 md:hidden">
         {rows.map((r) => (
-          <li key={r.faction_id} className="flex flex-col gap-2.5 rounded-[12px] border border-line bg-surface p-3.5">
+          <li key={r.faction_id} className={cn('flex flex-col gap-2.5 rounded-[12px] border border-line bg-surface p-3.5', placeTint(r.rank))}>
             <div className="flex items-center gap-2.5">
               <span className="w-6 shrink-0 font-serif text-[26px] italic leading-none text-lime-dark">
                 <span className="sr-only">Rank </span>
                 {r.rank}
               </span>
               <FactionBadge faction={faction(r.faction_id)} logos={hub.logos} className="flex-1" />
-              <span className="shrink-0 font-serif text-[22px] font-semibold tabular-nums text-green-900">{r.points} pts</span>
+              <span className="shrink-0 font-serif text-[22px] font-semibold tabular-nums text-green-900"><CountUp value={r.points} /> pts</span>
             </div>
             <div className="flex items-center gap-2 pl-[34px]">
               <MedalChip medal="gold" count={r.gold} />
@@ -119,67 +168,136 @@ function MedalTable({ rows, hub, edition }: { rows: SkMedalTableRow[]; hub: HubD
   );
 }
 
-/** Cumulative points per day as an SVG line chart, with the numbers as a hidden table. */
-function PointsRace({ race, hub, upto, total }: { race: SkPointsByDayRow[]; hub: HubData; upto: number; total: number }) {
-  const shown = Math.max(1, Math.min(upto || 1, total));
-  const series = raceSeries(race, shown);
-  const W = 640;
-  const H = 290;
-  const pad = { l: 30, r: 20, t: 16, b: 16 };
-  const max = Math.max(5, ...[...series.values()].flat().map((p) => p.points));
-  const x = (day: number) => (shown === 1 ? (pad.l + W - pad.r) / 2 : pad.l + ((day - 1) / (shown - 1)) * (W - pad.l - pad.r));
-  const y = (pts: number) => H - pad.b - (pts / max) * (H - pad.t - pad.b);
-  const days = Array.from({ length: shown }, (_, i) => i + 1);
+/** Cumulative points as an SVG line chart (day by day, or in 1/3/6/12-hour steps), with the numbers as a hidden table. */
+function PointsRace({ race, hub, upto, total, range = 'day', onRange, timeline, timelineLoading }: {
+  race: SkPointsByDayRow[];
+  hub: HubData;
+  upto: number;
+  total: number;
+  range?: RaceRange;
+  onRange?: (r: RaceRange) => void;
+  timeline?: SkPointsTimelineRow[];
+  timelineLoading?: boolean;
+}) {
+  const hourly = range !== 'day';
   const factions = hub.factions;
+  let labels: string[];
+  let target: Map<string, number[]>;
+  if (hourly) {
+    const t = timelineSeries(timeline ?? []);
+    labels = t.steps.map((st) => stepLabel(st, range === 12));
+    target = t.series;
+  } else {
+    const shown = Math.max(1, Math.min(upto || 1, total));
+    const rs = raceSeries(race, shown);
+    labels = Array.from({ length: shown }, (_, i) => `Day ${i + 1}`);
+    target = new Map([...rs].map(([key, v]) => [key, v.map((p) => p.points)]));
+  }
+  const n = labels.length;
+  // lines rise from 0 on load and move to new totals when results come in
+  const flat = factions.flatMap((f) => target.get(f.id) ?? []);
+  const tweened = useTweenedNumbers(flat, 1200);
+  const series = new Map<string, number[]>();
+  let k = 0;
+  for (const f of factions) series.set(f.id, (target.get(f.id) ?? []).map((v) => tweened[k++] ?? v));
+
+  const W = 640;
+  const H = 312;
+  const pad = { l: 30, r: 20, t: 16, b: 38 };
+  const max = Math.max(5, ...flat);
+  const x = (i: number) => (n <= 1 ? (pad.l + W - pad.r) / 2 : pad.l + (i / (n - 1)) * (W - pad.l - pad.r));
+  const y = (pts: number) => H - pad.b - (pts / max) * (H - pad.t - pad.b);
+  const every = Math.max(1, Math.ceil(n / 6)); // at most ~6 time labels
+  const showLabel = (i: number) => i === n - 1 || (i % every === 0 && n - 1 - i >= every / 2);
+  const dots = n <= 14;
+  const firstStep = timeline?.[0]?.bucket_end;
+  const subtitle = !hourly
+    ? 'Cumulative points at the end of each competition day'
+    : range === 12
+      ? 'Cumulative points every 12 hours across the games'
+      : `Cumulative points every ${range === 1 ? 'hour' : `${range} hours`}${firstStep ? `, ${stepLabel(firstStep, true).split(',')[0]}` : ''}`;
 
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-[14px] border border-line bg-surface p-4 md:p-7">
-      <div>
-        <h3 className="font-serif text-[20px] font-semibold md:text-[24px]">Points race<span className="hidden md:inline">, day by day</span></h3>
-        <p className="mt-1 text-meta text-ink-muted">Cumulative points at the end of each competition day</p>
-      </div>
-      <figure className="flex flex-col gap-1.5">
-        <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`Points by day for ${factions.map((f) => f.name).join(', ')}. The table below has the numbers.`}>
-          {[0, 0.25, 0.5, 0.75, 1].map((t) => (
-            <line key={t} x1={pad.l} x2={W - pad.r} y1={y(max * t)} y2={y(max * t)} stroke="var(--color-line)" strokeWidth={1} />
-          ))}
-          {factions.map((f) => {
-            const pts = series.get(f.id) ?? [];
-            if (!pts.length) return null;
-            return (
-              <g key={f.id}>
-                <polyline points={pts.map((p) => `${x(p.day)},${y(p.points)}`).join(' ')} fill="none" stroke={f.color} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
-                {pts.map((p) => (
-                  <circle key={p.day} cx={x(p.day)} cy={y(p.points)} r={p.day === shown ? 6 : 3.5} fill={p.day === shown ? f.color : 'var(--color-surface)'} stroke={f.color} strokeWidth={2} />
-                ))}
-              </g>
-            );
-          })}
-        </svg>
-        <div className="flex justify-between pl-[4.7%] pr-[3%] text-meta text-ink-muted" aria-hidden>
-          {days.map((d) => (
-            <span key={d}>Day {d}</span>
-          ))}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="font-serif text-[20px] font-semibold md:text-[24px]">Points race</h3>
+          <p className="mt-1 text-meta text-ink-muted">{subtitle}</p>
         </div>
-        <figcaption className="sr-only">
-          <table aria-label="Points by day">
-            <thead>
-              <tr>
-                <th scope="col">Faction</th>
-                {days.map((d) => <th key={d} scope="col">Day {d}</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {factions.map((f) => (
-                <tr key={f.id}>
-                  <th scope="row">{f.name}</th>
-                  {days.map((d) => <td key={d}>{series.get(f.id)?.find((p) => p.day === d)?.points ?? 0}</td>)}
+        {onRange && (
+          <div role="group" aria-label="Time steps" className="inline-flex rounded-full border border-line bg-paper p-1">
+            {raceRanges.map((r) => (
+              <button
+                key={r.label}
+                type="button"
+                aria-pressed={range === r.value}
+                onClick={() => onRange(r.value)}
+                className={cn('h-8 rounded-full px-3 text-[13px] font-bold transition-colors', range === r.value ? 'bg-green-900 text-lime' : 'text-ink-muted hover:text-ink')}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {hourly && timelineLoading && !timeline ? (
+        <LogoLoader label="Loading the points race" className="min-h-[260px]" />
+      ) : hourly && n === 0 ? (
+        <p className="grid min-h-[200px] place-items-center text-body-m text-ink-muted">No results yet for this view.</p>
+      ) : (
+        <figure className="flex flex-col gap-1.5">
+          <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label={`Points race for ${factions.map((f) => f.name).join(', ')}. The table below has the numbers.`}>
+            {[0, 0.25, 0.5, 0.75, 1].map((t) => (
+              <line key={t} x1={pad.l} x2={W - pad.r} y1={y(max * t)} y2={y(max * t)} stroke="var(--color-line)" strokeWidth={1} />
+            ))}
+            {factions.map((f) => {
+              const pts = series.get(f.id) ?? [];
+              if (!pts.length) return null;
+              return (
+                <g key={f.id}>
+                  <polyline points={pts.map((v, i) => `${x(i)},${y(v)}`).join(' ')} fill="none" stroke={f.color} strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" />
+                  {pts.map((v, i) =>
+                    dots || i === pts.length - 1 ? (
+                      <circle key={i} cx={x(i)} cy={y(v)} r={i === pts.length - 1 ? 6 : 3.5} fill={i === pts.length - 1 ? f.color : 'var(--color-surface)'} stroke={f.color} strokeWidth={2} />
+                    ) : null,
+                  )}
+                </g>
+              );
+            })}
+            {labels.map((l, i) =>
+              showLabel(i) ? (
+                <text key={i} x={x(i)} y={H - 12} textAnchor={n === 1 ? 'middle' : i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'} fontSize="12" fill="var(--color-ink-muted)">
+                  {l}
+                </text>
+              ) : null,
+            )}
+          </svg>
+          <figcaption className="sr-only">
+            <table aria-label="Points race">
+              <thead>
+                <tr>
+                  <th scope="col">Faction</th>
+                  {labels.map((l, i) => (
+                    <th key={i} scope="col">
+                      {l}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </figcaption>
-      </figure>
+              </thead>
+              <tbody>
+                {factions.map((f) => (
+                  <tr key={f.id}>
+                    <th scope="row">{f.name}</th>
+                    {labels.map((_, i) => (
+                      <td key={i}>{target.get(f.id)?.[i] ?? 0}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </figcaption>
+        </figure>
+      )}
       <ul className="hidden flex-wrap gap-x-5 gap-y-2 md:flex" aria-hidden>
         {factions.map((f) => (
           <li key={f.id}>
@@ -224,13 +342,17 @@ function MedalBreakdown({ rows, hub }: { rows: SkMedalTableRow[]; hub: HubData }
   );
 }
 
-export function MedalTallyView({ edition, hub, table, race, phase, now = new Date() }: {
+export function MedalTallyView({ edition, hub, table, race, phase, now = new Date(), range, onRange, timeline, timelineLoading }: {
   edition: SkEditionRow;
   hub: HubData;
   table: SkMedalTableRow[];
   race: SkPointsByDayRow[];
   phase: HubPhase;
   now?: Date;
+  range?: RaceRange;
+  onRange?: (r: RaceRange) => void;
+  timeline?: SkPointsTimelineRow[];
+  timelineLoading?: boolean;
 }) {
   const games = liveAndNext(hub.matches, now);
   const totalDays = phase.kind === 'before' ? 1 : phase.of;
@@ -240,7 +362,7 @@ export function MedalTallyView({ edition, hub, table, race, phase, now = new Dat
       <MedalTable rows={table} hub={hub} edition={edition} />
       <section aria-label="Charts" className="container-page pt-8 md:pt-10">
         <div className="flex flex-col gap-6 lg:flex-row">
-          <PointsRace race={race} hub={hub} upto={standingsDay(phase)} total={totalDays} />
+          <PointsRace race={race} hub={hub} upto={standingsDay(phase)} total={totalDays} range={range} onRange={onRange} timeline={timeline} timelineLoading={timelineLoading} />
           <MedalBreakdown rows={table} hub={hub} />
         </div>
       </section>

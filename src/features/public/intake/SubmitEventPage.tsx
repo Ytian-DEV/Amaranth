@@ -7,6 +7,7 @@ import { errorText } from '@/lib/errors';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { PageHeader } from '../PageHeader';
 import { FileField } from './FileField';
+import { Turnstile } from '@/components/ui/Turnstile';
 import { Honeypot, SuccessPanel } from './FormBits';
 import { useSubmitEvent, type EventSubmission } from './intakeData';
 import { focusFirstError, hasErrors, validate, type Errors } from './validate';
@@ -80,6 +81,7 @@ export function SubmitEventForm({ onSubmit }: { onSubmit: (values: EventSubmissi
       </Field>
       <FileField label="Photos and documents" files={values.files} onChange={(files) => setValues((v) => ({ ...v, files }))} hint="Up to 5 photos or documents, 20 MB each. Large photos are resized before upload." />
       <Honeypot value={values.website} onChange={(website) => setValues((v) => ({ ...v, website }))} />
+      <Turnstile />
       <Button type="submit" size="lg" loading={status === 'sending'} className="self-start">
         {status === 'sending' ? 'Sending…' : 'Send event report'}
       </Button>

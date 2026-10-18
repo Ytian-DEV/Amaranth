@@ -18,6 +18,7 @@ export const divisionLabels: Record<SkDivision, string> = { men: 'Men', women: '
 export const formatLabels: Record<SkFormat, string> = {
   bracket: 'Bracket (knockout)',
   round_robin: 'Round robin',
+  round_robin_final: 'Round robin + final',
   timed: 'Timed / measured',
   judged: 'Judged',
 };

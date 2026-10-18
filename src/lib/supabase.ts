@@ -36,3 +36,8 @@ export function unwrapMaybe<R extends Response>(result: R): NonNullable<R['data'
   if (result.error) throw result.error;
   return (result.data ?? null) as NonNullable<R['data']> | null;
 }
+
+/** A page number past the last page (PostgREST 416, PGRST103): show an empty page, not an error. */
+export function pastLastPage(error: unknown) {
+  return typeof error === 'object' && error !== null && (error as { code?: string }).code === 'PGRST103';
+}

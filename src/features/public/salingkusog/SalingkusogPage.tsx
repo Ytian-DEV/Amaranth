@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback';
 import { usePageMeta } from '@/lib/usePageMeta';
 import type { SkCategory, SkEditionRow } from '@/lib/database.types';
 import { categoryLabels } from '@/lib/skLabels';
-import { hubPhase, hubTabs, scheduleDay, type ScheduleFilters, type ScheduleShow } from './hub';
+import { hubPhase, hubTabs, scheduleDay, type RaceRange, type ScheduleFilters, type ScheduleShow } from './hub';
 import { MedalTallyView } from './MedalTallyView';
 import { SalingkusogHeader } from './SalingkusogHeader';
 import { ScheduleView } from './ScheduleView';
@@ -12,7 +13,7 @@ import { SportView } from './SportView';
 import { RecapView } from './RecapView';
 import { VenuesView } from './VenuesView';
 import { useArticle } from '@/features/public/article/articleData';
-import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useArticleSlug, useEventLeaders, useMatchExtras, useMediaList, useResults, useStandings, type HubData } from './skData';
+import { useCurrentEdition, useHubData, useLiveGames, useMediaAsset, useArticleSlug, useEventLeaders, useMatchExtras, useMediaList, useResults, useStandings, useTimeline, type HubData } from './skData';
 import { completedCount, winnerCards } from './winners';
 import { WinnersView } from './WinnersView';
 
@@ -159,6 +160,13 @@ function VenuesPage({ edition, hub }: { edition: SkEditionRow; hub: HubData }) {
 }
 
 /** /salingkusog/* — the intramurals hub. */
+/** Medal tally with the points-race time steps (hourly data is fetched only when chosen). */
+function MedalTallyPage(props: Omit<React.ComponentProps<typeof MedalTallyView>, 'range' | 'onRange' | 'timeline' | 'timelineLoading'>) {
+  const [range, setRange] = useState<RaceRange>('day');
+  const timeline = useTimeline(props.edition.id, range === 'day' ? null : range);
+  return <MedalTallyView {...props} range={range} onRange={setRange} timeline={timeline.data} timelineLoading={timeline.isPending} />;
+}
+
 export function SalingkusogPage() {
   const edition = useCurrentEdition();
   const ed = edition.data ?? undefined;
@@ -207,7 +215,7 @@ export function SalingkusogPage() {
     <>
       <SalingkusogHeader edition={ed} factions={hub.data.factions} sportsCount={hub.data.sports.length} liveCount={hub.data.matches.filter((m) => m.status === 'live').length} phase={phase} />
       <Routes>
-        <Route index element={<MedalTallyView edition={ed} hub={hub.data} table={standings.data.table} race={standings.data.race} phase={phase} />} />
+        <Route index element={<MedalTallyPage edition={ed} hub={hub.data} table={standings.data.table} race={standings.data.race} phase={phase} />} />
         <Route path="schedule" element={<SchedulePage edition={ed} hub={hub.data} />} />
         <Route path="winners" element={<WinnersPage edition={ed} hub={hub.data} />} />
         <Route path="factions" element={<FactionPage hub={hub.data} table={standings.data.table} editionId={ed.id} />} />

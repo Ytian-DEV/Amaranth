@@ -7,6 +7,7 @@ import { errorText } from '@/lib/errors';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { PageHeader } from '../PageHeader';
 import { FileField } from './FileField';
+import { Turnstile } from '@/components/ui/Turnstile';
 import { Honeypot, SuccessPanel } from './FormBits';
 import { useSubmissionSections, useSubmitArticle, type ArticleSubmission } from './intakeData';
 import { focusFirstError, hasErrors, validate, type Errors } from './validate';
@@ -148,6 +149,7 @@ export function SubmitArticleForm({
         )}
       </div>
       <Honeypot value={values.website} onChange={(website) => setValues((v) => ({ ...v, website }))} />
+      <Turnstile />
       <Button type="submit" size="lg" loading={status === 'sending'} className="self-start">
         {status === 'sending' ? 'Sending…' : 'Send to the editors'}
       </Button>

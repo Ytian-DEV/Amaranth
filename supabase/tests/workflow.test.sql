@@ -161,6 +161,48 @@ select tests.expect_error('uninvited user cannot upload media',
   $$insert into storage.objects (bucket_id, name) values ('media', 'x.jpg')$$);
 select tests.expect_error('uninvited user cannot read stats', $$select public.dashboard_stats()$$, 'Staff only');
 
+-- ---------------------------------------------------------------- publishing access
+select tests.login('writer@test.local');
+select tests.expect_ok('writer drafts another story',
+  $$insert into public.articles (id, category_id, title, body_text)
+    select '00000000-0000-0000-0000-0000000000b9', c.id, 'Granted story', 'one two three'
+    from public.categories c where c.slug = 'campus-news'$$);
+select tests.expect_error('writer without access cannot publish',
+  $$select public.transition_article('00000000-0000-0000-0000-0000000000b9', 'published')$$, 'cannot move');
+select tests.expect_error('writer cannot give self publishing access',
+  $$update public.profiles set can_publish = true where id = auth.uid()$$, 'publishing access');
+select tests.expect_error('writer cannot call the grant',
+  $$select public.set_publish_access(auth.uid(), true)$$, 'publishing access');
+
+select tests.login('bm@test.local');
+select tests.expect_error('business manager cannot give publishing access',
+  $$select public.set_publish_access((select id from public.profiles where email = 'writer@test.local'), true)$$, 'publishing access');
+select tests.expect_ok('business manager drafts a story',
+  $$insert into public.articles (id, category_id, title, body_text)
+    select '00000000-0000-0000-0000-0000000000ba', c.id, 'Business story', 'one two three'
+    from public.categories c where c.slug = 'campus-news'$$);
+select tests.expect_ok('business manager publishes',
+  $$select public.transition_article('00000000-0000-0000-0000-0000000000ba', 'published')$$);
+
+select tests.login('pub.me@test.local');
+select tests.expect_ok('managing editor gives the writer publishing access',
+  $$select public.set_publish_access((select id from public.profiles where email = 'writer@test.local'), true)$$);
+
+select tests.login('writer@test.local');
+select tests.expect_ok('writer with access publishes own story',
+  $$select public.transition_article('00000000-0000-0000-0000-0000000000b9', 'published')$$);
+
+select tests.login('pub.me@test.local');
+select tests.expect_ok('managing editor takes the access back',
+  $$select public.set_publish_access((select id from public.profiles where email = 'writer@test.local'), false)$$);
+select tests.login('writer@test.local');
+select tests.expect_error('writer without access cannot unpublish',
+  $$select public.transition_article('00000000-0000-0000-0000-0000000000b9', 'draft')$$, 'cannot move');
+
+select tests.logout();
+select tests.expect_count('publishing access changes are audited',
+  $$select 1 from public.audit_log where action = 'profile.publish_access'$$, 2);
+
 -- ---------------------------------------------------------------- media in use cannot be deleted
 select tests.logout();
 select tests.expect_error('used cover cannot be deleted',

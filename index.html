@@ -13,7 +13,18 @@
     <title>Amaranth | The Official Student Media Organization of Visayas State University</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- shown until the app starts: the Amaranth mark, rotating -->
+      <div role="status" style="min-height:100vh;display:grid;place-items:center">
+        <img src="/amaranth-logo.svg" alt="" width="56" height="54" class="boot-logo" />
+        <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Loading Amaranth</span>
+      </div>
+      <style>
+        .boot-logo { animation: boot-spin 1.6s linear infinite; }
+        @keyframes boot-spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .boot-logo { animation: none; } }
+      </style>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

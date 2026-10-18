@@ -7,7 +7,7 @@ function domCheck() {
     .filter((e) => !e.closest('[data-scroll-x]'))
     .slice(0, 10)
     .map((e) => `${e.tagName.toLowerCase()}.${String(e.className).slice(0, 60)}`);
-  const unnamed = [...document.querySelectorAll<HTMLElement>('button, a[href], input, select, textarea, [role="button"]')]
+  const unnamed = [...document.querySelectorAll<HTMLElement>('button, a[href], input:not([type="hidden"]), select, textarea, [role="button"]')]
     .filter((e) => !e.closest('[aria-hidden="true"]'))
     .filter(
       (e) =>

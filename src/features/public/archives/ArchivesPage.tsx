@@ -10,6 +10,7 @@ import { PAGE_SIZE } from '../section/sectionData';
 import { SectionSkeleton, SectionView } from '../section/SectionView';
 import { ArchivesView } from './ArchivesView';
 import { monthLabel, monthRange, useArchiveMonths, useIssues } from './archivesData';
+import { pastLastPage } from '@/lib/supabase';
 
 export function ArchivesPage() {
   useDocumentTitle('Archives');
@@ -53,7 +54,7 @@ export function ArchiveMonthPage() {
         .lt('published_at', range![1])
         .order('published_at', { ascending: false })
         .range(from, from + PAGE_SIZE - 1);
-      if (error) throw error;
+      if (error && !pastLastPage(error)) throw error;
       return { items: (data ?? []).map(toStoryItem), total: count ?? 0 };
     },
   });

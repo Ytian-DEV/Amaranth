@@ -10,7 +10,7 @@ import { alsoLinks, menuMeta, useMenuLatest, type MenuLatest } from './moreMenu'
 
 function UtilityBar() {
   return (
-    <div className="hidden bg-green-900 text-meta text-green-soft md:block">
+    <div className="hidden bg-green-900 text-meta text-on-dark-muted md:block">
       <div className="container-page flex h-[38px] items-center justify-between">
         <p>
           {formatLongDate()} <span aria-hidden>·</span> Baybay City, Leyte
@@ -21,7 +21,7 @@ function UtilityBar() {
               .filter((l) => l.to !== '/submit#guidelines')
               .map((l) => (
                 <li key={l.to}>
-                  <Link to={l.to} className="hover:text-on-dark hover:underline">
+                  <Link to={l.to} className="text-on-dark hover:text-lime hover:underline">
                     {l.short}
                   </Link>
                 </li>
@@ -35,20 +35,26 @@ function UtilityBar() {
 
 function Masthead() {
   return (
-    <div className="hidden border-b border-line bg-paper md:block">
+    <div className="hidden border-b border-line bg-surface md:block">
       <div className="container-page grid h-[113px] grid-cols-[1fr_auto_1fr] items-center gap-6">
-        <span aria-hidden />
+        {/* the motto from the cover photo */}
+        <p className="hidden text-[15px] italic leading-snug text-ink-muted lg:block">
+          In the name of <strong className="font-extrabold text-lime-dark-text">TRUTH</strong>
+          <br />
+          and standing by it—we remain.
+        </p>
+        <span aria-hidden className="lg:hidden" />
         <Link to="/" className="flex items-center gap-4" aria-label="Amaranth — front page">
           <LogoMark className="h-[64px] lg:h-[76px]" />
           <span className="flex flex-col gap-0.5">
-            <span className="font-serif text-[40px] font-bold leading-none tracking-[0.06em] text-green-900 lg:text-[52px]">
+            <span className="font-wordmark text-[40px] font-bold leading-none tracking-[0.08em] text-green-900 lg:text-[52px]">
               AMARANTH
             </span>
             <span className="text-meta text-ink-muted">The Official Student Media Organization of Visayas State University</span>
           </span>
         </Link>
         <div className="flex items-center justify-end gap-5">
-          <Link to="/admin/login" className="hidden items-center gap-1.5 text-button text-ink hover:text-green-700 lg:inline-flex">
+          <Link to="/admin/login" className="hidden items-center gap-1.5 text-button text-ink hover-lime lg:inline-flex">
             <UserRound className="size-[18px]" aria-hidden />
             Log in
           </Link>
@@ -70,7 +76,7 @@ const useSectionActive = () => {
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   cn(
     'flex h-[52px] items-center border-b-[3px] text-nav uppercase transition-colors',
-    isActive ? 'border-lime text-lime' : 'border-transparent text-on-dark hover:border-on-dark-muted',
+    isActive ? 'border-lime text-lime' : 'border-transparent text-on-dark hover:border-lime hover:text-lime',
   );
 
 /** The "More" mega menu panel (Figma 42:1077): one card per section with its latest story. */
@@ -93,7 +99,7 @@ export function MorePanel({ id, sections, latest, onNavigate }: { id?: string; s
                 to={sectionPath(s.slug)}
                 onClick={onNavigate}
                 aria-current={current ? 'page' : undefined}
-                className="font-serif text-[22px] font-semibold leading-tight text-ink after:absolute after:inset-0 after:rounded-xl group-hover:text-green-700"
+                className="font-serif text-[22px] font-semibold leading-tight text-ink after:absolute after:inset-0 after:rounded-xl group-hover-lime"
               >
                 {meta.label ?? s.name}
                 {meta.label && <span className="sr-only"> ({s.name})</span>}
@@ -117,7 +123,7 @@ export function MorePanel({ id, sections, latest, onNavigate }: { id?: string; s
           <ul className="flex flex-wrap gap-x-7 gap-y-2">
             {alsoLinks.map((l) => (
               <li key={l.to}>
-                <Link to={l.to} onClick={onNavigate} className="text-button text-green-900 hover:text-green-700 hover:underline">
+                <Link to={l.to} onClick={onNavigate} className="text-button text-green-900 hover-lime hover:underline">
                   {l.label}
                 </Link>
               </li>
@@ -237,7 +243,7 @@ function MobileDrawer({ open, onClose }: { open: boolean; onClose: () => void })
     >
       <div className="flex h-full flex-col">
         <div className="flex h-[58px] items-center justify-between border-b border-green-700 px-4">
-          <span className="font-serif text-[20px] font-bold tracking-[0.06em]">AMARANTH</span>
+          <span className="font-wordmark text-[20px] font-bold tracking-[0.08em] text-lime">AMARANTH</span>
           <button type="button" onClick={onClose} className="grid size-10 place-items-center rounded-md hover:bg-green-700" aria-label="Close menu">
             <X className="size-6" aria-hidden />
           </button>
@@ -294,7 +300,7 @@ function SectionChips() {
               className={({ isActive }) =>
                 cn(
                   'inline-flex h-8 items-center rounded-full border px-3.5 text-nav uppercase',
-                  sectionActive(s.slug, isActive) ? 'border-lime bg-lime text-green-900' : 'border-green-500 text-on-dark',
+                  sectionActive(s.slug, isActive) ? 'border-lime bg-lime text-green-900' : 'border-on-dark/25 text-on-dark hover:border-lime hover:text-lime',
                 )
               }
             >
@@ -313,22 +319,22 @@ function MobileHeader() {
   useEffect(() => setOpen(false), [location.pathname]);
   return (
     <>
-      <div className="sticky top-0 z-20 bg-green-900 md:hidden">
+      <div className="sticky top-0 z-20 border-b border-line bg-surface md:hidden">
         <div className="flex h-[58px] items-center justify-between px-2">
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="grid size-11 place-items-center rounded-md text-on-dark"
+            className="grid size-11 place-items-center rounded-md text-ink hover:bg-paper"
             aria-label="Open menu"
             aria-haspopup="dialog"
           >
             <Menu className="size-6" aria-hidden />
           </button>
-          <Link to="/" className="flex items-center gap-2 text-on-dark" aria-label="Amaranth — front page">
+          <Link to="/" className="flex items-center gap-2 text-green-900" aria-label="Amaranth — front page">
             <LogoMark className="h-7" />
-            <span className="font-serif text-[24px] font-bold leading-none tracking-[0.06em]">AMARANTH</span>
+            <span className="font-wordmark text-[24px] font-bold leading-none tracking-[0.08em]">AMARANTH</span>
           </Link>
-          <Link to="/search" className="grid size-11 place-items-center rounded-md text-on-dark" aria-label="Search">
+          <Link to="/search" className="grid size-11 place-items-center rounded-md text-ink hover:bg-paper" aria-label="Search">
             <Search className="size-[22px]" aria-hidden />
           </Link>
         </div>

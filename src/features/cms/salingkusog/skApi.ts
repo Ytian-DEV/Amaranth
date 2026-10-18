@@ -208,6 +208,15 @@ export function useUpdateMatch(id: string) {
   });
 }
 
+/** "Build schedule": creates an event's games; later rounds fill in by themselves (public.sk_build_schedule). */
+export function useBuildSchedule() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: Database['public']['Functions']['sk_build_schedule']['Args']) => unwrap(await sb().rpc('sk_build_schedule', args)),
+    onSettled: () => void client.invalidateQueries({ queryKey: ['sk'] }),
+  });
+}
+
 export function useCreateMatch() {
   const client = useQueryClient();
   return useMutation({
@@ -265,6 +274,35 @@ export function useSaveAthleteStats(matchId: string) {
         ? unwrap(await sb().from('sk_athlete_stats').upsert({ match_id: matchId, athlete_id: p.athlete_id, stats: p.stats }))
         : unwrap(await sb().from('sk_athlete_stats').delete().eq('match_id', matchId).eq('athlete_id', p.athlete_id)),
     onSettled: () => void client.invalidateQueries({ queryKey: ['sk', 'sk_athlete_stats', matchId] }),
+  });
+}
+
+// ---------------------------------------------------------------- contests (every faction at once)
+
+export function useSkEntries(editionId: string | undefined) {
+  return useQuery({
+    queryKey: ['sk', 'sk_entries', editionId],
+    enabled: !!editionId,
+    queryFn: async () => unwrap(await sb().from('sk_entries').select('*').eq('edition_id', editionId!).order('lane')),
+  });
+}
+
+/** Save one entry's athlete, result, place, order or status. */
+export function useSaveEntry() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...patch }: { id: string } & Tables['sk_entries']['Update']) =>
+      unwrap(await sb().from('sk_entries').update(patch).eq('id', id).select('*').single()),
+    onSettled: () => void client.invalidateQueries({ queryKey: ['sk', 'sk_entries'] }),
+  });
+}
+
+/** "Create contest": one session with every faction in it (public.sk_create_contest). */
+export function useCreateContest() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: Database['public']['Functions']['sk_create_contest']['Args']) => unwrap(await sb().rpc('sk_create_contest', args)),
+    onSettled: () => void client.invalidateQueries({ queryKey: ['sk'] }),
   });
 }
 

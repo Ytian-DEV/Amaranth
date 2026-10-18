@@ -133,7 +133,7 @@ export function SalingkusogPage() {
           }
         />
         <Route path="factions" element={needsEdition((e) => <FactionsTab key={e.id} editionId={e.id} />)} />
-        <Route path="sports" element={needsEdition((e) => <SportsTab key={e.id} editionId={e.id} />)} />
+        <Route path="sports" element={needsEdition((e) => <SportsTab key={e.id} editionId={e.id} startsOn={e.starts_on} endsOn={e.ends_on} />)} />
         <Route path="venues" element={needsEdition((e) => <VenuesTab key={e.id} editionId={e.id} />)} />
         <Route path="import" element={needsEdition((e) => <ImportTab key={e.id} edition={e} />)} />
         <Route path="team" element={<TeamTab canManage={manager} />} />

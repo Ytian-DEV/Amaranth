@@ -1,6 +1,4 @@
-import type { Json } from '@/lib/database.types';
-import { compressImage, safeFileName } from '@/lib/images';
-import { getSupabase } from '@/lib/supabase';
+import { compressImage } from '@/lib/images';
 
 export const MAX_FILES = 5;
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;
@@ -21,21 +19,9 @@ export function fileProblem(file: File): string | null {
   return null;
 }
 
-/**
- * Uploads files to the private "intake" bucket under `<folder>/<random>/` and returns the
- * JSON the intake RPCs expect. Images are compressed first.
- */
-export async function uploadIntakeFiles(folder: 'submissions' | 'events', files: File[]): Promise<Json> {
-  if (files.length === 0) return [];
-  const storage = getSupabase().storage.from('intake');
-  const batch = crypto.randomUUID();
-  const out: { path: string; name: string; mime: string; size: number }[] = [];
-  for (const original of files) {
-    const { file } = await compressImage(original, { maxDimension: 2400, type: 'image/jpeg', quality: 0.85 });
-    const path = `${folder}/${batch}/${out.length + 1}-${safeFileName(file.name)}`;
-    const { error } = await storage.upload(path, file, { contentType: file.type, upsert: false });
-    if (error) throw new Error(`Couldn’t upload ${original.name}: ${error.message}`);
-    out.push({ path, name: original.name, mime: file.type, size: file.size });
-  }
+/** Compresses images (the upload itself goes through src/lib/sendForm.ts). */
+export async function prepareIntakeFiles(files: File[]): Promise<File[]> {
+  const out: File[] = [];
+  for (const original of files) out.push((await compressImage(original, { maxDimension: 2400, type: 'image/jpeg', quality: 0.85 })).file);
   return out;
 }

@@ -75,7 +75,7 @@ export function BlogsLanding({ section, categories, items }: LandingProps) {
                   <li key={w.name} className={cn('group relative flex flex-col items-center gap-2 rounded-[12px] px-4 py-6 text-center', i % 2 ? 'bg-green-soft' : 'bg-lime-soft')}>
                     <Avatar name={w.name} size="lg" />
                     <h3 className="mt-1 font-serif text-[20px] font-semibold text-ink md:text-[22px]">
-                      <Link to={articlePath(w.posts[0].slug)} className="after:absolute after:inset-0 hover:text-green-700">
+                      <Link to={articlePath(w.posts[0].slug)} className="after:absolute after:inset-0 hover-lime">
                         {w.name}
                       </Link>
                     </h3>
@@ -107,7 +107,7 @@ export function BlogsLanding({ section, categories, items }: LandingProps) {
                   <ul className="flex flex-wrap gap-2">
                     {categories.map((c) => (
                       <li key={c.slug}>
-                        <Link to={categoryHref(section.slug, c.slug)} className="inline-flex h-8 items-center rounded-full border border-line bg-surface px-3 text-[14px] font-medium text-ink hover:border-green-700">
+                        <Link to={categoryHref(section.slug, c.slug)} className="inline-flex h-8 items-center rounded-full border border-line bg-surface px-3 text-[14px] font-medium text-ink hover:border-lime">
                           {c.name}
                         </Link>
                       </li>

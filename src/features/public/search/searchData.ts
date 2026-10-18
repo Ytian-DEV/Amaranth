@@ -1,6 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { toStoryItem, type StoryItem } from '@/components/story/types';
-import { getSupabase, unwrap, unwrapMaybe } from '@/lib/supabase';
+import { getSupabase, unwrap, unwrapMaybe, pastLastPage } from '@/lib/supabase';
 import { liveCards } from '../articles';
 
 export const SEARCH_PAGE_SIZE = 10;
@@ -56,7 +56,7 @@ async function searchByTag(f: SearchFilters): Promise<SearchResult> {
     .in('id', ids)
     .order('published_at', { ascending: false })
     .range(from, from + SEARCH_PAGE_SIZE - 1);
-  if (error) throw error;
+  if (error && !pastLastPage(error)) throw error;
   const total = count ?? 0;
   return {
     items: (data ?? []).map(toStoryItem),

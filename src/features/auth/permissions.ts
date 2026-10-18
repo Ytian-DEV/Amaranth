@@ -8,6 +8,7 @@ export const roleLabels: Record<AppRole, string> = {
   super_admin: 'Super admin',
   editor_in_chief: 'Executive Editor',
   managing_editor: 'Managing editor',
+  business_manager: 'Business Manager',
   section_editor: 'Section editor',
   staff_writer: 'Staff writer',
   contributor: 'Contributor',
@@ -17,6 +18,7 @@ export const roleOrder: AppRole[] = [
   'super_admin',
   'editor_in_chief',
   'managing_editor',
+  'business_manager',
   'section_editor',
   'staff_writer',
   'contributor',
@@ -24,6 +26,14 @@ export const roleOrder: AppRole[] = [
 
 export const isAdmin = (role?: AppRole | null) => role === 'super_admin' || role === 'editor_in_chief';
 export const canPublish = (role?: AppRole | null) => isAdmin(role) || role === 'managing_editor';
+/** Publish and schedule articles (app.can_publish_articles): the managing roles, the Business Manager,
+ *  and anyone given publishing access in Staff. Everyone else saves drafts and submits for review. */
+export const canPublishArticles = (role?: AppRole | null, granted?: boolean | null) =>
+  canPublish(role) || role === 'business_manager' || (!!role && !!granted);
+/** Roles that always publish, so Staff shows "Always" instead of a switch. */
+export const publishesByRole = (role?: AppRole | null) => canPublish(role) || role === 'business_manager';
+/** Super admin, Executive Editor and Managing editor give or take publishing access (public.set_publish_access). */
+export const canGrantPublishing = (role?: AppRole | null) => canPublish(role);
 export const isEditor = (role?: AppRole | null) => canPublish(role) || role === 'section_editor';
 
 /** Statistics (and staff usage): Super admin, Executive Editor and Managing editor (app.can_view_stats). */
@@ -47,11 +57,13 @@ export type ArticleContext = {
   isOwner: boolean;
   /** publisher, or section editor assigned to the article's section */
   canEditSection: boolean;
+  /** the user's own publishing access from Staff (profiles.can_publish) */
+  publishAccess?: boolean;
 };
 
 /** Statuses the user may move the article to (same rules as the DB trigger). */
 export function allowedTransitions(role: AppRole | null | undefined, ctx: ArticleContext): ArticleStatus[] {
-  const publisher = canPublish(role);
+  const publisher = canPublishArticles(role, ctx.publishAccess);
   const editor = ctx.canEditSection;
   const { status: from, isOwner } = ctx;
   const out = new Set<ArticleStatus>();

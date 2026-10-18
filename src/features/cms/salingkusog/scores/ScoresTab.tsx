@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback';
 import { Pill } from '@/components/ui/StatusPill';
 import type { SkEditionRow, SkMatchRow, SkMatchStatus } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
+import { pendingSide } from '@/lib/skSources';
 import { formatDate, formatShortDate } from '@/lib/format';
 import { Card } from '../../ui';
 import { defaultDay, editionDays, manilaTime, matchesForDay, statusLabels } from '../scoring';
@@ -16,7 +17,7 @@ import { namer, useSkLookups, type SkLookups } from './lookups';
 
 const statusTone: Record<SkMatchStatus, 'alert' | 'neutral' | 'green' | 'review'> = { live: 'alert', upcoming: 'neutral', final: 'green', postponed: 'review', cancelled: 'neutral' };
 
-export function GameRow({ match, lookups }: { match: SkMatchRow; lookups: SkLookups }) {
+export function GameRow({ match, lookups, games = [] }: { match: SkMatchRow; lookups: SkLookups; games?: SkMatchRow[] }) {
   const n = namer(lookups);
   const a = n.faction(match.side_a_id);
   const b = n.faction(match.side_b_id);
@@ -31,7 +32,16 @@ export function GameRow({ match, lookups }: { match: SkMatchRow; lookups: SkLook
             {match.round && ` · ${match.round}`}
           </p>
           <p className="truncate font-semibold text-ink">
-            {a?.short_name ?? a?.name ?? 'TBD'} <span className="font-normal text-ink-muted">vs</span> {b?.short_name ?? b?.name ?? 'TBD'}
+            {match.is_contest ? (
+              <>
+                Contest <span className="font-normal text-ink-muted">· all factions</span>
+              </>
+            ) : (
+              <>
+                {a?.short_name ?? a?.name ?? <span className="font-normal text-ink-muted">{pendingSide(match, 'a', games) ?? 'TBD'}</span>} <span className="font-normal text-ink-muted">vs</span>{' '}
+                {b?.short_name ?? b?.name ?? <span className="font-normal text-ink-muted">{pendingSide(match, 'b', games) ?? 'TBD'}</span>}
+              </>
+            )}
           </p>
         </div>
         {scored && (
@@ -108,7 +118,7 @@ export function ScoresView({ edition, matches, lookups, day, onDay, sportId, onS
         <Card as="div">
           <ul aria-label={`Games on ${formatDate(day)}`}>
             {list.map((m) => (
-              <GameRow key={m.id} match={m} lookups={lookups} />
+              <GameRow key={m.id} match={m} lookups={lookups} games={matches} />
             ))}
           </ul>
         </Card>

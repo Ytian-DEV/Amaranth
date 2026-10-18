@@ -10,6 +10,7 @@ export type AppRole =
   | 'super_admin'
   | 'editor_in_chief'
   | 'managing_editor'
+  | 'business_manager'
   | 'section_editor'
   | 'staff_writer'
   | 'contributor';
@@ -56,6 +57,8 @@ export type ProfileRow = {
   bio: string | null;
   role: AppRole;
   is_active: boolean;
+  /** publishing access given in Staff (the managing roles and Business Manager always have it) */
+  can_publish: boolean;
   last_seen_at: string | null;
   created_at: string;
   updated_at: string;
@@ -419,7 +422,7 @@ export type DashboardStats = {
 
 export type SkCategory = 'ball_games' | 'athletics' | 'combat_sports' | 'racket_sports' | 'aquatics' | 'mind_games' | 'esports' | 'dance_cheer' | 'pageant' | 'others';
 export type SkDivision = 'men' | 'women' | 'mixed' | 'open';
-export type SkFormat = 'bracket' | 'round_robin' | 'timed' | 'judged';
+export type SkFormat = 'bracket' | 'round_robin' | 'round_robin_final' | 'timed' | 'judged';
 export type SkMatchStatus = 'upcoming' | 'live' | 'final' | 'postponed' | 'cancelled';
 export type SkMedal = 'gold' | 'silver' | 'bronze';
 export type SkAwardKind = 'mvp_of_day' | 'athlete_of_day' | 'finals_mvp';
@@ -529,6 +532,8 @@ export type SkEventRow = {
   result_unit: string | null;
   venue_id: string | null;
   sort_order: number;
+  /** factions in seed order, set by "Build schedule" */
+  seeds: string[];
   created_at: string;
   updated_at: string;
 };
@@ -563,8 +568,30 @@ export type SkMatchRow = {
   started_at: string | null;
   ended_at: string | null;
   recap_article_id: string | null;
+  /** generated games: where the side comes from — seed:3, winner:<id>, loser:<id>, rank:2 */
+  source_a: string | null;
+  source_b: string | null;
+  /** a contest session: every faction at once, results in sk_entries */
+  is_contest: boolean;
   winner_side: 'a' | 'b' | null; // generated
   updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type SkEntryStatus = 'ok' | 'dns' | 'dnf' | 'dq';
+/** One faction (or its athlete) in a contest session. */
+export type SkEntryRow = {
+  id: string;
+  edition_id: string;
+  match_id: string;
+  faction_id: string;
+  athlete_id: string | null;
+  lane: number;
+  /** seconds, metres or points (timed / measured events) */
+  result: number | null;
+  /** judged events: the place the judges announced */
+  place: number | null;
+  status: SkEntryStatus;
   created_at: string;
   updated_at: string;
 };
@@ -616,6 +643,7 @@ export type SkMedalTableRow = {
   rank: number;
 };
 export type SkPointsByDayRow = { edition_id: string; faction_id: string; day: string; day_number: number; points: number };
+export type SkPointsTimelineRow = { faction_id: string; bucket_end: string; points: number };
 export type SkHeadToHeadRow = { edition_id: string; faction_id: string; opponent_id: string; wins: number; losses: number };
 export type SkEventStatusRow = {
   edition_id: string;
@@ -725,6 +753,7 @@ export type Database = {
         [FK<'sk_athlete_stats', 'match_id', 'sk_matches'>, FK<'sk_athlete_stats', 'athlete_id', 'sk_athletes'>]
       >;
       sk_placements: Table<SkPlacementRow, 'event_id' | 'place' | 'faction_id'>;
+      sk_entries: Table<SkEntryRow, 'match_id' | 'faction_id', [FK<'sk_entries', 'match_id', 'sk_matches'>]>;
       sk_awards: Table<
         SkAwardRow,
         'edition_id' | 'kind' | 'day' | 'athlete_id',
@@ -742,8 +771,27 @@ export type Database = {
     };
     Functions: {
       record_article_view: { Args: { p_article_id: string }; Returns: undefined };
+      sk_build_schedule: {
+        Args: {
+          p_event_id: string;
+          p_format: 'bracket' | 'round_robin' | 'round_robin_final';
+          p_seeds: string[];
+          p_first_at: string;
+          p_round_gap_hours?: number;
+          p_game_gap_minutes?: number;
+          p_venue_id?: string | null;
+          p_bronze?: boolean;
+        };
+        Returns: number;
+      };
+      sk_create_contest: {
+        Args: { p_event_id: string; p_at: string; p_venue_id?: string | null; p_round?: string | null; p_factions?: string[] | null; p_shuffle?: boolean };
+        Returns: string;
+      };
       sk_set_placements: { Args: { p_event_id: string; p_rows: SkPlacementInput[] }; Returns: number };
       sk_countdown: { Args: Record<string, never>; Returns: SkCountdownRow[] };
+      sk_points_timeline: { Args: { p_edition_id: string; p_hours: number }; Returns: SkPointsTimelineRow[] };
+      set_publish_access: { Args: { p_profile_id: string; p_allowed: boolean }; Returns: undefined };
       staff_heartbeat: { Args: Record<string, never>; Returns: number };
       stats_overview: { Args: { p_from: string; p_to: string }; Returns: StatsOverview };
       stats_articles: { Args: { p_from: string; p_to: string; p_limit?: number }; Returns: StatsArticleRow[] };

@@ -6,7 +6,7 @@ import { articlePath, storyMeta, type StoryItem } from '@/components/story/types
 import { ButtonLink } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/Feedback';
 import { Img } from '@/components/ui/Img';
-import { Kicker } from '@/components/ui/Tag';
+import { CategoryPill, Kicker } from '@/components/ui/Tag';
 import { cn } from '@/lib/cn';
 import { formatShortDate } from '@/lib/format';
 import { allHref, categoryHref } from './links';
@@ -32,7 +32,7 @@ export function CategoryChips({ section, categories, allLabel, className }: { se
         </li>
         {categories.map((c) => (
           <li key={c.slug} className="shrink-0">
-            <Link to={categoryHref(section.slug, c.slug)} className="inline-flex h-9 items-center rounded-full border border-line bg-surface px-3.5 text-button text-ink hover:border-green-700">
+            <Link to={categoryHref(section.slug, c.slug)} className="inline-flex h-9 items-center rounded-full border border-line bg-surface px-3.5 text-button text-ink hover:border-lime">
               {c.name}
             </Link>
           </li>
@@ -59,7 +59,7 @@ export function SectionIntro({ section, categories = [], allLabel, children }: {
 
 /** A full-width band with the page container inside. */
 export function Band({ tone = 'paper', className, children, label }: { tone?: 'paper' | 'surface' | 'dark' | 'ink' | 'lime'; className?: string; children: ReactNode; label?: string }) {
-  const bg = { paper: 'bg-paper', surface: 'bg-surface', dark: 'bg-green-900 text-on-dark', ink: 'bg-ink text-on-dark', lime: 'bg-lime-soft' }[tone];
+  const bg = { paper: 'bg-paper', surface: 'bg-surface', dark: 'bg-green-900 text-on-dark', ink: 'bg-green-900 text-on-dark', lime: 'bg-lime-soft' }[tone];
   return (
     <section aria-label={label} className={bg}>
       <div className={cn('container-page py-10 md:py-14', className)}>{children}</div>
@@ -70,7 +70,7 @@ export function Band({ tone = 'paper', className, children, label }: { tone?: 'p
 export function Headline({ story, as: Heading = 'h2', className }: { story: StoryItem; as?: 'h2' | 'h3'; className?: string }) {
   return (
     <Heading className={className}>
-      <Link to={articlePath(story.slug)} className="after:absolute after:inset-0 hover:text-green-700">
+      <Link to={articlePath(story.slug)} className="after:absolute after:inset-0 hover-lime">
         {story.title}
       </Link>
     </Heading>
@@ -81,8 +81,10 @@ export function Headline({ story, as: Heading = 'h2', className }: { story: Stor
 export function LeadStory({ story, ratio = '16/9' }: { story: StoryItem; ratio?: string }) {
   return (
     <article className="group relative flex flex-col gap-3.5">
-      <Img {...story.image} ratio={ratio} priority sizes="(min-width: 1024px) 770px, 100vw" className="rounded-[10px]" />
-      <Kicker>{story.categoryName ?? story.label}</Kicker>
+      <div className="relative mb-5">
+        <Img {...story.image} ratio={ratio} priority sizes="(min-width: 1024px) 770px, 100vw" className="rounded-[24px]" />
+        <CategoryPill label={story.label} className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 whitespace-nowrap shadow-card" />
+      </div>
       <Headline story={story} className="font-serif text-[30px] font-bold leading-[1.08] tracking-[-0.46px] text-ink md:text-[46px]" />
       {story.excerpt && <p className="text-body-m text-ink-muted md:text-body-l">{story.excerpt}</p>}
       <p className="text-meta text-ink-muted">{storyMeta(story)}</p>

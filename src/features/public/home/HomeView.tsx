@@ -1,17 +1,18 @@
+import { LogoLoader } from '@/components/ui/LogoLoader';
 import { Link } from 'react-router-dom';
 import { SectionHeader, StoryCard, StoryCompact, StoryRow } from '@/components/story/Story';
 import { articlePath, storyMeta, type StoryItem } from '@/components/story/types';
 import { ButtonLink } from '@/components/ui/Button';
-import { EmptyState, Skeleton } from '@/components/ui/Feedback';
+import { EmptyState } from '@/components/ui/Feedback';
 import { Img } from '@/components/ui/Img';
-import { Kicker } from '@/components/ui/Tag';
+import { CategoryPill, Kicker } from '@/components/ui/Tag';
 import { formatReadingTime } from '@/lib/format';
 import type { HomeData, TickerItem } from './homeData';
 
 export function Ticker({ items }: { items: TickerItem[] }) {
   if (!items.length) return null;
   return (
-    <section aria-label="Latest headlines" className="bg-lime-soft">
+    <section aria-label="Latest headlines" className="border-b border-line bg-surface">
       <div className="container-page flex items-center gap-4 py-2.5 md:py-3">
         <span className="shrink-0 rounded-sm bg-alert px-2 py-1 text-kicker uppercase text-on-dark">Latest</span>
         <ul data-scroll-x className="flex min-w-0 flex-1 gap-2 overflow-hidden text-[14px] md:text-body-m md:[mask-image:linear-gradient(to_right,black_92%,transparent)]">
@@ -23,7 +24,7 @@ export function Ticker({ items }: { items: TickerItem[] }) {
                 </span>
               )}
               {item.href ? (
-                <Link to={item.href} className="block truncate text-ink hover:text-green-700 hover:underline">
+                <Link to={item.href} className="block truncate text-ink hover-lime hover:underline">
                   {item.text}
                 </Link>
               ) : (
@@ -40,9 +41,11 @@ export function Ticker({ items }: { items: TickerItem[] }) {
 function LeadStory({ story }: { story: StoryItem }) {
   return (
     <article className="group relative flex flex-col gap-3">
-      <Img {...story.image} ratio="772/430" priority sizes="(min-width: 1024px) 772px, 100vw" />
-      <Kicker className="mt-1">{story.label}</Kicker>
-      <h1 className="font-serif text-[30px] font-bold leading-[1.1] tracking-[-0.5px] text-ink group-hover:text-green-700 md:text-[44px] md:tracking-[-1px] lg:text-display-xl">
+      <div className="relative mb-5">
+        <Img {...story.image} ratio="772/430" priority sizes="(min-width: 1024px) 772px, 100vw" className="rounded-[24px]" />
+        <CategoryPill label={story.label} className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 whitespace-nowrap shadow-card" />
+      </div>
+      <h1 className="font-serif text-[30px] font-bold leading-[1.1] tracking-[-0.5px] text-ink group-hover-lime md:text-[44px] md:tracking-[-1px] lg:text-display-xl">
         <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
           {story.title}
         </Link>
@@ -113,7 +116,7 @@ function ViewItem({ story }: { story: StoryItem }) {
       <Img {...story.image} ratio="1/1" sizes="64px" rounded={false} className="size-16 shrink-0 rounded-full" />
       <div className="flex min-w-0 flex-col gap-1.5">
         <Kicker>{story.label.split(' · ').pop()}</Kicker>
-        <h3 className="font-serif text-headline-m text-ink group-hover:text-green-700">
+        <h3 className="font-serif text-headline-m text-ink group-hover-lime">
           <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
             {story.title}
           </Link>
@@ -127,12 +130,12 @@ function ViewItem({ story }: { story: StoryItem }) {
 function ContributeCta() {
   return (
     <section aria-labelledby="contribute" className="container-page pb-16 pt-6 md:pb-20 md:pt-12">
-      <div className="flex flex-col gap-6 rounded-[16px] bg-lime-soft p-5 md:p-12 lg:flex-row lg:items-center lg:gap-12">
+      <div className="flex flex-col gap-6 rounded-[28px] border-[1.5px] border-lime/60 bg-green-900 p-6 md:p-12 lg:flex-row lg:items-center lg:gap-12">
         <div className="flex flex-1 flex-col gap-2.5">
-          <h2 id="contribute" className="font-serif text-[24px] font-semibold leading-tight text-green-900 md:text-headline-l">
+          <h2 id="contribute" className="font-serif text-[24px] font-extrabold uppercase leading-tight text-on-dark md:text-[30px]">
             Have a story the campus needs to hear?
           </h2>
-          <p className="text-body-m text-ink-muted">
+          <p className="text-body-m text-on-dark-muted">
             <span className="md:hidden">Send us your articles, tips and event reports.</span>
             <span className="hidden md:inline">
               Amaranth is written by students, for students. Send us your articles, tips and event reports. Our editors
@@ -141,10 +144,10 @@ function ContributeCta() {
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <ButtonLink to="/submit" variant="primary">
+          <ButtonLink to="/submit" variant="accent">
             Submit an Article
           </ButtonLink>
-          <ButtonLink to="/submit/event" variant="outline">
+          <ButtonLink to="/submit/event" variant="on-dark">
             Report an Event
           </ButtonLink>
         </div>
@@ -238,21 +241,9 @@ export function HomeView({ data }: { data: HomeData }) {
 
 export function HomeSkeleton() {
   return (
-    <div className="container-page grid gap-12 py-12 lg:grid-cols-[minmax(0,772fr)_minmax(0,380fr)]" aria-busy>
+    <div aria-busy>
       <h1 className="sr-only">Loading the front page</h1>
-      <div className="flex flex-col gap-4">
-        <Skeleton className="aspect-[772/430]" />
-        <Skeleton className="h-3 w-40" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-      </div>
-      <div className="hidden flex-col gap-6 lg:flex">
-        <Skeleton className="h-7 w-40" />
-        {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-16" />
-        ))}
-      </div>
+      <LogoLoader label="Loading the front page" />
     </div>
   );
 }

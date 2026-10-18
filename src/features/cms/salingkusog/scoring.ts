@@ -1,5 +1,8 @@
 // Pure helpers for the scorekeeper, results and awards screens. Salingkusog runs on Philippine time (UTC+8, no DST).
-import type { SkEditionRow, SkMatchRow, SkMatchStatus, SkPlacementInput, SkSportRow } from '@/lib/database.types';
+import { roundRobinTable } from '@/features/public/salingkusog/sports';
+import type { SkEditionRow, SkEntryRow, SkEventRow, SkMatchRow, SkMatchStatus, SkPlacementInput, SkSportRow } from '@/lib/database.types';
+import { contestPodium, isContestFormat } from '@/lib/skContests';
+import { isGroupGame } from '@/lib/skSources';
 import { dayRange, manilaDate, manilaTime } from '@/lib/manila';
 
 export { manilaDate, manilaTime };
@@ -99,6 +102,41 @@ export function podiumFromGames(games: Pick<SkMatchRow, 'round' | 'round_order' 
   }
   return rows;
 }
+
+type Game = Pick<SkMatchRow, 'id' | 'round' | 'round_order' | 'status' | 'side_a_id' | 'side_b_id' | 'score_a' | 'score_b' | 'winner_side' | 'ended_at' | 'scheduled_at' | 'source_a' | 'is_contest'>;
+
+/** Every game of the event is finished (cancelled ones don't count). */
+export const eventFinished = (games: Pick<SkMatchRow, 'status'>[]) => games.some((g) => g.status === 'final') && games.every((g) => g.status === 'final' || g.status === 'cancelled');
+
+/**
+ * Medals the games point to, once the event's last game is final, for staff to confirm in
+ * Results: knockout events from the final and bronze game, round robins from the standings,
+ * contests from the last session's places.
+ */
+export function suggestedPodium(
+  event: Pick<SkEventRow, 'format' | 'seeds' | 'result_unit' | 'is_team'>,
+  games: Game[],
+  entries: Pick<SkEntryRow, 'match_id' | 'faction_id' | 'athlete_id' | 'lane' | 'result' | 'place' | 'status'>[] = [],
+): SkPlacementInput[] {
+  if (!eventFinished(games)) return [];
+  if (isContestFormat(event.format)) {
+    const sessions = games.filter((g) => g.is_contest && g.status === 'final').sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
+    const last = sessions.find((g) => /final/i.test(g.round ?? '')) ?? sessions.at(-1);
+    return last ? contestPodium(event, last, entries.filter((e) => e.match_id === last.id)) : [];
+  }
+  if (event.format === 'round_robin') {
+    const done = games.filter((g) => g.status === 'final');
+    const last = done.map((g) => g.ended_at ?? g.scheduled_at).sort().at(-1)!;
+    return roundRobinTable(done, event.seeds)
+      .slice(0, 3)
+      .map((r, i) => ({ place: i + 1, faction_id: r.factionId, awarded_on: manilaDate(last) }));
+  }
+  return podiumFromGames(event.format === 'round_robin_final' ? games.filter((g) => !isGroupGame(g)) : games);
+}
+
+/** A knockout game can't end in a tie (same rule as app.sk_knockout_needs_winner). */
+export const isKnockout = (match: Pick<SkMatchRow, 'source_a'>, event: Pick<SkEventRow, 'format'> | undefined) =>
+  event?.format === 'bracket' || /^(winner|loser|rank):/.test(match.source_a ?? '');
 
 /** "PTS 24, REB 9, Note ok" ↔ { PTS: 24, REB: 9, Note: "ok" } */
 export function parseStatLine(text: string): Record<string, number | string> {

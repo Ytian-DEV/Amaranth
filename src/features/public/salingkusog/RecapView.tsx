@@ -47,19 +47,19 @@ function Scoreboard({ match, hub, placements }: { match: SkMatchRow; hub: HubDat
       <div className="container-page flex flex-col items-center gap-6 py-7 md:gap-7 md:py-9">
         <nav aria-label="Breadcrumb" className="text-meta text-on-dark-muted">
           <ol className="flex flex-wrap justify-center gap-x-2">
-            <li><Link to="/salingkusog/schedule" className="hover:text-on-dark hover:underline">Schedule &amp; Results</Link> /</li>
-            <li>{sport ? <Link to={`/salingkusog/sports/${sport.slug}${event ? `?event=${event.slug}` : ''}`} className="hover:text-on-dark hover:underline">{eventLabel}</Link> : eventLabel}{match.round && ' /'}</li>
+            <li><Link to="/salingkusog/schedule" className="hover:text-lime hover:underline">Schedule &amp; Results</Link> /</li>
+            <li>{sport ? <Link to={`/salingkusog/sports/${sport.slug}${event ? `?event=${event.slug}` : ''}`} className="hover:text-lime hover:underline">{eventLabel}</Link> : eventLabel}{match.round && ' /'}</li>
             {match.round && <li aria-current="page">{match.round}</li>}
           </ol>
         </nav>
         <h2 id="recap-score" className="sr-only">
           {a?.name ?? 'TBD'} {scored ? `${match.score_a} – ${match.score_b}` : 'vs'} {b?.name ?? 'TBD'}
         </h2>
-        <div className="grid w-full max-w-[980px] grid-cols-[1fr_auto_1fr] items-start gap-3 md:gap-8">
+        <div className="grid w-full max-w-[980px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3 md:gap-8">
           {[a, b].map((f, i) => (
             <div key={i} className={cn('flex flex-col items-center gap-2 text-center md:gap-3', i === 1 && 'order-3')}>
               <Emblem faction={f} logos={hub.logos} />
-              <p className="font-serif text-[17px] font-semibold leading-tight md:text-[26px]">{f?.name ?? 'To be decided'}</p>
+              <p className="font-serif text-[15px] font-semibold leading-tight break-words [hyphens:auto] md:text-[26px]">{f?.name ?? 'To be decided'}</p>
               <p className="hidden whitespace-pre text-meta text-on-dark-muted md:block">{note(i === 0 ? match.side_a_id : match.side_b_id)}</p>
             </div>
           ))}
