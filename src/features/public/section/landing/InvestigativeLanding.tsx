@@ -15,7 +15,7 @@ export function InvestigativeLanding({ section, items }: LandingProps) {
 
   return (
     <div>
-      <header className="bg-night text-on-dark">
+      <header className="bg-green-900 text-on-dark">
         <div className="container-page py-12 md:py-16">
           {lead ? (
             <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
@@ -36,7 +36,7 @@ export function InvestigativeLanding({ section, items }: LandingProps) {
                   <span className="text-meta text-on-dark-muted">{joinMeta(lead.byline ? `By ${lead.byline}` : 'By the Investigations Desk', formatShortDate(lead.publishedAt))}</span>
                 </div>
               </div>
-              <Img {...lead.image} ratio="560/420" priority sizes="(min-width: 768px) 560px, 100vw" className="rounded-[12px] bg-night-2" />
+              <Img {...lead.image} ratio="560/420" priority sizes="(min-width: 768px) 560px, 100vw" className="rounded-[12px] bg-green-800" />
             </div>
           ) : (
             <h1 className="font-serif text-[44px] font-bold md:text-[64px]">{section.name}</h1>

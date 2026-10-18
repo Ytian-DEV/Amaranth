@@ -129,12 +129,12 @@ function ViewItem({ story }: { story: StoryItem }) {
 function ContributeCta() {
   return (
     <section aria-labelledby="contribute" className="container-page pb-16 pt-6 md:pb-20 md:pt-12">
-      <div className="flex flex-col gap-6 rounded-[16px] bg-lime-soft p-5 md:p-12 lg:flex-row lg:items-center lg:gap-12">
+      <div className="flex flex-col gap-6 rounded-[28px] border-[1.5px] border-lime/60 bg-green-900 p-6 md:p-12 lg:flex-row lg:items-center lg:gap-12">
         <div className="flex flex-1 flex-col gap-2.5">
-          <h2 id="contribute" className="font-serif text-[24px] font-semibold leading-tight text-green-900 md:text-headline-l">
+          <h2 id="contribute" className="font-serif text-[24px] font-extrabold uppercase leading-tight text-on-dark md:text-[30px]">
             Have a story the campus needs to hear?
           </h2>
-          <p className="text-body-m text-ink-muted">
+          <p className="text-body-m text-on-dark-muted">
             <span className="md:hidden">Send us your articles, tips and event reports.</span>
             <span className="hidden md:inline">
               Amaranth is written by students, for students. Send us your articles, tips and event reports. Our editors
@@ -143,10 +143,10 @@ function ContributeCta() {
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <ButtonLink to="/submit" variant="primary">
+          <ButtonLink to="/submit" variant="accent">
             Submit an Article
           </ButtonLink>
-          <ButtonLink to="/submit/event" variant="outline">
+          <ButtonLink to="/submit/event" variant="on-dark">
             Report an Event
           </ButtonLink>
         </div>

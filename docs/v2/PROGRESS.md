@@ -83,9 +83,9 @@ Design: Figma page "Brand 2026" (94:121). Plan: 1 tokens + fonts → 2 header/fo
 - [x] 2 `feature/brand-header-footer`: light utility bar, white masthead with the AMARANTH wordmark in Cinzel (deep green) over a hairline rule, one solid deep-green nav with the lime active underline, white sticky mobile top bar (chips stay on the green band), light "Latest" ticker, footer with lime Cinzel wordmark and the `@AMARANTHVSU · site` strip; newsroom/sign-in lockups use the Cinzel wordmark too.
 - [x] 2b `feature/brand-header-tagline`: header matched to the Figma frame: deep-green utility bar, and the cover motto "In the name of TRUTH and standing by it—we remain." on the left of the masthead (desktop).
 - [x] 3 `feature/brand-components`: `CategoryPill` (lime, specific word heavy: "**ENVIRONMENT** NEWS") on the home and landing leads (overlapping the photo edge) and the article header; rounder radii (6/12/16/20, lead photos 24); pill-shaped buttons; caps ExtraBold section headers; black-italic numerals; the post byline chip "via Name | Amaranth" on articles.
-- [ ] 4 `feature/brand-pages`
+- [x] 4 `feature/brand-pages`: home "Have a story" panel is the deep-forest CTA with lime outline and lime button; landing heroes and bands (Specials, Investigative, Literary call for submissions, Stories tiles) use deep forest instead of near-black (Salingkusog keeps its own night theme); article gets a carded author box and the dark "Got a news tip?" card. **Brand 2026 is applied.**
 
-**Next:** Brand step 4 `feature/brand-pages` (awaiting the user's go).
+**Next:** open the `develop` → `main` PR for Brand 2026 (the user opens it). Nothing else queued.
 
 | # | Branch | Status |
 |---|---|---|

@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { SectionHeader, StoryCard } from '@/components/story/Story';
 import type { StoryItem } from '@/components/story/types';
+import { ButtonLink } from '@/components/ui/Button';
 import { Alert, Skeleton } from '@/components/ui/Feedback';
 import { Img } from '@/components/ui/Img';
 import { statusInfo } from '@/components/ui/status';
@@ -143,7 +144,7 @@ export function ArticleView({
         {authorsWithBio.length > 0 && (
           <aside aria-label="About the authors" className="mt-10 flex flex-col gap-4">
             {authorsWithBio.map((a) => (
-              <div key={a.id} className="flex gap-4 rounded-lg bg-surface p-5">
+              <div key={a.id} className="flex gap-4 rounded-[20px] border border-line bg-surface p-5 md:p-6">
                 <Img {...a.avatar} alt="" ratio="1/1" sizes="56px" rounded={false} className="size-14 shrink-0 rounded-full" />
                 <div className="flex flex-col gap-1">
                   <p className="font-serif text-headline-s text-ink">{a.name}</p>
@@ -154,6 +155,19 @@ export function ArticleView({
             ))}
           </aside>
         )}
+
+        <aside aria-labelledby="news-tip" className="mt-10 flex flex-col gap-3 rounded-[22px] border-[1.5px] border-lime/50 bg-green-900 p-6 text-on-dark md:flex-row md:items-center md:justify-between md:gap-8">
+          <div className="flex flex-col gap-1.5">
+            <p className="text-kicker uppercase text-lime">Write to the newsroom</p>
+            <h2 id="news-tip" className="font-serif text-[22px] font-extrabold uppercase leading-tight">
+              Got a news tip?
+            </h2>
+            <p className="text-body-m text-on-dark-muted">Tell us what’s happening on campus. You can stay anonymous.</p>
+          </div>
+          <ButtonLink to="/contact" variant="accent" className="self-start md:self-auto">
+            Send a tip
+          </ButtonLink>
+        </aside>
 
         {comments && <div className="mt-14">{comments}</div>}
       </div>

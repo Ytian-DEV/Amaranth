@@ -59,7 +59,7 @@ export function SectionIntro({ section, categories = [], allLabel, children }: {
 
 /** A full-width band with the page container inside. */
 export function Band({ tone = 'paper', className, children, label }: { tone?: 'paper' | 'surface' | 'dark' | 'ink' | 'lime'; className?: string; children: ReactNode; label?: string }) {
-  const bg = { paper: 'bg-paper', surface: 'bg-surface', dark: 'bg-green-900 text-on-dark', ink: 'bg-ink text-on-dark', lime: 'bg-lime-soft' }[tone];
+  const bg = { paper: 'bg-paper', surface: 'bg-surface', dark: 'bg-green-900 text-on-dark', ink: 'bg-green-900 text-on-dark', lime: 'bg-lime-soft' }[tone];
   return (
     <section aria-label={label} className={bg}>
       <div className={cn('container-page py-10 md:py-14', className)}>{children}</div>
