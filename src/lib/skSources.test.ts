@@ -47,8 +47,8 @@ describe('round-robin standings and medals', () => {
 
   it('suggests medals only when every game is final', () => {
     const games = [game('x', 'y', 3, 1), game('z', 'w', 2, 0), game('x', 'z', 1, 0, 'live')];
-    expect(suggestedPodium({ format: 'round_robin', seeds: [] }, games)).toEqual([]);
+    expect(suggestedPodium({ format: 'round_robin', seeds: [], is_team: true, result_unit: null }, games)).toEqual([]);
     const done = [game('x', 'y', 3, 1), game('z', 'w', 2, 0), game('x', 'z', 1, 0)];
-    expect(suggestedPodium({ format: 'round_robin', seeds: [] }, done).map((p) => [p.place, p.faction_id])).toEqual([[1, 'x'], [2, 'z'], [3, 'y']]);
+    expect(suggestedPodium({ format: 'round_robin', seeds: [], is_team: true, result_unit: null }, done).map((p) => [p.place, p.faction_id])).toEqual([[1, 'x'], [2, 'z'], [3, 'y']]);
   });
 });

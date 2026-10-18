@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Field';
 import { Alert, EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedback';
 import { Pill } from '@/components/ui/StatusPill';
-import type { SkEditionRow, SkEventRow, SkMatchRow, SkPlacementInput, SkPlacementRow } from '@/lib/database.types';
+import type { SkEditionRow, SkEntryRow, SkEventRow, SkMatchRow, SkPlacementInput, SkPlacementRow } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
 import { Card, CardHeader } from '../../ui';
 import { namer, useSkLookups, type SkLookups } from '../scores/lookups';
 import { defaultDay, medalForPlace, suggestedPodium } from '../scoring';
 import { toPlacementInput, toRow, type Row } from './placementForm';
-import { skErrorText, useSetPlacements, useSkMatches, useSkPlacements } from '../skApi';
+import { skErrorText, useSetPlacements, useSkEntries, useSkMatches, useSkPlacements } from '../skApi';
 
 const medalStyle = { gold: 'bg-lime text-green-900', silver: 'bg-line text-ink', bronze: 'bg-status-review-soft text-ink' } as const;
 
@@ -25,10 +25,11 @@ export function MedalBadge({ place }: { place: number }) {
   );
 }
 
-export function ResultsEditorView({ event, lookups, games, placements, day, busy, message, onSave }: {
+export function ResultsEditorView({ event, lookups, games, entries = [], placements, day, busy, message, onSave }: {
   event: SkEventRow;
   lookups: SkLookups;
   games: SkMatchRow[];
+  entries?: SkEntryRow[];
   placements: SkPlacementRow[];
   day: string;
   busy?: boolean;
@@ -36,7 +37,7 @@ export function ResultsEditorView({ event, lookups, games, placements, day, busy
   onSave: (rows: SkPlacementInput[]) => void;
 }) {
   const n = namer(lookups);
-  const suggestion = suggestedPodium(event, games);
+  const suggestion = suggestedPodium(event, games, entries);
   // nothing saved yet but the games are done: start from what they point to, for staff to confirm
   const suggested = !placements.length && suggestion.length > 0;
   const initial = () =>
@@ -120,7 +121,7 @@ export function ResultsEditorView({ event, lookups, games, placements, day, busy
   );
 }
 
-export function ResultsListView({ lookups, placements, matches = [] }: { lookups: SkLookups; placements: SkPlacementRow[]; matches?: SkMatchRow[] }) {
+export function ResultsListView({ lookups, placements, matches = [], entries = [] }: { lookups: SkLookups; placements: SkPlacementRow[]; matches?: SkMatchRow[]; entries?: SkEntryRow[] }) {
   const n = namer(lookups);
   if (!lookups.events.length) return <EmptyState title="No events yet">Add sports and events in the Sports & events tab.</EmptyState>;
   const done = lookups.events.filter((e) => placements.some((p) => p.event_id === e.id && p.medal === 'gold')).length;
@@ -151,7 +152,7 @@ export function ResultsListView({ lookups, placements, matches = [] }: { lookups
                             </span>
                           ))}
                         </span>
-                      ) : suggestedPodium(e, matches.filter((m) => m.event_id === e.id)).length ? (
+                      ) : suggestedPodium(e, matches.filter((m) => m.event_id === e.id), entries).length ? (
                         <Pill tone="review">Ready to confirm</Pill>
                       ) : (
                         <Pill tone="neutral">No results yet</Pill>
@@ -172,16 +173,25 @@ function useResultsData(edition: SkEditionRow) {
   const lookups = useSkLookups(edition.id);
   const placements = useSkPlacements(edition.id);
   const matches = useSkMatches(edition.id);
-  const error = lookups.error ?? placements.error ?? matches.error;
-  const ready = lookups.data && placements.data && matches.data;
-  return { lookups: lookups.data, placements: placements.data, matches: matches.data, error, ready, refetch: () => (lookups.refetch(), void placements.refetch(), void matches.refetch()) };
+  const entries = useSkEntries(edition.id);
+  const error = lookups.error ?? placements.error ?? matches.error ?? entries.error;
+  const ready = lookups.data && placements.data && matches.data && entries.data;
+  return {
+    lookups: lookups.data,
+    placements: placements.data,
+    matches: matches.data,
+    entries: entries.data,
+    error,
+    ready,
+    refetch: () => (lookups.refetch(), void placements.refetch(), void matches.refetch(), void entries.refetch()),
+  };
 }
 
 export function ResultsTab({ edition }: { edition: SkEditionRow }) {
   const d = useResultsData(edition);
   if (d.error) return <ErrorState error={d.error} onRetry={d.refetch} />;
   if (!d.ready) return <Skeleton className="h-64" />;
-  return <ResultsListView lookups={d.lookups!} placements={d.placements!} matches={d.matches!} />;
+  return <ResultsListView lookups={d.lookups!} placements={d.placements!} matches={d.matches!} entries={d.entries!} />;
 }
 
 function EventResults({ edition, event, d }: { edition: SkEditionRow; event: SkEventRow; d: ReturnType<typeof useResultsData> }) {
@@ -192,6 +202,7 @@ function EventResults({ edition, event, d }: { edition: SkEditionRow; event: SkE
       event={event}
       lookups={d.lookups!}
       games={d.matches!.filter((m) => m.event_id === event.id)}
+      entries={d.entries!}
       placements={d.placements!.filter((p) => p.event_id === event.id)}
       day={defaultDay(edition)}
       busy={save.isPending}

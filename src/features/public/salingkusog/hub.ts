@@ -145,18 +145,20 @@ export function scheduleDay(edition: Pick<SkEditionRow, 'starts_on' | 'ends_on'>
 }
 
 /** One day's games, filtered and grouped into live / later / completed / postponed. */
-export function scheduleGroups<T extends Pick<SkMatchRow, 'status' | 'scheduled_at' | 'event_id' | 'side_a_id' | 'side_b_id' | 'venue_id'>>(
+export function scheduleGroups<T extends Pick<SkMatchRow, 'status' | 'scheduled_at' | 'event_id' | 'side_a_id' | 'side_b_id' | 'venue_id'> & { id?: string; is_contest?: boolean }>(
   matches: T[],
   day: string,
   filters: ScheduleFilters,
   sportOf: (eventId: string) => string | undefined,
   today = manilaDate(),
+  /** contests: the factions in a session's line-up */
+  lineUp: (matchId: string) => string[] = () => [],
 ): ScheduleGroup<T>[] {
   const isToday = day === today;
   const list = matches
     .filter((m) => manilaDate(m.scheduled_at) === day)
     .filter((m) => !filters.sport || sportOf(m.event_id) === filters.sport)
-    .filter((m) => !filters.faction || m.side_a_id === filters.faction || m.side_b_id === filters.faction)
+    .filter((m) => !filters.faction || m.side_a_id === filters.faction || m.side_b_id === filters.faction || (!!m.is_contest && !!m.id && lineUp(m.id).includes(filters.faction)))
     .filter((m) => !filters.venue || m.venue_id === filters.venue)
     .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
   const groups: ScheduleGroup<T>[] = [

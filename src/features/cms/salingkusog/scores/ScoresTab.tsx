@@ -32,8 +32,16 @@ export function GameRow({ match, lookups, games = [] }: { match: SkMatchRow; loo
             {match.round && ` · ${match.round}`}
           </p>
           <p className="truncate font-semibold text-ink">
-            {a?.short_name ?? a?.name ?? <span className="font-normal text-ink-muted">{pendingSide(match, 'a', games) ?? 'TBD'}</span>} <span className="font-normal text-ink-muted">vs</span>{' '}
-            {b?.short_name ?? b?.name ?? <span className="font-normal text-ink-muted">{pendingSide(match, 'b', games) ?? 'TBD'}</span>}
+            {match.is_contest ? (
+              <>
+                Contest <span className="font-normal text-ink-muted">· all factions</span>
+              </>
+            ) : (
+              <>
+                {a?.short_name ?? a?.name ?? <span className="font-normal text-ink-muted">{pendingSide(match, 'a', games) ?? 'TBD'}</span>} <span className="font-normal text-ink-muted">vs</span>{' '}
+                {b?.short_name ?? b?.name ?? <span className="font-normal text-ink-muted">{pendingSide(match, 'b', games) ?? 'TBD'}</span>}
+              </>
+            )}
           </p>
         </div>
         {scored && (

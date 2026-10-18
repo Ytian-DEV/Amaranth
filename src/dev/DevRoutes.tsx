@@ -1,3 +1,4 @@
+import type { SkEntryRow } from '@/lib/database.types';
 import { lazy, Suspense } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { useState } from 'react';
@@ -179,6 +180,30 @@ const genMatches = [
 ];
 const genHub = { ...skHub, events: genEvents, matches: genMatches };
 
+// Contests: a finished 100m (times, one athlete per faction) and a dance contest before it starts
+const danceEvent = { ...skFixture.events[3], id: 'dance', sport_id: 'at', name: 'Hip-hop', format: 'judged' as const, is_team: true, result_unit: null };
+const contestMatches = [
+  gen('c1', 'at-100w', 'Final', 1, { is_contest: true, status: 'final', venue_id: 'oval', scheduled_at: '2026-11-03T01:00:00Z', ended_at: '2026-11-03T01:20:00Z' }),
+  gen('c2', 'dance', 'Final', 1, { is_contest: true, venue_id: 'gym', scheduled_at: '2026-11-05T06:00:00Z' }),
+];
+const entry = (id: string, match_id: string, faction_id: string, lane: number, extra: Partial<SkEntryRow> = {}): SkEntryRow =>
+  ({ id, edition_id: 'e1', match_id, faction_id, athlete_id: null, lane, result: null, place: null, status: 'ok', created_at: '', updated_at: '', ...extra }) as SkEntryRow;
+const contestHub = {
+  ...skHub,
+  events: [...skHub.events, danceEvent],
+  matches: [...skHub.matches, ...contestMatches],
+  entries: [
+    entry('x1', 'c1', 'pt', 1, { athlete_id: 'a1', result: 12.84 }),
+    entry('x2', 'c1', 'sd', 2, { athlete_id: 'a2', result: 12.61 }),
+    entry('x3', 'c1', 'cv', 3, { athlete_id: 'a3', result: 13.02 }),
+    entry('x4', 'c1', 'mm', 4, { status: 'dnf' }),
+    entry('y1', 'c2', 'mm', 1),
+    entry('y2', 'c2', 'cv', 2),
+    entry('y3', 'c2', 'pt', 3),
+    entry('y4', 'c2', 'sd', 4),
+  ],
+};
+
 function FixtureSalingkusog() {
   return (
     <>
@@ -188,6 +213,8 @@ function FixtureSalingkusog() {
         <Route path="final" element={<MedalTallyView edition={skFixture.edition} hub={{ ...skHub, matches: skHub.matches.map((m) => (m.status === 'cancelled' ? m : { ...m, status: 'final' as const })) }} table={skFixture.medalTable} race={skFixture.pointsByDay} phase={{ kind: 'after', of: 6 }} />} />
         <Route path="schedule" element={<FixtureSchedule />} />
         <Route path="winners" element={<FixtureWinners />} />
+        <Route path="sports/contest-race" element={<SportView sport={skFixture.sports[2]} event={skFixture.events[3]} hub={contestHub} placements={[]} athletes={skFixture.athletes} leaders={[]} />} />
+        <Route path="sports/contest-dance" element={<SportView sport={skFixture.sports[2]} event={danceEvent} hub={contestHub} placements={[]} athletes={skFixture.athletes} leaders={[]} />} />
         <Route path="sports/auto-bracket" element={<SportView sport={skFixture.sports[0]} event={genEvents[0]} hub={genHub} placements={[]} athletes={skFixture.athletes} leaders={[]} />} />
         <Route path="sports/auto-round-robin" element={<SportView sport={skFixture.sports[0]} event={genEvents[1]} hub={genHub} placements={[]} athletes={skFixture.athletes} leaders={[]} />} />
         <Route path="sports" element={<SportView sport={skFixture.sports[0]} event={skFixture.events[0]} hub={skHub} placements={skFixture.placements} athletes={skFixture.athletes} leaders={skFixture.leaders} />} />
@@ -225,6 +252,8 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'countdown/done', label: 'Salingkusog countdown — the games have begun' },
   { path: 'salingkusog', label: 'Salingkusog — Medal Tally' },
   { path: 'salingkusog/final', label: 'Salingkusog — Official and final medal tally' },
+  { path: 'salingkusog/sports/contest-race', label: 'Salingkusog — Contest results (100m, times)' },
+  { path: 'salingkusog/sports/contest-dance', label: 'Salingkusog — Contest line-up (dance, before it starts)' },
   { path: 'salingkusog/sports/auto-bracket', label: 'Salingkusog — Built bracket, halfway (winners move on)' },
   { path: 'salingkusog/sports/auto-round-robin', label: 'Salingkusog — Round robin + final after round 1' },
   { path: 'salingkusog/schedule', label: 'Salingkusog — Schedule & Results (filters work)' },

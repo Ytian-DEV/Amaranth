@@ -219,6 +219,38 @@ exception when duplicate_object then null; end $$;
 -- Factions in seed order, set by "Build schedule"
 alter table public.sk_events add column if not exists seeds uuid[] not null default '{}';
 
+-- Contests (2026-10): one session where every faction competes at once (dance, swimming,
+-- athletics, painting…). The session is an sk_matches row with is_contest and no sides; the
+-- line-up and results are in sk_entries. Timed/measured events rank by result (unit "s":
+-- lowest wins, else highest wins); judged events take the place staff enter.
+alter table public.sk_matches add column if not exists is_contest boolean not null default false;
+alter table public.sk_matches drop constraint if exists sk_matches_final_needs_scores;
+alter table public.sk_matches add constraint sk_matches_final_needs_scores
+  check (status <> 'final' or is_contest or (score_a is not null and score_b is not null));
+alter table public.sk_matches drop constraint if exists sk_matches_contest_no_sides;
+alter table public.sk_matches add constraint sk_matches_contest_no_sides
+  check (not is_contest or (side_a_id is null and side_b_id is null));
+
+create table if not exists public.sk_entries (
+  id uuid primary key default gen_random_uuid(),
+  edition_id uuid not null,
+  match_id uuid not null,
+  faction_id uuid not null,
+  athlete_id uuid,                              -- individual events: the faction's one entrant
+  lane smallint not null default 0,             -- performance order / lane
+  result numeric(10, 3),                        -- seconds, metres or points (timed / measured)
+  place smallint check (place between 1 and 64), -- judged: the place announced by the judges
+  status text not null default 'ok' check (status in ('ok', 'dns', 'dnf', 'dq')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (match_id, faction_id),
+  foreign key (edition_id, match_id) references public.sk_matches (edition_id, id) on delete cascade,
+  foreign key (edition_id, faction_id) references public.sk_factions (edition_id, id) on delete cascade,
+  foreign key (edition_id, athlete_id) references public.sk_athletes (edition_id, id) on delete set null (athlete_id)
+);
+create index if not exists sk_entries_faction_idx on public.sk_entries (faction_id);
+create index if not exists sk_entries_athlete_idx on public.sk_entries (athlete_id) where athlete_id is not null;
+
 -- Per-athlete box score for a game: {"PTS": 24, "REB": 9, "AST": 5, "STL": 3}
 create table if not exists public.sk_athlete_stats (
   match_id uuid not null references public.sk_matches (id) on delete cascade,
@@ -330,6 +362,14 @@ begin
     select e.edition_id into new.edition_id from public.sk_events e where e.id = new.event_id;
   elsif tg_table_name = 'sk_athletes' then
     select f.edition_id into new.edition_id from public.sk_factions f where f.id = new.faction_id;
+  elsif tg_table_name = 'sk_entries' then
+    select m.edition_id into new.edition_id from public.sk_matches m where m.id = new.match_id and m.is_contest;
+    if new.edition_id is null then
+      raise exception 'Entries belong to a contest session.' using errcode = '23503';
+    end if;
+    if new.athlete_id is not null and not exists (select 1 from public.sk_athletes a where a.id = new.athlete_id and a.faction_id = new.faction_id) then
+      raise exception 'The athlete must be from the same faction.' using errcode = '23514';
+    end if;
   end if;
   if new.edition_id is null then
     raise exception 'Unknown parent record.' using errcode = '23503';
@@ -341,11 +381,11 @@ $$;
 do $$
 declare t text;
 begin
-  foreach t in array array['sk_events', 'sk_matches', 'sk_placements', 'sk_athletes'] loop
+  foreach t in array array['sk_events', 'sk_matches', 'sk_placements', 'sk_athletes', 'sk_entries'] loop
     execute format('drop trigger if exists %I on public.%I', t || '_edition', t);
     execute format('create trigger %I before insert or update on public.%I for each row execute function app.sk_inherit_edition()', t || '_edition', t);
   end loop;
-  foreach t in array array['sk_editions', 'sk_factions', 'sk_venues', 'sk_sports', 'sk_events', 'sk_athletes', 'sk_matches', 'sk_placements', 'sk_awards'] loop
+  foreach t in array array['sk_editions', 'sk_factions', 'sk_venues', 'sk_sports', 'sk_events', 'sk_athletes', 'sk_matches', 'sk_placements', 'sk_awards', 'sk_entries'] loop
     execute format('drop trigger if exists %I on public.%I', t || '_touch', t);
     execute format('create trigger %I before update on public.%I for each row execute function app.touch_updated_at()', t || '_touch', t);
   end loop;
@@ -933,6 +973,60 @@ $$;
 revoke execute on function public.sk_build_schedule(uuid, text, uuid[], timestamptz, integer, integer, uuid, boolean) from public, anon;
 grant execute on function public.sk_build_schedule(uuid, text, uuid[], timestamptz, integer, integer, uuid, boolean) to authenticated;
 
+-- -----------------------------------------------------------------------------
+-- RPC: a contest session with every faction in it ("Create contest" in the newsroom).
+-- p_factions: who takes part, in performance order (default: all, by faction order);
+-- p_shuffle draws a random order instead. Returns the session's id.
+-- -----------------------------------------------------------------------------
+create or replace function public.sk_create_contest(
+  p_event_id uuid, p_at timestamptz, p_venue_id uuid default null, p_round text default null,
+  p_factions uuid[] default null, p_shuffle boolean default false
+)
+returns uuid
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_edition uuid;
+  v_format text;
+  v_venue uuid;
+  v_id uuid;
+begin
+  if not app.can_edit_sk() then
+    raise exception 'Only the Salingkusog team can create contests.' using errcode = '42501';
+  end if;
+  select e.edition_id, e.format::text, e.venue_id into v_edition, v_format, v_venue from public.sk_events e where e.id = p_event_id;
+  if v_edition is null then
+    raise exception 'Unknown event.' using errcode = 'P0002';
+  end if;
+  if v_format not in ('timed', 'judged') then
+    raise exception 'Contests are for timed, measured or judged events.' using errcode = '22023';
+  end if;
+  if p_at is null then
+    raise exception 'Set when the contest starts.' using errcode = '22023';
+  end if;
+  if p_factions is not null and cardinality(p_factions) = 0 then
+    raise exception 'Pick at least one faction.' using errcode = '22023';
+  end if;
+
+  insert into public.sk_matches (edition_id, event_id, round, round_order, venue_id, scheduled_at, is_contest)
+  values (v_edition, p_event_id, coalesce(nullif(trim(p_round), ''), 'Final'), 1, coalesce(p_venue_id, v_venue), p_at, true)
+  returning id into v_id;
+
+  insert into public.sk_entries (edition_id, match_id, faction_id, lane)
+  select v_edition, v_id, f.id, row_number() over (
+           order by case when p_shuffle then random() end,
+                    coalesce(array_position(p_factions, f.id), 0), f.sort_order, f.name)
+  from public.sk_factions f
+  where f.edition_id = v_edition and (p_factions is null or f.id = any (p_factions));
+  return v_id;
+end;
+$$;
+
+revoke execute on function public.sk_create_contest(uuid, timestamptz, uuid, text, uuid[], boolean) from public, anon;
+grant execute on function public.sk_create_contest(uuid, timestamptz, uuid, text, uuid[], boolean) to authenticated;
+
 
 -- -----------------------------------------------------------------------------
 -- RPC: the public countdown. Returns a row only while the current edition's
@@ -1025,7 +1119,7 @@ grant execute on function public.sk_points_timeline(uuid, integer) to anon, auth
 do $$
 declare t text;
 begin
-  foreach t in array array['sk_editions', 'sk_factions', 'sk_venues', 'sk_sports', 'sk_events', 'sk_athletes', 'sk_matches', 'sk_athlete_stats', 'sk_placements', 'sk_awards', 'sk_team'] loop
+  foreach t in array array['sk_editions', 'sk_factions', 'sk_venues', 'sk_sports', 'sk_events', 'sk_athletes', 'sk_matches', 'sk_athlete_stats', 'sk_placements', 'sk_awards', 'sk_team', 'sk_entries'] loop
     execute format('alter table public.%I enable row level security', t);
   end loop;
 end $$;
@@ -1045,7 +1139,7 @@ create policy sk_editions_write on public.sk_editions for all to authenticated u
 do $$
 declare t text;
 begin
-  foreach t in array array['sk_factions', 'sk_venues', 'sk_sports', 'sk_events', 'sk_athletes', 'sk_matches', 'sk_placements', 'sk_awards'] loop
+  foreach t in array array['sk_factions', 'sk_venues', 'sk_sports', 'sk_events', 'sk_athletes', 'sk_matches', 'sk_placements', 'sk_awards', 'sk_entries'] loop
     execute format('create policy %I on public.%I for select to anon, authenticated using (app.sk_edition_visible(edition_id))', t || '_read', t);
     execute format('create policy %I on public.%I for all to authenticated using (app.can_edit_sk()) with check (app.can_edit_sk())', t || '_write', t);
   end loop;
@@ -1066,12 +1160,12 @@ grant execute on all functions in schema app to anon, authenticated, service_rol
 -- -----------------------------------------------------------------------------
 -- Realtime: live scores push to readers (Supabase only; skipped elsewhere)
 -- -----------------------------------------------------------------------------
--- sk_matches: scores; sk_placements: medals and points (medal tally, points race, winners)
+-- sk_matches: scores; sk_placements: medals and points (medal tally, points race, winners); sk_entries: contest results
 do $$
 declare t text;
 begin
   if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
-    foreach t in array array['sk_matches', 'sk_placements'] loop
+    foreach t in array array['sk_matches', 'sk_placements', 'sk_entries'] loop
       if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t) then
         execute format('alter publication supabase_realtime add table public.%I', t);
       end if;

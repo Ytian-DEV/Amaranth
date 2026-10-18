@@ -95,6 +95,7 @@ const match = (id: string, extra: Partial<SkMatchRow>): SkMatchRow => ({
   recap_article_id: null,
   source_a: null,
   source_b: null,
+  is_contest: false,
   winner_side: null,
   updated_by: null,
   ...extra,
