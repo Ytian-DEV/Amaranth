@@ -65,7 +65,7 @@ export function ViewsLanding({ section, items, mostRead }: LandingProps) {
               {editorial.category === 'editorial' && ' · The Amaranth Editorial Board'}
             </p>
             <h1 className="font-serif text-[40px] font-bold leading-[1.04] tracking-[-1px] text-ink md:text-[60px]">
-              <Link to={articlePath(editorial.slug)} className="hover:text-green-700">
+              <Link to={articlePath(editorial.slug)} className="hover-lime">
                 {editorial.title}
               </Link>
             </h1>

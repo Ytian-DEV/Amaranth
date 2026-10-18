@@ -120,7 +120,7 @@ export function ArticleView({
               <li key={t.slug}>
                 <Link
                   to={`/search?tag=${encodeURIComponent(t.slug)}`}
-                  className="inline-flex h-8 items-center rounded-full bg-green-soft px-3 text-[13px] font-semibold text-green-700 hover:bg-green-700 hover:text-on-dark"
+                  className="inline-flex h-8 items-center rounded-full bg-green-soft px-3 text-[13px] font-semibold text-green-700 hover:bg-green-700 hover:text-lime"
                 >
                   #{t.name}
                 </Link>

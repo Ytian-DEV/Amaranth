@@ -47,8 +47,8 @@ function Scoreboard({ match, hub, placements }: { match: SkMatchRow; hub: HubDat
       <div className="container-page flex flex-col items-center gap-6 py-7 md:gap-7 md:py-9">
         <nav aria-label="Breadcrumb" className="text-meta text-on-dark-muted">
           <ol className="flex flex-wrap justify-center gap-x-2">
-            <li><Link to="/salingkusog/schedule" className="hover:text-on-dark hover:underline">Schedule &amp; Results</Link> /</li>
-            <li>{sport ? <Link to={`/salingkusog/sports/${sport.slug}${event ? `?event=${event.slug}` : ''}`} className="hover:text-on-dark hover:underline">{eventLabel}</Link> : eventLabel}{match.round && ' /'}</li>
+            <li><Link to="/salingkusog/schedule" className="hover:text-lime hover:underline">Schedule &amp; Results</Link> /</li>
+            <li>{sport ? <Link to={`/salingkusog/sports/${sport.slug}${event ? `?event=${event.slug}` : ''}`} className="hover:text-lime hover:underline">{eventLabel}</Link> : eventLabel}{match.round && ' /'}</li>
             {match.round && <li aria-current="page">{match.round}</li>}
           </ol>
         </nav>

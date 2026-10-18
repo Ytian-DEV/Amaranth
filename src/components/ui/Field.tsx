@@ -10,7 +10,7 @@ import { cn } from '@/lib/cn';
 
 const control =
   'w-full rounded-[8px] border border-line bg-surface px-3.5 text-body-m text-ink placeholder:text-ink-muted ' +
-  'transition-colors hover:border-ink-muted focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-soft ' +
+  'transition-colors hover:border-lime focus:border-green-700 focus:outline-none focus:ring-2 focus:ring-green-soft ' +
   'disabled:cursor-not-allowed disabled:opacity-60 aria-[invalid=true]:border-alert';
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input(

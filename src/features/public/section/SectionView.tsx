@@ -27,7 +27,7 @@ function LeadCard({ story }: { story: StoryItem }) {
       <Img {...story.image} ratio="16/10" priority sizes="(min-width: 1024px) 700px, 100vw" />
       <div className="flex flex-col gap-3">
         <Kicker>{story.label}</Kicker>
-        <h2 className="font-serif text-[28px] font-semibold leading-[1.15] tracking-[-0.5px] text-ink group-hover:text-green-700 md:text-headline-l">
+        <h2 className="font-serif text-[28px] font-semibold leading-[1.15] tracking-[-0.5px] text-ink group-hover-lime md:text-headline-l">
           <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
             {story.title}
           </Link>
@@ -76,7 +76,7 @@ export function SectionView({
                         aria-current={active ? 'page' : undefined}
                         className={cn(
                           'inline-flex h-9 items-center rounded-full border px-4 text-[14px] font-semibold transition-colors',
-                          active ? 'border-green-700 bg-green-700 text-on-dark' : 'border-line text-ink hover:border-green-700',
+                          active ? 'border-green-700 bg-green-700 text-on-dark' : 'border-line text-ink hover:border-lime',
                         )}
                       >
                         {c.name}

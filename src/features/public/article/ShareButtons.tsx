@@ -20,7 +20,7 @@ function MessengerIcon({ className }: { className?: string }) {
 }
 
 const button =
-  'inline-grid size-10 place-items-center rounded-full border border-line text-ink transition-colors hover:border-green-700 hover:text-green-700';
+  'inline-grid size-10 place-items-center rounded-full border border-line text-ink transition-colors hover:border-lime hover-lime';
 
 /** Facebook, Messenger, X, copy link — and the native share sheet where available. */
 export function ShareButtons({ url, title, className }: { url: string; title: string; className?: string }) {

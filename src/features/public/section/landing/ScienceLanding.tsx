@@ -46,7 +46,7 @@ export function ScienceLanding({ section, categories, items }: LandingProps) {
                   {glance.map((s) => (
                     <li key={s.id} className="flex flex-col gap-1 border-b border-green-900/10 py-3 last:border-0">
                       <p className="text-kicker uppercase text-green-700">{s.categoryName ?? s.label}</p>
-                      <Link to={articlePath(s.slug)} className="text-[14px] font-medium leading-snug text-ink hover:text-green-700 hover:underline">
+                      <Link to={articlePath(s.slug)} className="text-[14px] font-medium leading-snug text-ink hover-lime hover:underline">
                         {s.title}
                       </Link>
                     </li>

@@ -82,10 +82,10 @@ export function SiteFooter() {
           </p>
           <div className="flex items-center gap-5">
             <span className="hidden font-bold uppercase tracking-[0.04em] text-on-dark md:inline">{siteHost}</span>
-            <Link to="/privacy" className="hover:text-on-dark">
+            <Link to="/privacy" className="hover:text-lime">
               Privacy
             </Link>
-            <Link to="/admin/login" className="hidden hover:text-on-dark md:inline">
+            <Link to="/admin/login" className="hidden hover:text-lime md:inline">
               Staff login
             </Link>
           </div>

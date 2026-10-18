@@ -125,7 +125,7 @@ export function FeatureLanding({ section, categories, items }: LandingProps) {
             {photos.map((s, i) => (
               <li key={s.id} className="group relative flex flex-col gap-2">
                 <Img {...s.image} ratio={i === 0 ? '400/260' : '200/260'} sizes="(min-width: 768px) 400px, 100vw" className="rounded-md bg-green-700" />
-                <Link to={articlePath(s.slug)} className="text-meta text-on-dark-muted after:absolute after:inset-0 hover:text-on-dark">
+                <Link to={articlePath(s.slug)} className="text-meta text-on-dark-muted after:absolute after:inset-0 hover:text-lime">
                   {s.title}
                 </Link>
               </li>

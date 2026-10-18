@@ -36,7 +36,7 @@ export function SectionHeader({
       </Heading>
       {rule && <span className="h-px min-w-0 flex-1 bg-line" aria-hidden />}
       {href && (
-        <Link to={href} className="shrink-0 text-button text-green-700 hover:text-green-900 hover:underline">
+        <Link to={href} className="shrink-0 text-button text-green-700 hover-lime hover:underline">
           {linkLabel} <span aria-hidden>→</span>
           <span className="sr-only"> {title}</span>
         </Link>
@@ -67,7 +67,7 @@ export function StoryCard({
     <article className={cn('group relative flex flex-col gap-2.5', className)}>
       <Img {...story.image} ratio="360/220" sizes={sizes} priority={priority} />
       <Kicker className="mt-1">{story.label}</Kicker>
-      <Heading className={cn('font-serif text-ink group-hover:text-green-700', size === 'l' ? 'text-headline-l' : 'text-headline-m')}>
+      <Heading className={cn('font-serif text-ink group-hover-lime', size === 'l' ? 'text-headline-l' : 'text-headline-m')}>
         <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
           {story.title}
         </Link>
@@ -85,7 +85,7 @@ export function StoryCompact({ story, as: Heading = 'h3', className }: { story: 
       <Img {...story.image} ratio="104/76" sizes="104px" className="w-[104px] shrink-0 rounded-sm" />
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <Kicker>{story.label}</Kicker>
-        <Heading className="font-serif text-headline-s text-ink group-hover:text-green-700">
+        <Heading className="font-serif text-headline-s text-ink group-hover-lime">
           <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
             {story.title}
           </Link>
@@ -116,7 +116,7 @@ export function StoryRow({
         {String(index).padStart(2, '0')}
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <Heading className="font-serif text-headline-s text-ink group-hover:text-green-700">
+        <Heading className="font-serif text-headline-s text-ink group-hover-lime">
           <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
             {story.title}
           </Link>

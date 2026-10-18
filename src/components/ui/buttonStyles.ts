@@ -8,12 +8,12 @@ const base =
   'disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2';
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-green-700 text-on-dark hover:bg-green-900 focus-visible:outline-green-700',
-  outline: 'border-[1.5px] border-green-700 text-green-700 hover:bg-green-soft focus-visible:outline-green-700',
-  accent: 'bg-lime text-green-900 hover:bg-lime-dark hover:text-on-dark focus-visible:outline-green-900',
-  ghost: 'text-green-700 hover:bg-green-soft focus-visible:outline-green-700',
+  primary: 'bg-green-700 text-on-dark hover:bg-lime hover:text-green-900 focus-visible:outline-green-700',
+  outline: 'border-[1.5px] border-green-700 text-green-700 hover:border-lime hover:bg-lime hover:text-green-900 focus-visible:outline-green-700',
+  accent: 'bg-lime text-green-900 hover:bg-green-900 hover:text-lime focus-visible:outline-green-900',
+  ghost: 'text-green-700 hover:bg-lime-soft focus-visible:outline-green-700',
   danger: 'bg-alert text-on-dark hover:opacity-90 focus-visible:outline-alert',
-  'on-dark': 'border-[1.5px] border-on-dark-muted text-on-dark hover:bg-green-700 focus-visible:outline-lime',
+  'on-dark': 'border-[1.5px] border-on-dark-muted text-on-dark hover:border-lime hover:text-lime focus-visible:outline-lime',
 };
 
 const sizes: Record<ButtonSize, string> = {

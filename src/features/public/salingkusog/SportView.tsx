@@ -24,7 +24,7 @@ export function SportSwitcher({ hub }: { hub: HubData }) {
           <li key={s.id} className="shrink-0">
             <NavLink
               to={sportHref(s)}
-              className={({ isActive }) => cn('block rounded-full border px-3.5 py-1.5 text-[13px] font-semibold', isActive ? 'border-green-900 bg-green-900 text-lime' : 'border-line text-ink hover:border-green-700')}
+              className={({ isActive }) => cn('block rounded-full border px-3.5 py-1.5 text-[13px] font-semibold', isActive ? 'border-green-900 bg-green-900 text-lime' : 'border-line text-ink hover:border-lime')}
             >
               {s.name}
             </NavLink>
@@ -43,7 +43,7 @@ function BracketGame({ match, hub, title }: { match: SkMatchRow; hub: HubData; t
     [match.side_b_id, match.score_b, 'b'],
   ];
   return (
-    <Link to={`/salingkusog/match/${match.id}`} className="block w-full overflow-hidden rounded-[8px] border border-line bg-surface hover:border-green-700">
+    <Link to={`/salingkusog/match/${match.id}`} className="block w-full overflow-hidden rounded-[8px] border border-line bg-surface hover:border-lime">
       <p className="border-b border-line px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.9px] text-ink-muted">
         {title ?? match.round ?? 'Game'} · {dayLabel(manilaDate(match.scheduled_at), false)}
         {match.status === 'live' && <span className="ml-1 text-alert">· Live</span>}
