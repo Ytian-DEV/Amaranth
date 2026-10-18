@@ -69,7 +69,7 @@ export function useArchiveMonths() {
   return useQuery({
     queryKey: ['archive-months'],
     staleTime: 30 * 60_000,
-    queryFn: async (): Promise<ArchiveMonth[]> => unwrap(await getSupabase().rpc('archive_months')),
+    queryFn: async (): Promise<ArchiveMonth[]> => unwrap(await getSupabase().rpc('archive_months', {}, { get: true })),
   });
 }
 

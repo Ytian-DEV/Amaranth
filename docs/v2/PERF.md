@@ -53,3 +53,42 @@ Measured 2026-10-17 with Lighthouse 12.2.1 (headless Chrome, default mobile = si
 ## Follow-ups
 - Mobile TBT (~200–340 ms) is mostly React + Supabase client parse; lazy-initialising the Supabase client after first paint would help further.
 - Re-measure on the Vercel preview with real photos (LCP will then be the lead image, which is `priority` + `srcset`).
+
+## Pass 2 — production with real data (2026-10-18, `perf/edge-cache-images`)
+
+Lighthouse 12.2.1, mobile (simulated slow 4G, 4× CPU), against production `amaranth-iota.vercel.app` with live content:
+
+| Page | Perf | A11y | Best pr. | SEO | FCP | LCP | TBT | CLS | Transfer |
+|---|---|---|---|---|---|---|---|---|---|
+| `/` | 68 | 100 | 100 | 100 | 2.2 s | 6.1 s | 250 ms | 0.016 | 533 KB |
+| `/news` | 72 | 100 | 100 | 100 | 2.1 s | 5.4 s | 220 ms | 0 | 478 KB |
+| `/salingkusog` | 67 | 100 | 100 | 100 | 2.3 s | 6.0 s | 300 ms | 0 | 494 KB |
+
+What held LCP back:
+- **Oversized photos.** Variants were 640/1280 px; a phone (412 px at 1.75×) needs ~720 px, so it got the 1280 px file, and older uploads without variants were sent at full size (up to 175 KB for one image, 142 KB wasted on `/`).
+- **Every Supabase read paid twice**: a CORS preflight, then the GET (7–12 reads per page before anything can render).
+
+Changes:
+- **Edge cache for public reads** (`api/r.ts`, `src/lib/edgeCache.ts`): signed-out readers' GETs of public, slow-changing tables go to same-origin `/api/r`, cached by Vercel's CDN for 60 s (`stale-while-revalidate=300`). No preflight, one hop to the nearest edge, and a traffic spike costs the database one query per minute per URL. Staff (signed in), writes, counts, comments and live Salingkusog results stay direct; if the proxy can't answer, the read goes to Supabase as before. The live-articles cutoff is rounded to the minute so readers share cache entries; `most_read_articles` / `archive_months` are called with GET.
+- **Image sizes 320 / 640 / 960 / 1280** for new uploads, and **Media Library → "Make web sizes"** (editors) to add the missing sizes to older images in the browser.
+- `srcset`/`sizes` on the three remaining raw `<img>` (Feature hero, Stories tiles, venue map).
+- Debounced the recap-article search in the scorekeeper (it queried on every keystroke).
+
+Re-run the table above after deploy and after "Make web sizes" has been run once.
+
+### Checklist status (the list from 2026-10-18)
+| Item | Status |
+|---|---|
+| Cache API responses / server-side caching / cache expensive queries / CDN | Done in pass 2 (edge-cached `/api/r`; sitemap, RSS, robots and crawler previews were already edge-cached; Vercel CDN serves all static files) |
+| Load balancer | Not needed: Vercel and Supabase are managed platforms that scale and balance on their own |
+| Database indexes | Checked: schema, Salingkusog and statistics queries all have matching indexes |
+| Image compression | Yes, on upload in v2 (WebP ≤2400 px); pass 2 adds 320/960 sizes and a backfill |
+| Loading skeletons | Yes on every public page and newsroom list |
+| Debounced inputs | Yes; the last gap (recap search) fixed in pass 2 |
+| Code splitting | Yes, per route plus vendor chunks |
+| Pagination | Yes, every long list is paginated (12–24 per page) |
+| Compress API payloads / minify JS and CSS | Automatic (Vercel Brotli/gzip; Vite minifies) |
+| Lazy loading | Images lazy by default; routes lazy |
+| Defer non-critical scripts | Yes (analytics async, statistics tracker batches after load) |
+| Connection pooling | Handled by Supabase (PostgREST); nothing connects to Postgres directly |
+| Lighthouse | Run above (production, real data) |
