@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { ArticleRow, ArticleStatus, Json, MediaAssetRow } from '@/lib/database.types';
 import { slugify } from '@/lib/slug';
-import { getSupabase, unwrap, unwrapMaybe } from '@/lib/supabase';
+import { getSupabase, unwrap, unwrapMaybe, pastLastPage } from '@/lib/supabase';
 
 export const LIST_PAGE_SIZE = 20;
 
@@ -38,7 +38,7 @@ export function useArticleList(filters: ArticleListFilters, userId: string | und
       if (filters.section) query = query.eq('section_slug', filters.section);
       if (filters.mine && userId) query = query.eq('created_by', userId);
       const { data, error, count } = await query.order('updated_at', { ascending: false }).range(from, from + LIST_PAGE_SIZE - 1);
-      if (error) throw error;
+      if (error && !pastLastPage(error)) throw error;
       return {
         total: count ?? 0,
         rows: (data ?? []).map(

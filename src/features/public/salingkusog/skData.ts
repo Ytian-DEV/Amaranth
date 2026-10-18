@@ -73,18 +73,25 @@ export function useTimeline(editionId: string | undefined, hours: number | null)
   });
 }
 
-/** Live scores: refresh the hub when any game of the edition changes (Supabase Realtime). */
+/** Live updates (Supabase Realtime): a score refreshes the games; a medal or result also refreshes
+ *  the medal tally, points race and winners. Polling every minute stays as the fallback. */
 export function useLiveGames(editionId: string | undefined) {
   const client = useQueryClient();
   useEffect(() => {
     if (!editionId) return;
     let channel: ReturnType<ReturnType<typeof sb>['channel']> | null = null;
+    const refresh = (...keys: string[]) => {
+      for (const k of keys) void client.invalidateQueries({ queryKey: ['sk-public', k, editionId] });
+    };
     try {
       channel = sb()
         .channel(`sk-public-${editionId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'sk_matches', filter: `edition_id=eq.${editionId}` }, () => {
-          void client.invalidateQueries({ queryKey: ['sk-public', 'hub', editionId] });
-        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sk_matches', filter: `edition_id=eq.${editionId}` }, () =>
+          refresh('hub', 'standings', 'timeline', 'results'),
+        )
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sk_placements', filter: `edition_id=eq.${editionId}` }, () =>
+          refresh('standings', 'timeline', 'results'),
+        )
         .subscribe();
     } catch {
       /* not configured (fixtures) */

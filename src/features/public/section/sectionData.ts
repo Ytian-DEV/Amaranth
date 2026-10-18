@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { toStoryItem, type StoryItem } from '@/components/story/types';
 import type { CategoryRow, SectionRow } from '@/lib/database.types';
-import { getSupabase, unwrap, unwrapMaybe } from '@/lib/supabase';
+import { getSupabase, unwrap, unwrapMaybe, pastLastPage } from '@/lib/supabase';
 import { liveCards } from '../articles';
 
 export const PAGE_SIZE = 12;
@@ -50,7 +50,7 @@ export function useArticlePage({ section, category, page, enabled = true }: { se
       const { data, error, count } = await query
         .order('published_at', { ascending: false })
         .range(from, from + PAGE_SIZE - 1);
-      if (error) throw error;
+      if (error && !pastLastPage(error)) throw error;
       const total = count ?? 0;
       return { items: (data ?? []).map(toStoryItem), total, pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
     },
