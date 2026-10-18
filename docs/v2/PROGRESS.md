@@ -87,7 +87,14 @@ Design: Figma page "Brand 2026" (94:121). Plan: 1 tokens + fonts → 2 header/fo
 
 - [x] 5 `feature/brand-lime-hover` (user request): hovers are lime. On light backgrounds `hover-lime` / `group-hover-lime` (app.css) turn text lime ink with a 3px lime underline, since pure lime text is unreadable on white; on dark bands links hover to lime; borders hover lime; buttons: primary/outline turn lime with dark text, lime accent inverts to deep green with lime text. Rechecked the performance checklist after branding: fonts are latin-only subsets (~91 KB incl. italic and Cinzel), local prod build Lighthouse home 73 / news 76 perf, a11y 100.
 
-**Next:** open the `develop` → `main` PR for Brand 2026 (the user opens it). Nothing else queued.
+## After Brand 2026 (user requests, 2026-10-19)
+- [x] `feature/literary-folio-photo`: the Literary hero folio shows the lead story's photo on the deep-green cover (SVG mountain art only when there is no photo).
+- [x] `feature/logo-loader`: page loads show the Amaranth logo rotating (`LogoLoader`, `NavigationLoader` after 300 ms, inline boot spinner in index.html); reduced motion pulses instead. Skeletons inside lists stay.
+- [x] `feature/sk-chart-animations`: points race lines rise from 0 and the podium and medal-table points count up (`src/lib/useTween.ts`), moving to new totals on live updates.
+- [x] `feature/sk-points-race-ranges`: points race in 1h / 3h / 6h steps (latest day with results), 12h (whole edition) or Day. New RPC `sk_points_timeline` in salingkusog.sql. **Re-paste `supabase/v2/salingkusog.sql`.**
+- [x] `feature/publish-permissions`: only the Super admin, Executive Editor, Managing editor, the new **Business Manager** role, and staff given access in Staff → Accounts → "Can publish and schedule articles" may publish/schedule (`app.can_publish_articles()`, `profiles.can_publish`, RPC `set_publish_access`, audited). Only SA/EE/ME give access (the Managing editor now sees the Accounts tab, publishing switch only). Everyone else saves drafts and submits for review. Granted staff publish articles they can already open (their own; section editors their sections). Front page, settings and the board stay with SA/EE/ME. **Re-paste `supabase/v2/schema.sql`, then salingkusog.sql and stats.sql.**
+
+**Next:** the user opens the `develop` → `main` PR. Nothing else queued.
 
 | # | Branch | Status |
 |---|---|---|

@@ -5,7 +5,7 @@ import { Alert, EmptyState, ErrorState, Skeleton } from '@/components/ui/Feedbac
 import { Modal } from '@/components/ui/Modal';
 import { Pill } from '@/components/ui/StatusPill';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { assignableRoles, roleLabels } from '@/features/auth/permissions';
+import { assignableRoles, canGrantPublishing, isAdmin, publishesByRole, roleLabels } from '@/features/auth/permissions';
 import type { AppRole } from '@/lib/database.types';
 import { errorText } from '@/lib/errors';
 import { formatRelative } from '@/lib/format';
@@ -19,18 +19,24 @@ function EditStaff({ member, onClose }: { member: StaffMember; onClose: () => vo
   const [role, setRole] = useState<AppRole>(member.role);
   const [active, setActive] = useState(member.is_active);
   const [sectionIds, setSectionIds] = useState(member.sectionIds);
+  const [publish, setPublish] = useState(member.can_publish);
   const [error, setError] = useState<string | null>(null);
   const roles = assignableRoles(profile?.role);
   const self = member.id === profile?.id;
+  // Super admin and Executive Editor manage accounts; the Managing editor only gives publishing access
+  const admin = isAdmin(profile?.role);
+  const grants = canGrantPublishing(profile?.role);
+  const alwaysPublishes = publishesByRole(role);
 
   async function save() {
     setError(null);
     try {
       await update.mutateAsync({
         id: member.id,
-        role: role !== member.role ? role : undefined,
-        is_active: active !== member.is_active ? active : undefined,
-        sectionIds: role === 'section_editor' ? sectionIds : [],
+        role: admin && role !== member.role ? role : undefined,
+        is_active: admin && active !== member.is_active ? active : undefined,
+        sectionIds: admin ? (role === 'section_editor' ? sectionIds : []) : undefined,
+        canPublish: grants && publish !== member.can_publish ? publish : undefined,
       });
       onClose();
     } catch (err) {
@@ -59,7 +65,7 @@ function EditStaff({ member, onClose }: { member: StaffMember; onClose: () => vo
         {error && <Alert tone="error">{error}</Alert>}
         <label className="flex flex-col gap-1.5 text-[14px] font-semibold">
           Role
-          <Select value={role} onChange={(e) => setRole(e.target.value as AppRole)} disabled={!roles.includes(member.role) && member.role === 'super_admin'}>
+          <Select value={role} onChange={(e) => setRole(e.target.value as AppRole)} disabled={!admin || (!roles.includes(member.role) && member.role === 'super_admin')}>
             {(roles.includes(member.role) ? roles : [member.role, ...roles]).map((r) => (
               <option key={r} value={r} disabled={!roles.includes(r)}>
                 {roleLabels[r]}
@@ -67,7 +73,7 @@ function EditStaff({ member, onClose }: { member: StaffMember; onClose: () => vo
             ))}
           </Select>
         </label>
-        {role === 'section_editor' && (
+        {admin && role === 'section_editor' && (
           <fieldset className="flex flex-col gap-2">
             <legend className="mb-1 text-[14px] font-semibold">Sections they edit</legend>
             <div className="grid grid-cols-2 gap-2">
@@ -82,8 +88,25 @@ function EditStaff({ member, onClose }: { member: StaffMember; onClose: () => vo
             </div>
           </fieldset>
         )}
-        <Checkbox label="Active — can sign in to the newsroom" checked={active} disabled={self} onChange={(e) => setActive(e.target.checked)} />
-        {self && <p className="text-meta font-normal text-ink-muted">You can’t deactivate your own account.</p>}
+        {grants && (
+          <fieldset className="flex flex-col gap-2 rounded-md border border-line p-4">
+            <legend className="px-1 text-[14px] font-semibold">Publishing</legend>
+            {alwaysPublishes ? (
+              <p className="text-body-m text-ink-muted">{roleLabels[role]} accounts can always publish and schedule articles.</p>
+            ) : (
+              <>
+                <Checkbox label="Can publish and schedule articles" checked={publish} onChange={(e) => setPublish(e.target.checked)} />
+                <p className="text-meta font-normal text-ink-muted">Without this, they save drafts and submit them for review.</p>
+              </>
+            )}
+          </fieldset>
+        )}
+        {admin && (
+          <>
+            <Checkbox label="Active — can sign in to the newsroom" checked={active} disabled={self} onChange={(e) => setActive(e.target.checked)} />
+            {self && <p className="text-meta font-normal text-ink-muted">You can’t deactivate your own account.</p>}
+          </>
+        )}
       </div>
     </Modal>
   );
@@ -110,6 +133,9 @@ export function StaffTab() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Pill tone={m.is_active ? 'green' : 'neutral'}>{m.is_active ? roleLabels[m.role] : 'Inactive'}</Pill>
+              {m.is_active && (publishesByRole(m.role) || m.can_publish) && (
+                <Pill tone="neutral">{publishesByRole(m.role) ? 'Publishes' : 'Can publish'}</Pill>
+              )}
               {m.role === 'section_editor' && m.sectionIds.length > 0 && (
                 <span className="text-meta text-ink-muted">{m.sectionIds.map(sectionName).join(', ')}</span>
               )}

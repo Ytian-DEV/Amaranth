@@ -148,6 +148,10 @@ $$;
 -- -----------------------------------------------------------------------------
 -- People
 -- -----------------------------------------------------------------------------
+-- Business Manager (added 2026-10): may publish and schedule articles, nothing more.
+-- Compared as text below so this file can add the value and use it in one run.
+alter type public.app_role add value if not exists 'business_manager' after 'managing_editor';
+
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   email text not null,
@@ -161,6 +165,8 @@ create table if not exists public.profiles (
   updated_at timestamptz not null default now()
 );
 create unique index if not exists profiles_email_key on public.profiles (lower(email));
+-- Publishing access granted to one person by the Super admin, Executive Editor or Managing editor
+alter table public.profiles add column if not exists can_publish boolean not null default false;
 
 -- Pre-authorised staff: a new auth user whose email is here gets this role and
 -- is activated. Anyone else who signs up gets an inactive profile (no access).
@@ -623,6 +629,20 @@ as $$
   select coalesce(app.current_role() in ('super_admin', 'editor_in_chief', 'managing_editor'), false);
 $$;
 
+-- Publish / schedule articles: the three managing roles, the Business Manager, and anyone
+-- given publishing access in Staff. (Front page, settings and the like stay app.can_publish.)
+create or replace function app.can_publish_articles()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select app.can_publish()
+    or coalesce((select p.role::text = 'business_manager' or p.can_publish
+                 from public.profiles p where p.id = auth.uid() and p.is_active), false);
+$$;
+
 create or replace function app.is_editor()
 returns boolean
 language sql
@@ -820,6 +840,10 @@ begin
     raise exception 'Email is managed by authentication.' using errcode = '42501';
   end if;
 
+  if new.can_publish is distinct from old.can_publish and not app.can_publish() then
+    raise exception 'Only the Super admin, Executive Editor or Managing editor can give publishing access.' using errcode = '42501';
+  end if;
+
   if new.role is distinct from old.role or new.is_active is distinct from old.is_active then
     if not app.is_admin() then
       raise exception 'Only admins can change roles or access.' using errcode = '42501';
@@ -836,6 +860,11 @@ begin
        where p.role = 'super_admin' and p.is_active and p.id <> old.id
      ) then
     raise exception 'At least one active super admin is required.' using errcode = '42501';
+  end if;
+
+  if new.can_publish is distinct from old.can_publish then
+    perform app.audit('profile.publish_access', 'profiles', new.id::text,
+      jsonb_build_object('can_publish', jsonb_build_array(old.can_publish, new.can_publish)));
   end if;
 
   if new.role is distinct from old.role or new.is_active is distinct from old.is_active then
@@ -875,7 +904,7 @@ declare
   v_assignable boolean;
   v_is_editor boolean;
   v_is_owner boolean;
-  v_publisher boolean := app.can_publish();
+  v_publisher boolean := app.can_publish_articles();
   v_base text;
   v_slug text;
   v_n integer := 1;
@@ -1591,6 +1620,27 @@ begin
   return v_article;
 end;
 $$;
+
+-- Staff → "Can publish": the three managing roles turn publishing access on or off.
+create or replace function public.set_publish_access(p_profile_id uuid, p_allowed boolean)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not app.can_publish() then
+    raise exception 'Only the Super admin, Executive Editor or Managing editor can give publishing access.' using errcode = '42501';
+  end if;
+  update public.profiles set can_publish = coalesce(p_allowed, false), updated_at = now() where id = p_profile_id;
+  if not found then
+    raise exception 'Unknown staff member.' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
+revoke execute on function public.set_publish_access(uuid, boolean) from public;
+grant execute on function public.set_publish_access(uuid, boolean) to authenticated;
 
 create or replace function public.dashboard_stats()
 returns jsonb

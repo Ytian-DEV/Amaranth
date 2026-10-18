@@ -1,4 +1,4 @@
-import { allowedTransitions, assignableRoles, canEditContent, canEditSk, canManageSkTeam, canPublish, isAdmin, isEditor, roleLabels } from './permissions';
+import { allowedTransitions, assignableRoles, canEditContent, canEditSk, canGrantPublishing, canManageSkTeam, canPublish, canPublishArticles, isAdmin, isEditor, publishesByRole, roleLabels } from './permissions';
 
 describe('roles', () => {
   it('ranks roles like the database', () => {
@@ -68,5 +68,28 @@ describe('allowedTransitions', () => {
     expect(canEditContent({ status: 'draft', ...writerOwn })).toBe(true);
     expect(canEditContent({ status: 'submitted', ...writerOwn })).toBe(false);
     expect(canEditContent({ status: 'published', ...sectionEditor })).toBe(true);
+  });
+});
+
+describe('publishing access', () => {
+  const own = { isOwner: true, canEditSection: false };
+
+  it('staff without access only save drafts and submit for review', () => {
+    expect(allowedTransitions('staff_writer', { status: 'draft', ...own })).toEqual(['submitted']);
+    expect(allowedTransitions('section_editor', { status: 'draft', ...own })).not.toContain('published');
+  });
+
+  it('the Business Manager and granted staff publish and schedule', () => {
+    expect(roleLabels.business_manager).toBe('Business Manager');
+    expect(allowedTransitions('business_manager', { status: 'draft', ...own })).toEqual(expect.arrayContaining(['published', 'scheduled']));
+    expect(allowedTransitions('staff_writer', { status: 'draft', ...own, publishAccess: true })).toEqual(expect.arrayContaining(['published', 'scheduled']));
+    expect(canPublishArticles(null, true)).toBe(false);
+  });
+
+  it('only the three managing roles give access; the Business Manager does not', () => {
+    expect(['super_admin', 'editor_in_chief', 'managing_editor'].every((r) => canGrantPublishing(r as never))).toBe(true);
+    expect(canGrantPublishing('business_manager')).toBe(false);
+    expect(publishesByRole('business_manager')).toBe(true);
+    expect(publishesByRole('section_editor')).toBe(false);
   });
 });
