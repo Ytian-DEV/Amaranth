@@ -37,6 +37,8 @@ do $$ begin
   -- bracket: elimination games · round_robin: league · timed/measured: races, throws · judged: cheerdance
   create type public.sk_format as enum ('bracket', 'round_robin', 'timed', 'judged');
 exception when duplicate_object then null; end $$;
+-- round robin, then the top 2 play the final (and 3rd/4th the bronze game). Compared as text below.
+alter type public.sk_format add value if not exists 'round_robin_final' after 'round_robin';
 
 do $$ begin
   create type public.sk_match_status as enum ('upcoming', 'live', 'final', 'postponed', 'cancelled');
@@ -205,6 +207,17 @@ create index if not exists sk_matches_event_idx on public.sk_matches (event_id, 
 create index if not exists sk_matches_side_a_idx on public.sk_matches (side_a_id);
 create index if not exists sk_matches_side_b_idx on public.sk_matches (side_b_id);
 create index if not exists sk_matches_venue_idx on public.sk_matches (venue_id, scheduled_at);
+
+-- Generated games: where each side comes from (see app.sk_resolve below)
+alter table public.sk_matches add column if not exists source_a text;
+alter table public.sk_matches add column if not exists source_b text;
+do $$ begin
+  alter table public.sk_matches add constraint sk_matches_sources check (
+    (source_a is null or source_a ~ '^(seed:[0-9]+|rank:[0-9]+|(winner|loser):[0-9a-f-]{36})$')
+    and (source_b is null or source_b ~ '^(seed:[0-9]+|rank:[0-9]+|(winner|loser):[0-9a-f-]{36})$'));
+exception when duplicate_object then null; end $$;
+-- Factions in seed order, set by "Build schedule"
+alter table public.sk_events add column if not exists seeds uuid[] not null default '{}';
 
 -- Per-athlete box score for a game: {"PTS": 24, "REB": 9, "AST": 5, "STL": 3}
 create table if not exists public.sk_athlete_stats (
@@ -558,6 +571,368 @@ $$;
 
 revoke execute on function public.sk_set_placements(uuid, jsonb) from public, anon;
 grant execute on function public.sk_set_placements(uuid, jsonb) to authenticated;
+
+-- -----------------------------------------------------------------------------
+-- Auto brackets and round robins (2026-10)
+-- A generated game knows where its two sides come from (sk_matches.source_a/_b):
+--   seed:3            the 3rd faction in sk_events.seeds
+--   winner:<match id> the winner of that game · loser:<match id> its loser (bronze game)
+--   rank:2            2nd in the event's round-robin standings (round robin + final)
+-- app.sk_resolve() fills the sides in whenever a game of the event changes:
+--   knockout seeds at once; round-robin round n once rounds before it are done;
+--   winners/losers when that game is final; ranks when every round-robin game is done.
+-- A game that has started never changes: the edit that would change it is refused.
+-- -----------------------------------------------------------------------------
+
+-- Round-robin standings: wins, point difference, head-to-head among the tied, points scored, seed.
+-- Group games = every game of the event that isn't fed by a winner/loser/rank (so imported
+-- round robins without sources work too). Cancelled games don't count.
+create or replace function app.sk_rr_table(p_event_id uuid)
+returns table (faction_id uuid, rank integer, played integer, wins integer, losses integer, draws integer, pf numeric, pa numeric)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  with ev as (
+    select coalesce(e.seeds, '{}') as seeds from public.sk_events e where e.id = p_event_id
+  ),
+  games as (
+    select m.* from public.sk_matches m
+    where m.event_id = p_event_id and coalesce(m.source_a, '') !~ '^(winner|loser|rank):'
+  ),
+  teams as (
+    select unnest(ev.seeds) as id from ev
+    union select side_a_id from games where side_a_id is not null
+    union select side_b_id from games where side_b_id is not null
+  ),
+  results as (
+    select side_a_id as id, side_b_id as opp, score_a as f, score_b as a from games where status = 'final'
+    union all
+    select side_b_id, side_a_id, score_b, score_a from games where status = 'final'
+  ),
+  base as (
+    select t.id,
+           count(r.id)::integer as played,
+           count(*) filter (where r.f > r.a)::integer as wins,
+           count(*) filter (where r.f < r.a)::integer as losses,
+           count(*) filter (where r.f = r.a)::integer as draws,
+           coalesce(sum(r.f), 0) as pf,
+           coalesce(sum(r.a), 0) as pa
+    from teams t left join results r on r.id = t.id
+    group by t.id
+  ),
+  h2h as (
+    -- wins against the teams level with you on wins and difference
+    select b.id, count(*) filter (where r.f > r.a)::integer as h2h
+    from base b
+    left join results r on r.id = b.id
+      and exists (select 1 from base o where o.id = r.opp and o.wins = b.wins and o.pf - o.pa = b.pf - b.pa)
+    group by b.id
+  )
+  select b.id, (row_number() over (
+           order by b.wins desc, b.pf - b.pa desc, h.h2h desc, b.pf desc,
+                    coalesce(array_position((select seeds from ev), b.id), 999)))::integer,
+         b.played, b.wins, b.losses, b.draws, b.pf, b.pa
+  from base b join h2h h on h.id = b.id;
+$$;
+
+-- Fills in the sides of the event's generated games (idempotent).
+create or replace function app.sk_resolve(p_event_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_format text;
+  v_seeds uuid[];
+  v_group_left integer;
+  m record;
+  v_a uuid;
+  v_b uuid;
+begin
+  select e.format::text, coalesce(e.seeds, '{}') into v_format, v_seeds from public.sk_events e where e.id = p_event_id;
+  if v_format is null then
+    return;
+  end if;
+  select count(*) into v_group_left from public.sk_matches g
+  where g.event_id = p_event_id and coalesce(g.source_a, '') !~ '^(winner|loser|rank):' and g.status not in ('final', 'cancelled');
+
+  for m in
+    select * from public.sk_matches x
+    where x.event_id = p_event_id and (x.source_a is not null or x.source_b is not null)
+    order by x.round_order, x.bracket_slot nulls last, x.scheduled_at
+  loop
+    v_a := app.sk_source_side(p_event_id, v_format, v_seeds, v_group_left, m.round_order, m.source_a);
+    v_b := app.sk_source_side(p_event_id, v_format, v_seeds, v_group_left, m.round_order, m.source_b);
+    if m.source_a is null then v_a := m.side_a_id; end if;
+    if m.source_b is null then v_b := m.side_b_id; end if;
+    if m.side_a_id is distinct from v_a or m.side_b_id is distinct from v_b then
+      if m.status <> 'upcoming' then
+        raise exception '% has already started, so its teams can''t change. Fix that game first.', coalesce(m.round, 'The next game')
+          using errcode = '55000';
+      end if;
+      update public.sk_matches set side_a_id = v_a, side_b_id = v_b where id = m.id;
+    end if;
+  end loop;
+end;
+$$;
+
+-- One side of a generated game, or null while it isn't known yet.
+create or replace function app.sk_source_side(p_event_id uuid, p_format text, p_seeds uuid[], p_group_left integer, p_round integer, p_source text)
+returns uuid
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v_kind text := split_part(p_source, ':', 1);
+  v_ref text := split_part(p_source, ':', 2);
+  g record;
+begin
+  if p_source is null then
+    return null;
+  elsif v_kind = 'seed' then
+    -- knockout seeds (incl. byes) at once; a round-robin round once every earlier round is done
+    if p_format = 'bracket' or p_round <= 1 or not exists (
+      select 1 from public.sk_matches x
+      where x.event_id = p_event_id and coalesce(x.source_a, '') !~ '^(winner|loser|rank):'
+        and x.round_order < p_round and x.status not in ('final', 'cancelled')
+    ) then
+      return p_seeds[v_ref::integer];
+    end if;
+    return null;
+  elsif v_kind in ('winner', 'loser') then
+    select x.status, x.winner_side, x.side_a_id, x.side_b_id into g from public.sk_matches x where x.id = v_ref::uuid;
+    if g.status is distinct from 'final' or g.winner_side is null then
+      return null;
+    end if;
+    return case when (v_kind = 'winner') = (g.winner_side = 'a') then g.side_a_id else g.side_b_id end;
+  elsif v_kind = 'rank' then
+    if p_group_left > 0 then
+      return null;
+    end if;
+    return (select t.faction_id from app.sk_rr_table(p_event_id) t where t.rank = v_ref::integer);
+  end if;
+  return null;
+end;
+$$;
+
+-- After a game changes, move the teams along (one level deep: the updates it makes don't recurse).
+create or replace function app.sk_matches_advance()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if pg_trigger_depth() > 1 then
+    return null;
+  end if;
+  perform app.sk_resolve(coalesce(new.event_id, old.event_id));
+  return null;
+end;
+$$;
+
+drop trigger if exists sk_matches_advance on public.sk_matches;
+create trigger sk_matches_advance
+after insert or delete or update of status, score_a, score_b, side_a_id, side_b_id, source_a, source_b on public.sk_matches
+for each row execute function app.sk_matches_advance();
+
+-- Knockout games need a winner (overtime, penalties… go into the score)
+create or replace function app.sk_knockout_needs_winner()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if new.status = 'final' and new.score_a = new.score_b and (
+    coalesce(new.source_a, '') ~ '^(winner|loser|rank):'
+    or exists (select 1 from public.sk_events e where e.id = new.event_id and e.format::text = 'bracket')
+    or exists (select 1 from public.sk_matches x where x.event_id = new.event_id and new.id::text in (split_part(x.source_a, ':', 2), split_part(x.source_b, ':', 2)))
+  ) then
+    raise exception 'A knockout game needs a winner. Add the tiebreak (overtime, penalties, extra set) to the score.' using errcode = '23514';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists sk_matches_knockout on public.sk_matches;
+create trigger sk_matches_knockout before insert or update on public.sk_matches
+for each row execute function app.sk_knockout_needs_winner();
+
+-- -----------------------------------------------------------------------------
+-- RPC: build an event's games ("Build schedule" in the newsroom).
+-- p_format: bracket (single elimination), round_robin, or round_robin_final (top 2 play the final).
+-- p_seeds: factions in seed order. Replaces the event's games while none has started.
+-- -----------------------------------------------------------------------------
+create or replace function public.sk_build_schedule(
+  p_event_id uuid, p_format text, p_seeds uuid[], p_first_at timestamptz,
+  p_round_gap_hours integer default 24, p_game_gap_minutes integer default 90,
+  p_venue_id uuid default null, p_bronze boolean default true
+)
+returns integer
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_edition uuid;
+  n integer := coalesce(cardinality(p_seeds), 0);
+  v_round interval := make_interval(hours => greatest(coalesce(p_round_gap_hours, 24), 0));
+  v_game interval := make_interval(mins => greatest(coalesce(p_game_gap_minutes, 90), 0));
+  v_count integer := 0;
+  -- bracket
+  v_size integer;
+  v_rounds integer;
+  v_pos integer[];
+  v_next integer[];
+  v_prev text[];   -- sources feeding the next round, per slot
+  v_cur text[];
+  v_ids uuid[];
+  v_id uuid;
+  v_name text;
+  v_left integer;
+  v_semis uuid[];
+  r integer;
+  i integer;
+  -- round robin
+  v_teams integer[];
+  v_rr_rounds integer;
+  g integer;
+  x integer;
+  y integer;
+  v_final_at timestamptz;
+begin
+  if not app.can_edit_sk() then
+    raise exception 'Only the Salingkusog team can build schedules.' using errcode = '42501';
+  end if;
+  if p_format not in ('bracket', 'round_robin', 'round_robin_final') then
+    raise exception 'Choose single elimination, round robin, or round robin + final.' using errcode = '22023';
+  end if;
+  select e.edition_id into v_edition from public.sk_events e where e.id = p_event_id;
+  if v_edition is null then
+    raise exception 'Unknown event.' using errcode = 'P0002';
+  end if;
+  if n < 2 or n > 16 then
+    raise exception 'Pick between 2 and 16 factions.' using errcode = '22023';
+  end if;
+  if (select count(distinct s) from unnest(p_seeds) s) <> n
+     or (select count(*) from public.sk_factions f where f.edition_id = v_edition and f.id = any (p_seeds)) <> n then
+    raise exception 'Each faction can be picked once, from this edition.' using errcode = '22023';
+  end if;
+  if p_format = 'round_robin_final' and n < 3 then
+    raise exception 'Round robin + final needs at least 3 factions.' using errcode = '22023';
+  end if;
+  if p_first_at is null then
+    raise exception 'Set when the first game starts.' using errcode = '22023';
+  end if;
+  if exists (select 1 from public.sk_matches m where m.event_id = p_event_id and m.status not in ('upcoming', 'postponed', 'cancelled')) then
+    raise exception 'This event already has games played, so its schedule can''t be rebuilt.' using errcode = '55000';
+  end if;
+
+  delete from public.sk_matches where event_id = p_event_id;
+  update public.sk_events set format = p_format::public.sk_format, seeds = p_seeds where id = p_event_id;
+
+  if p_format = 'bracket' then
+    v_size := 1;
+    while v_size < n loop v_size := v_size * 2; end loop;
+    v_rounds := round(ln(v_size) / ln(2))::integer;
+    -- standard seeding order: 1 v 8, 4 v 5, 2 v 7, 3 v 6 …
+    v_pos := array[1, 2];
+    while cardinality(v_pos) < v_size loop
+      v_next := '{}';
+      foreach i in array v_pos loop
+        v_next := v_next || i || (cardinality(v_pos) * 2 + 1 - i);
+      end loop;
+      v_pos := v_next;
+    end loop;
+    v_prev := '{}';
+    for i in 1 .. v_size loop
+      v_prev := v_prev || ('seed:' || v_pos[i]);
+    end loop;
+
+    for r in 1 .. v_rounds loop
+      v_left := (v_size / power(2, r - 1))::integer;
+      v_cur := '{}';
+      v_ids := '{}';
+      g := 0;
+      for i in 1 .. cardinality(v_prev) / 2 loop
+        -- a bye: the seed with no opponent goes straight on
+        if v_prev[2 * i]::text ~ '^seed:' and split_part(v_prev[2 * i], ':', 2)::integer > n then
+          v_cur := v_cur || v_prev[2 * i - 1];
+          v_ids := v_ids || null::uuid;
+          continue;
+        end if;
+        g := g + 1;
+        v_name := case v_left when 2 then 'Final' when 4 then 'Semifinal ' || g when 8 then 'Quarterfinal ' || g else 'Round of ' || v_left || ' · ' || g end;
+        insert into public.sk_matches (edition_id, event_id, round, round_order, bracket_slot, venue_id, scheduled_at, source_a, source_b)
+        values (v_edition, p_event_id, v_name, r, i, p_venue_id,
+                p_first_at + v_round * (r - 1) + v_game * (i - 1) + case when v_left = 2 and p_bronze and v_size >= 4 then v_game else interval '0' end,
+                v_prev[2 * i - 1], v_prev[2 * i])
+        returning id into v_id;
+        v_count := v_count + 1;
+        v_cur := v_cur || ('winner:' || v_id);
+        v_ids := v_ids || v_id;
+      end loop;
+      if v_left = 4 then
+        v_semis := v_ids;
+      end if;
+      v_prev := v_cur;
+    end loop;
+
+    if p_bronze and v_size >= 4 and cardinality(v_semis) = 2 and v_semis[1] is not null and v_semis[2] is not null then
+      insert into public.sk_matches (edition_id, event_id, round, round_order, bracket_slot, venue_id, scheduled_at, source_a, source_b)
+      values (v_edition, p_event_id, 'Bronze game', v_rounds, null, p_venue_id, p_first_at + v_round * (v_rounds - 1),
+              'loser:' || v_semis[1], 'loser:' || v_semis[2]);
+      v_count := v_count + 1;
+    end if;
+  else
+    -- round robin, circle method: seed 1 stays put, the rest rotate; an odd field adds a rest slot (0)
+    v_teams := '{}';
+    for i in 1 .. n loop v_teams := v_teams || i; end loop;
+    if n % 2 = 1 then v_teams := v_teams || 0; end if;
+    v_rr_rounds := cardinality(v_teams) - 1;
+    for r in 1 .. v_rr_rounds loop
+      g := 0;
+      for i in 1 .. cardinality(v_teams) / 2 loop
+        x := v_teams[i];
+        y := v_teams[cardinality(v_teams) + 1 - i];
+        continue when x = 0 or y = 0;
+        g := g + 1;
+        insert into public.sk_matches (edition_id, event_id, round, round_order, bracket_slot, venue_id, scheduled_at, source_a, source_b)
+        values (v_edition, p_event_id, 'Round ' || r || ' · Game ' || g, r, g, p_venue_id,
+                p_first_at + v_round * (r - 1) + v_game * (g - 1), 'seed:' || least(x, y), 'seed:' || greatest(x, y));
+        v_count := v_count + 1;
+      end loop;
+      v_teams := v_teams[1:1] || v_teams[cardinality(v_teams):cardinality(v_teams)] || v_teams[2:cardinality(v_teams) - 1];
+    end loop;
+
+    if p_format = 'round_robin_final' then
+      v_final_at := p_first_at + v_round * v_rr_rounds;
+      if p_bronze and n >= 4 then
+        insert into public.sk_matches (edition_id, event_id, round, round_order, bracket_slot, venue_id, scheduled_at, source_a, source_b)
+        values (v_edition, p_event_id, 'Bronze game', v_rr_rounds + 1, null, p_venue_id, v_final_at, 'rank:3', 'rank:4');
+        v_count := v_count + 1;
+        v_final_at := v_final_at + v_game;
+      end if;
+      insert into public.sk_matches (edition_id, event_id, round, round_order, bracket_slot, venue_id, scheduled_at, source_a, source_b)
+      values (v_edition, p_event_id, 'Final', v_rr_rounds + 1, 1, p_venue_id, v_final_at, 'rank:1', 'rank:2');
+      v_count := v_count + 1;
+    end if;
+  end if;
+
+  perform app.sk_resolve(p_event_id);
+  return v_count;
+end;
+$$;
+
+revoke execute on function public.sk_build_schedule(uuid, text, uuid[], timestamptz, integer, integer, uuid, boolean) from public, anon;
+grant execute on function public.sk_build_schedule(uuid, text, uuid[], timestamptz, integer, integer, uuid, boolean) to authenticated;
+
 
 -- -----------------------------------------------------------------------------
 -- RPC: the public countdown. Returns a row only while the current edition's

@@ -3,12 +3,13 @@ import { Link, NavLink } from 'react-router-dom';
 import { SectionHeader } from '@/components/story/Story';
 import type { SkAthleteRow, SkEventLeaderRow, SkEventRow, SkMatchRow, SkPlacementRow, SkSportRow } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
+import { isGroupGame, pendingSide } from '@/lib/skSources';
 import { manilaDate } from '@/lib/manila';
 import { categoryLabels } from '@/lib/skLabels';
 import { dayLabel } from './hub';
 import { FactionBadge, MatchCard } from './SkBits';
 import type { HubData } from './skData';
-import { bracketColumns, eventStatusLine, formatLine, leaderStat, roundRobinTable } from './sports';
+import { bracketColumns, eventStatusLine, formatLine, isBronzeRound, leaderStat, roundRobinTable } from './sports';
 import { winnerCards } from './winners';
 import { WinnerCardView } from './WinnersView';
 
@@ -36,6 +37,7 @@ export function SportSwitcher({ hub }: { hub: HubData }) {
 }
 
 function BracketGame({ match, hub, title }: { match: SkMatchRow; hub: HubData; title?: string }) {
+  const waiting = (k: 'a' | 'b') => pendingSide(match, k, hub.matches) ?? 'To be decided';
   const side = (id: string | null) => hub.factions.find((f) => f.id === id);
   const done = match.status === 'final' || match.status === 'live';
   const rows: [string | null, number | null, 'a' | 'b'][] = [
@@ -52,7 +54,7 @@ function BracketGame({ match, hub, title }: { match: SkMatchRow; hub: HubData; t
         const won = match.winner_side === k;
         return (
           <div key={k} className={cn('flex items-center gap-2 px-2.5 py-2', won && 'bg-lime-soft')}>
-            <FactionBadge faction={side(id)} logos={hub.logos} className="min-w-0 flex-1" nameClassName={cn('text-[13px]', won ? 'font-semibold' : 'font-medium')} />
+            <FactionBadge faction={side(id)} logos={hub.logos} placeholder={waiting(k)} className="min-w-0 flex-1" nameClassName={cn('text-[13px]', won ? 'font-semibold' : 'font-medium', !id && 'text-ink-muted')} />
             <span className={cn('font-serif text-[18px] font-semibold tabular-nums', done && !won && match.winner_side ? 'text-ink-muted' : 'text-ink')}>{done && score !== null ? score : '—'}</span>
           </div>
         );
@@ -131,8 +133,8 @@ function Bracket({ games, hub }: { games: SkMatchRow[]; hub: HubData }) {
   );
 }
 
-function RoundRobin({ games, hub }: { games: SkMatchRow[]; hub: HubData }) {
-  const rows = roundRobinTable(games);
+function RoundRobin({ games, hub, seeds }: { games: SkMatchRow[]; hub: HubData; seeds: string[] }) {
+  const rows = roundRobinTable(games, seeds);
   return (
     <div data-scroll-x className="overflow-x-auto">
       <table className="w-full min-w-[480px] text-left">
@@ -219,12 +221,23 @@ export function SportView({ sport, event, hub, placements, athletes, leaders }: 
           <section aria-label="Bracket" className="rounded-[14px] border border-line bg-surface p-5 md:p-8">
             <Bracket games={games} hub={hub} />
           </section>
+        ) : event.format === 'round_robin_final' ? (
+          <>
+            <section aria-labelledby="sport-table" className="rounded-[14px] border border-line bg-surface p-5">
+              <h3 id="sport-table" className="font-serif text-[22px] font-semibold">Round robin</h3>
+              <p className="mb-3 text-meta text-ink-muted">The top two play the final{games.some((g) => isBronzeRound(g.round)) ? ', 3rd and 4th the bronze game' : ''}.</p>
+              <RoundRobin games={games.filter(isGroupGame)} hub={hub} seeds={event.seeds} />
+            </section>
+            <section aria-label="Finals" className="rounded-[14px] border border-line bg-surface p-5 md:p-8">
+              <Bracket games={games.filter((g) => !isGroupGame(g))} hub={hub} />
+            </section>
+          </>
         ) : (
           <div className="grid gap-5 md:grid-cols-2">
             {event.format === 'round_robin' && (
               <section aria-labelledby="sport-table" className="rounded-[14px] border border-line bg-surface p-5">
                 <h3 id="sport-table" className="mb-3 font-serif text-[22px] font-semibold">Standings</h3>
-                <RoundRobin games={games} hub={hub} />
+                <RoundRobin games={games} hub={hub} seeds={event.seeds} />
               </section>
             )}
             {card ? <WinnerCardView card={card} hub={hub} /> : <p className="rounded-[12px] border border-dashed border-line px-6 py-12 text-center text-body-m text-ink-muted">Results will appear here after the event.</p>}

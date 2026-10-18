@@ -56,6 +56,7 @@ const ev = (id: string, sport_id: string, name: string, slug: string, extra: Par
   result_unit: null,
   venue_id: null,
   sort_order: 0,
+  seeds: [],
   ...extra,
 });
 
@@ -92,6 +93,8 @@ const match = (id: string, extra: Partial<SkMatchRow>): SkMatchRow => ({
   started_at: null,
   ended_at: null,
   recap_article_id: null,
+  source_a: null,
+  source_b: null,
   winner_side: null,
   updated_by: null,
   ...extra,

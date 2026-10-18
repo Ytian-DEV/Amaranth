@@ -9,7 +9,7 @@ import type { SkEditionRow, SkEventRow, SkMatchRow, SkPlacementInput, SkPlacemen
 import { cn } from '@/lib/cn';
 import { Card, CardHeader } from '../../ui';
 import { namer, useSkLookups, type SkLookups } from '../scores/lookups';
-import { defaultDay, medalForPlace, podiumFromGames } from '../scoring';
+import { defaultDay, medalForPlace, suggestedPodium } from '../scoring';
 import { toPlacementInput, toRow, type Row } from './placementForm';
 import { skErrorText, useSetPlacements, useSkMatches, useSkPlacements } from '../skApi';
 
@@ -36,12 +36,15 @@ export function ResultsEditorView({ event, lookups, games, placements, day, busy
   onSave: (rows: SkPlacementInput[]) => void;
 }) {
   const n = namer(lookups);
-  const initial = () => (placements.length ? placements.map((p) => toRow(p, day)) : [1, 2, 3].map((place) => toRow({ place }, day)));
+  const suggestion = suggestedPodium(event, games);
+  // nothing saved yet but the games are done: start from what they point to, for staff to confirm
+  const suggested = !placements.length && suggestion.length > 0;
+  const initial = () =>
+    placements.length ? placements.map((p) => toRow(p, day)) : suggested ? suggestion.map((p) => toRow(p, day)) : [1, 2, 3].map((place) => toRow({ place }, day));
   const [rows, setRows] = useState<Row[]>(initial);
   const [error, setError] = useState<string | null>(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => setRows(initial()), [placements]);
-  const suggestion = podiumFromGames(games);
   const set = (key: number, patch: Partial<Row>) => setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...patch } : r)));
 
   function save() {
@@ -74,6 +77,9 @@ export function ResultsEditorView({ event, lookups, games, placements, day, busy
         <div className="flex flex-col gap-3 p-5">
           {error && <Alert tone="error">{error}</Alert>}
           {message && <Alert tone={message.tone}>{message.text}</Alert>}
+          {suggested && !message && (
+            <Alert tone="info">All games are finished. These medals come from the results: check them, then press Save results to confirm. Nothing counts in the medal tally until you do.</Alert>
+          )}
           {rows.map((r) => {
             const athletes = lookups.athletes.filter((a) => !r.faction_id || a.faction_id === r.faction_id);
             return (
@@ -114,7 +120,7 @@ export function ResultsEditorView({ event, lookups, games, placements, day, busy
   );
 }
 
-export function ResultsListView({ lookups, placements }: { lookups: SkLookups; placements: SkPlacementRow[] }) {
+export function ResultsListView({ lookups, placements, matches = [] }: { lookups: SkLookups; placements: SkPlacementRow[]; matches?: SkMatchRow[] }) {
   const n = namer(lookups);
   if (!lookups.events.length) return <EmptyState title="No events yet">Add sports and events in the Sports & events tab.</EmptyState>;
   const done = lookups.events.filter((e) => placements.some((p) => p.event_id === e.id && p.medal === 'gold')).length;
@@ -145,6 +151,8 @@ export function ResultsListView({ lookups, placements }: { lookups: SkLookups; p
                             </span>
                           ))}
                         </span>
+                      ) : suggestedPodium(e, matches.filter((m) => m.event_id === e.id)).length ? (
+                        <Pill tone="review">Ready to confirm</Pill>
                       ) : (
                         <Pill tone="neutral">No results yet</Pill>
                       )}
@@ -173,7 +181,7 @@ export function ResultsTab({ edition }: { edition: SkEditionRow }) {
   const d = useResultsData(edition);
   if (d.error) return <ErrorState error={d.error} onRetry={d.refetch} />;
   if (!d.ready) return <Skeleton className="h-64" />;
-  return <ResultsListView lookups={d.lookups!} placements={d.placements!} />;
+  return <ResultsListView lookups={d.lookups!} placements={d.placements!} matches={d.matches!} />;
 }
 
 function EventResults({ edition, event, d }: { edition: SkEditionRow; event: SkEventRow; d: ReturnType<typeof useResultsData> }) {
