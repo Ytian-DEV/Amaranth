@@ -82,10 +82,10 @@ Design: Figma page "Brand 2026" (94:121). Plan: 1 tokens + fonts → 2 header/fo
 - [x] 1 `feature/brand-tokens-fonts`: colour tokens to the Brand 2026 palette (page #FAFAF7, deep forest #0F2A1A/#14361F bands, logo lime #B5F000 for fills, lime ink #3F6A00 for lime text), Montserrat (headlines + text) and Cinzel (wordmark only, `--font-wordmark`) self-hosted via Fontsource; Fraunces and Inter removed; heavier type scale; contrast script covers the new pairs (39/39 AA). Social cards use Montserrat + Cinzel. Fixed two phone overflows the wider font exposed (match recap faction names, card preview).
 - [x] 2 `feature/brand-header-footer`: light utility bar, white masthead with the AMARANTH wordmark in Cinzel (deep green) over a hairline rule, one solid deep-green nav with the lime active underline, white sticky mobile top bar (chips stay on the green band), light "Latest" ticker, footer with lime Cinzel wordmark and the `@AMARANTHVSU · site` strip; newsroom/sign-in lockups use the Cinzel wordmark too.
 - [x] 2b `feature/brand-header-tagline`: header matched to the Figma frame: deep-green utility bar, and the cover motto "In the name of TRUTH and standing by it—we remain." on the left of the masthead (desktop).
-- [ ] 3 `feature/brand-components`
+- [x] 3 `feature/brand-components`: `CategoryPill` (lime, specific word heavy: "**ENVIRONMENT** NEWS") on the home and landing leads (overlapping the photo edge) and the article header; rounder radii (6/12/16/20, lead photos 24); pill-shaped buttons; caps ExtraBold section headers; black-italic numerals; the post byline chip "via Name | Amaranth" on articles.
 - [ ] 4 `feature/brand-pages`
 
-**Next:** Brand step 3 `feature/brand-components` (awaiting the user's go).
+**Next:** Brand step 4 `feature/brand-pages` (awaiting the user's go).
 
 | # | Branch | Status |
 |---|---|---|

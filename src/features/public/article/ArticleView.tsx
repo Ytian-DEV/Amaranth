@@ -6,7 +6,7 @@ import type { StoryItem } from '@/components/story/types';
 import { Alert, Skeleton } from '@/components/ui/Feedback';
 import { Img } from '@/components/ui/Img';
 import { statusInfo } from '@/components/ui/status';
-import { Kicker } from '@/components/ui/Tag';
+import { CategoryPill, Kicker } from '@/components/ui/Tag';
 import { formatDate, formatDateTime, formatReadingTime, joinMeta } from '@/lib/format';
 import { sanitizeArticleHtml } from '@/lib/sanitize';
 import { sectionPath } from '../nav';
@@ -15,13 +15,8 @@ import { ShareButtons } from './ShareButtons';
 
 function Byline({ article }: { article: ArticleDetail }) {
   const names = article.authors.length
-    ? article.authors.map((a, i) => (
-        <span key={a.id}>
-          {i > 0 && (i === article.authors.length - 1 ? ' and ' : ', ')}
-          <span className="font-semibold text-ink">{a.name}</span>
-        </span>
-      ))
-    : article.byline && <span className="font-semibold text-ink">{article.byline}</span>;
+    ? article.authors.map((a, i) => (i > 0 ? (i === article.authors.length - 1 ? ' and ' : ', ') : '') + a.name).join('')
+    : article.byline;
 
   return (
     <div className="flex items-center gap-3">
@@ -41,7 +36,13 @@ function Byline({ article }: { article: ArticleDetail }) {
         </div>
       )}
       <div className="text-meta text-ink-muted">
-        {names && <p>By {names}</p>}
+        {names && (
+          // the post byline: "via" box + inverted name chip
+          <p className="mb-1 inline-flex items-stretch text-[13px] leading-none">
+            <span className="border-[1.5px] border-ink px-1.5 py-1 text-ink">via</span>
+            <span className="bg-ink px-2 py-1 font-bold text-on-dark">{names} | Amaranth</span>
+          </p>
+        )}
         <p>
           {article.publishedAt ? (
             <time dateTime={article.publishedAt}>{formatDate(article.publishedAt)}</time>
@@ -89,7 +90,8 @@ export function ArticleView({
           </Link>
           {article.label.includes(' · ') && <span className="text-green-500-text"> · {article.label.split(' · ').pop()}</span>}
         </nav>
-        <h1 className="font-serif text-[32px] font-bold leading-[1.1] tracking-[-0.5px] text-ink md:text-[48px] md:tracking-[-1px] lg:text-display-xl">
+        <CategoryPill label={article.label} className="self-start" />
+        <h1 className="font-serif text-[32px] font-extrabold leading-[1.08] tracking-[-0.5px] text-ink md:text-[48px] md:tracking-[-1px] lg:text-display-xl">
           {article.title}
         </h1>
         {article.dek && <p className="text-[18px] leading-[1.5] text-ink-muted md:text-[20px]">{article.dek}</p>}
@@ -101,7 +103,7 @@ export function ArticleView({
 
       {article.cover && (
         <figure className="container-page mt-8 max-w-[1100px]">
-          <Img {...article.cover} priority sizes="(min-width: 1100px) 1068px, 100vw" />
+          <Img {...article.cover} priority sizes="(min-width: 1100px) 1068px, 100vw" className="rounded-[24px]" />
           {(article.coverCaption || article.cover.alt) && (
             <figcaption className="mt-2 text-meta font-normal text-ink-muted">{article.coverCaption || article.cover.alt}</figcaption>
           )}

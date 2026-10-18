@@ -6,7 +6,7 @@ import { articlePath, storyMeta, type StoryItem } from '@/components/story/types
 import { ButtonLink } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/Feedback';
 import { Img } from '@/components/ui/Img';
-import { Kicker } from '@/components/ui/Tag';
+import { CategoryPill, Kicker } from '@/components/ui/Tag';
 import { cn } from '@/lib/cn';
 import { formatShortDate } from '@/lib/format';
 import { allHref, categoryHref } from './links';
@@ -81,8 +81,10 @@ export function Headline({ story, as: Heading = 'h2', className }: { story: Stor
 export function LeadStory({ story, ratio = '16/9' }: { story: StoryItem; ratio?: string }) {
   return (
     <article className="group relative flex flex-col gap-3.5">
-      <Img {...story.image} ratio={ratio} priority sizes="(min-width: 1024px) 770px, 100vw" className="rounded-[10px]" />
-      <Kicker>{story.categoryName ?? story.label}</Kicker>
+      <div className="relative mb-5">
+        <Img {...story.image} ratio={ratio} priority sizes="(min-width: 1024px) 770px, 100vw" className="rounded-[24px]" />
+        <CategoryPill label={story.label} className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 whitespace-nowrap shadow-card" />
+      </div>
       <Headline story={story} className="font-serif text-[30px] font-bold leading-[1.08] tracking-[-0.46px] text-ink md:text-[46px]" />
       {story.excerpt && <p className="text-body-m text-ink-muted md:text-body-l">{story.excerpt}</p>}
       <p className="text-meta text-ink-muted">{storyMeta(story)}</p>

@@ -4,7 +4,7 @@ import { articlePath, storyMeta, type StoryItem } from '@/components/story/types
 import { ButtonLink } from '@/components/ui/Button';
 import { EmptyState, Skeleton } from '@/components/ui/Feedback';
 import { Img } from '@/components/ui/Img';
-import { Kicker } from '@/components/ui/Tag';
+import { CategoryPill, Kicker } from '@/components/ui/Tag';
 import { formatReadingTime } from '@/lib/format';
 import type { HomeData, TickerItem } from './homeData';
 
@@ -40,8 +40,10 @@ export function Ticker({ items }: { items: TickerItem[] }) {
 function LeadStory({ story }: { story: StoryItem }) {
   return (
     <article className="group relative flex flex-col gap-3">
-      <Img {...story.image} ratio="772/430" priority sizes="(min-width: 1024px) 772px, 100vw" />
-      <Kicker className="mt-1">{story.label}</Kicker>
+      <div className="relative mb-5">
+        <Img {...story.image} ratio="772/430" priority sizes="(min-width: 1024px) 772px, 100vw" className="rounded-[24px]" />
+        <CategoryPill label={story.label} className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 whitespace-nowrap shadow-card" />
+      </div>
       <h1 className="font-serif text-[30px] font-bold leading-[1.1] tracking-[-0.5px] text-ink group-hover:text-green-700 md:text-[44px] md:tracking-[-1px] lg:text-display-xl">
         <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
           {story.title}
