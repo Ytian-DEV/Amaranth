@@ -29,7 +29,7 @@ export async function fetchHome(): Promise<HomeData> {
   const [latestRows, slots, mostReadRows, sportsRows, viewsRows, literaryRows, tickerSetting] = await Promise.all([
     liveCards().order('published_at', newest).limit(10).then(unwrap),
     supabase.from('home_slots').select('*').then(unwrap),
-    supabase.rpc('most_read_articles', { p_days: 7, p_limit: 4 }).then(unwrap),
+    supabase.rpc('most_read_articles', { p_days: 7, p_limit: 4 }, { get: true }).then(unwrap),
     liveCards().eq('section_slug', 'sports').order('published_at', newest).limit(3).then(unwrap),
     liveCards().eq('section_slug', 'views').order('published_at', newest).limit(3).then(unwrap),
     liveCards().eq('section_slug', 'literary').order('published_at', newest).limit(3).then(unwrap),

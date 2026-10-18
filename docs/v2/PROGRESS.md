@@ -75,6 +75,8 @@
 - Bulletin: deadline dates (Deadlines strip, calendar deadlines) and pinned notices.
 - Stories: a tap-through story player ("How stories work" band).
 
+- `perf/edge-cache-images` (2026-10-18): performance pass 2 on production data (see `docs/v2/PERF.md`): CDN-cached `/api/r` for signed-out public reads, 320/960 px image sizes + Media Library "Make web sizes" backfill, srcset on the last raw images, debounced recap search.
+
 **Next:** Nothing queued: Track B is done. The user decides what comes next (open a `develop` → `main` PR for Track B, or one of the follow-ups above).
 
 | # | Branch | Status |

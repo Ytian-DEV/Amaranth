@@ -3,7 +3,7 @@ import { SectionHeader } from '@/components/story/Story';
 import { articlePath, type StoryItem } from '@/components/story/types';
 import { Img } from '@/components/ui/Img';
 import { cn } from '@/lib/cn';
-import { publicUrl } from '@/lib/media';
+import { publicUrl, srcSet } from '@/lib/media';
 import { Band, LandingEmpty, SeeAll, type LandingProps } from './blocks';
 import { inCategory, picker } from './data';
 import { allHref, categoryHref } from './links';
@@ -15,7 +15,7 @@ function StoryTile({ story, i }: { story: StoryItem; i: number }) {
   const src = story.image ? publicUrl(story.image.bucket, story.image.path) : null;
   return (
     <article className={cn('group relative isolate flex aspect-[9/16] w-[160px] shrink-0 flex-col justify-end overflow-hidden rounded-[12px] p-3.5 text-on-dark md:w-[184px]', tileBg[i % tileBg.length])}>
-      {src && <img src={src} alt="" loading="lazy" className="absolute inset-0 -z-10 size-full object-cover" />}
+      {src && <img src={src} srcSet={story.image ? srcSet(story.image) : undefined} sizes="184px" alt="" loading="lazy" className="absolute inset-0 -z-10 size-full object-cover" />}
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-transparent via-transparent to-ink/85" aria-hidden />
       <div className="absolute inset-x-3 top-3 flex gap-1" aria-hidden>
         {Array.from({ length: 6 }, (_, k) => (

@@ -14,6 +14,7 @@ import { useDebounced } from '@/lib/useDebounced';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { useQueryClient } from '@tanstack/react-query';
 import { CmsPageHeader } from '../ui';
+import { OptimiseImages } from './OptimiseImages';
 import { MediaDetails } from './MediaDetails';
 import { MediaGrid, MediaUploader } from './MediaGrid';
 import { MEDIA_PAGE_SIZE, useDeleteMedia, useMediaList, useMediaUsage, useUpdateMedia, type MediaFilters } from './mediaApi';
@@ -87,6 +88,7 @@ export function MediaLibraryPage() {
   return (
     <div className="flex flex-col gap-6">
       <CmsPageHeader title="Media library" subtitle={list.data ? `${total} image${total === 1 ? '' : 's'}` : undefined} />
+      {isEditor(profile?.role) && <OptimiseImages />}
       <MediaUploader onFiles={(files) => void uploads.upload(files)} busy={Boolean(uploads.progress)} progress={uploads.progress} />
       {uploads.error && <p role="alert" className="text-meta text-alert">{uploads.error}</p>}
       <Toolbar q={browser.q} setQ={browser.setQ} mine={filters.mine} onMine={(mine) => setFilters((f) => ({ ...f, mine, page: 1 }))} />
