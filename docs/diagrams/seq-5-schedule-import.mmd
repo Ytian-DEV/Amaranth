@@ -1,0 +1,17 @@
+sequenceDiagram
+  autonumber
+  actor S as Team member
+  participant I as Schedule import tab
+  participant C as scheduleCsv.ts
+  participant DB as sk_matches
+  S->>I: choose CSV file (date, time, sport, event, round, side_a, side_b, venue)
+  I->>C: parseCsv(text)
+  C->>C: match sport/event/faction/venue names to the edition's lookups
+  C->>C: check date within edition, time format, sides differ
+  C->>C: mark duplicates (same event, time and sides)
+  C-->>I: rows with errors / ready / duplicate
+  I-->>S: preview table with problems highlighted
+  S->>I: Import ready rows
+  I->>DB: insert rows (RLS: can_edit_sk)
+  DB-->>I: ids
+  I-->>S: "Imported N games"

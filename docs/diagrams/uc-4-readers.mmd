@@ -1,0 +1,16 @@
+flowchart LR
+  R(["Reader"])
+  subgraph Public["Public site"]
+    P1([Browse home and sections])
+    P2([Read article, share])
+    P3([Search and archives])
+    P4([Comment])
+    P5([Submit story / report event])
+    P6([Contact a desk])
+    P7([Follow medal tally and live scores])
+    P8([View schedule, brackets, winners])
+  end
+  R --- P1 & P2 & P3 & P4 & P5 & P6 & P7 & P8
+  P4 -. "includes" .-> T([Pass Turnstile check])
+  P5 -. "includes" .-> T
+  P6 -. "includes" .-> T

@@ -1,0 +1,44 @@
+erDiagram
+  stats_pageviews {
+    bigint id PK
+    date day
+    uuid article_id FK
+  }
+  stats_shares {
+    bigint id PK
+    date day
+    uuid article_id FK
+  }
+  staff_activity_daily {
+    uuid profile_id PK
+    date day PK
+  }
+  stats_daily_site {
+    date day PK
+  }
+  stats_daily_articles {
+    date day PK
+    uuid article_id PK
+  }
+  stats_daily_dims {
+    date day PK
+    text dim PK
+    text value PK
+  }
+  stats_daily_shares {
+    date day PK
+    text channel PK
+  }
+  stats_rollup_log {
+    date day PK
+  }
+  articles {
+    uuid id PK
+  }
+  profiles {
+    uuid id PK
+  }
+  articles ||--o{ stats_pageviews : "article_id"
+  articles ||--o{ stats_shares : "article_id"
+  profiles ||--o{ staff_activity_daily : "profile_id"
+  articles ||--o{ stats_daily_articles : "article_id"

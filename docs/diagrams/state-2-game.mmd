@@ -1,0 +1,12 @@
+stateDiagram-v2
+  [*] --> upcoming: imported / built / added
+  upcoming --> live: Start game
+  upcoming --> postponed: Postpone
+  upcoming --> cancelled: Cancel game
+  live --> final: Finish game (needs both scores;<br/>knockout needs a winner)
+  live --> upcoming: Back to not started
+  final --> live: Reopen (fix the score)
+  postponed --> upcoming: Back on the schedule
+  cancelled --> upcoming: Back on the schedule
+  final --> [*]
+  note right of final: winner_side generated · next games filled by app.sk_resolve

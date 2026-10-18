@@ -1,0 +1,51 @@
+flowchart LR
+  subgraph app["src/app"]
+    router["router.tsx<br/>lazy routes"]
+    root["RootLayout<br/>QueryClient · analytics"]
+  end
+  subgraph auth["features/auth"]
+    ap["AuthProvider"]
+    gd["guards: RequireStaff, RequireRole"]
+    perm["permissions.ts<br/>(UI mirror of DB rules)"]
+  end
+  subgraph public["features/public"]
+    home["home"]
+    sect["section + landings"]
+    art["article + comments"]
+    intake["intake forms"]
+    skp["salingkusog hub"]
+    an["analytics tracker"]
+  end
+  subgraph cms["features/cms"]
+    arts["articles + editor"]
+    ik["intake review"]
+    med["media"]
+    ppl["people"]
+    set["settings"]
+    st["statistics"]
+    skc["salingkusog newsroom"]
+  end
+  subgraph lib["src/lib"]
+    sb["supabase.ts"]
+    san["sanitize.ts"]
+    img["images.ts / media.ts"]
+    ec["edgeCache.ts"]
+    sf["sendForm.ts + turnstile.ts"]
+    skl["skSources.ts · skContests.ts"]
+  end
+  subgraph ui["src/components"]
+    kit["ui kit · story cards"]
+  end
+  router --> public & cms & auth
+  root --> ap
+  cms --> gd
+  gd --> perm
+  public --> kit
+  cms --> kit
+  art --> san
+  intake --> sf
+  skp --> skl
+  skc --> skl
+  med --> img
+  public --> ec
+  public & cms & auth --> sb

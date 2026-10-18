@@ -1,0 +1,32 @@
+flowchart TB
+  subgraph W["Writer (owner)"]
+    a1([Start]) --> a2[Create draft in editor]
+    a2 --> a3[Write; autosave every 2.5 s]
+    a3 --> a4{Ready?}
+    a4 -- no --> a3
+    a4 -- yes --> a5[Submit for review]
+  end
+  subgraph E["Section editor / publisher"]
+    b1[Start review<br/>status: in_review]
+    b2{Decision}
+    b3[Return to draft with note]
+    b4[Reject with note]
+    b5{Publish now<br/>or later?}
+    b6[Publish<br/>status: published]
+    b7[Schedule at future time<br/>status: scheduled]
+  end
+  subgraph DB["Database (trigger app.article_before_write)"]
+    c1{Transition allowed<br/>for this user?}
+    c2[Refuse: 'You cannot move<br/>this article…']
+    c3[Log article_activity +<br/>status revision]
+    c4[Goes live when<br/>published_at ≤ now]
+  end
+  a5 --> c1
+  c1 -- yes --> c3 --> b1 --> b2
+  c1 -- no --> c2
+  b2 -- needs work --> b3 --> a3
+  b2 -- not suitable --> b4 --> a3
+  b2 -- approve --> b5
+  b5 -- now --> b6 --> c4
+  b5 -- later --> b7 --> c4
+  c4 --> z([Visible to readers])

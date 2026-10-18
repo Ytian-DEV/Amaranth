@@ -1,0 +1,16 @@
+flowchart LR
+  reader(["Reader<br/>(anonymous)"])
+  staff(["Newsroom staff<br/>SA · EE · ME · BM · SE · SW · CO"])
+  skt(["Salingkusog team"])
+  crawler(["Social / search crawlers"])
+  sys["<b>Amaranth v2</b><br/>public site + newsroom + Salingkusog"]
+  supa[("Supabase<br/>Postgres · Auth · Storage · Realtime")]
+  vercel["Vercel<br/>hosting · /api functions · CDN"]
+  cf["Cloudflare Turnstile"]
+  reader -- "read, search, comment,<br/>submit stories/events, follow live scores" --> sys
+  staff -- "write, review, publish,<br/>manage media/staff/settings" --> sys
+  skt -- "schedules, scores,<br/>results, awards" --> sys
+  crawler -- "link previews, sitemap, RSS" --> sys
+  sys -- "SQL via PostgREST, auth, files, realtime" --> supa
+  sys -- "served by" --> vercel
+  sys -- "CAPTCHA check" --> cf

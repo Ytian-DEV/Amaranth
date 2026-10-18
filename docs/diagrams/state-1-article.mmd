@@ -1,0 +1,23 @@
+stateDiagram-v2
+  [*] --> draft: create
+  draft --> submitted: submit (owner / editor)
+  submitted --> draft: withdraw / return
+  submitted --> in_review: start review (editor)
+  submitted --> rejected: reject (editor)
+  in_review --> draft: return (editor)
+  in_review --> rejected: reject (editor)
+  rejected --> draft: revise (owner / editor)
+  rejected --> submitted: resubmit
+  draft --> published: publish (publisher)
+  draft --> scheduled: schedule (publisher)
+  submitted --> published: publish
+  submitted --> scheduled: schedule
+  in_review --> published: publish
+  in_review --> scheduled: schedule
+  scheduled --> published: publish now
+  scheduled --> draft: unschedule
+  published --> archived: archive (publisher)
+  published --> draft: unpublish
+  archived --> published: restore
+  archived --> draft: unpublish
+  note right of scheduled: Live automatically when published_at ≤ now (app.is_live)

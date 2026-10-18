@@ -1,0 +1,25 @@
+flowchart TB
+  subgraph L1["Presentation layer — React 18 + TypeScript (src/features, src/components)"]
+    pub["Public site<br/>home · sections · article · search · intake forms · Salingkusog hub"]
+    cms["Newsroom /admin<br/>articles · intake · media · staff · settings · statistics · Salingkusog"]
+  end
+  subgraph L2["Client data layer — TanStack Query hooks (*Api.ts, *Data.ts), supabase-js, edgeCache, sendForm"]
+    q["queries · mutations · realtime subscriptions"]
+  end
+  subgraph L3["Edge / server layer — Vercel (api/, middleware.ts)"]
+    edge["/api/r cache · /api/submit gateway · /api/e ingest · SEO documents · OG middleware"]
+  end
+  subgraph L4["Data and rules layer — PostgreSQL (supabase/v2/*.sql)"]
+    rls["RLS policies (97)"]
+    trg["Triggers (40): workflow, advance, guards"]
+    rpc["RPCs and views: transition_article, sk_build_schedule, sk_medal_table…"]
+  end
+  subgraph L5["Platform — Supabase Auth · Storage · Realtime · pg_cron"]
+    plat["managed services"]
+  end
+  pub --> q
+  cms --> q
+  q --> edge
+  q --> L4
+  edge --> L4
+  L4 --> L5

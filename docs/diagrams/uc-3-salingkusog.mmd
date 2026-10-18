@@ -1,0 +1,18 @@
+flowchart LR
+  SKT(["Salingkusog team member"])
+  MGR(["SA / EE / ME"])
+  subgraph SK["Salingkusog newsroom"]
+    S1([Set up edition, factions, venues])
+    S2([Set up sports, events, athletes])
+    S3([Import schedule CSV])
+    S4([Build bracket / round robin])
+    S5([Create contest])
+    S6([Keep live score])
+    S7([Enter contest results / places])
+    S8([Confirm medals])
+    S9([Record awards, download social cards])
+    S10([Manage team members])
+  end
+  SKT --- S1 & S2 & S3 & S4 & S5 & S6 & S7 & S8 & S9
+  MGR --- S10
+  MGR -. "can do everything a<br/>team member can" .- SKT

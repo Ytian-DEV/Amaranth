@@ -1,0 +1,33 @@
+flowchart LR
+  subgraph Client["Client devices"]
+    br["Browser (phone / desktop)<br/>React SPA bundle"]
+  end
+  subgraph Vercel["Vercel"]
+    cdn["CDN / edge<br/>static assets · index.html · cache"]
+    mw["Routing middleware<br/>middleware.ts (crawlers only)"]
+    fn["Node serverless functions<br/>/api/r · /api/e · /api/submit<br/>/api/sitemap · /api/rss · /api/robots"]
+  end
+  subgraph Supabase["Supabase project"]
+    rest["PostgREST API"]
+    auth["Auth (GoTrue)"]
+    stor["Storage<br/>media · archives · intake"]
+    rt["Realtime"]
+    pg[("PostgreSQL<br/>public + app schemas<br/>RLS · triggers · pg_cron")]
+  end
+  ts["Cloudflare Turnstile"]
+  br -- HTTPS --> cdn
+  cdn --> mw
+  br -- "fetch /api/*" --> fn
+  br -- "HTTPS + JWT" --> rest
+  br --> auth
+  br --> stor
+  br -- WebSocket --> rt
+  br -- widget --> ts
+  fn -- "anon key / service key" --> rest
+  fn -- siteverify --> ts
+  fn -- "signed upload URLs" --> stor
+  mw -- "anon key" --> rest
+  rest --> pg
+  rt --> pg
+  auth --> pg
+  stor --> pg

@@ -1,0 +1,119 @@
+erDiagram
+  sections {
+    uuid id PK
+    text slug
+  }
+  categories {
+    uuid id PK
+    uuid section_id FK
+    text slug
+  }
+  articles {
+    uuid id PK
+    uuid section_id FK
+    uuid category_id FK
+    uuid issue_id FK
+    text slug
+    uuid cover_asset_id FK
+    article_status status
+    uuid og_image_asset_id FK
+    uuid created_by FK
+    uuid updated_by FK
+  }
+  article_authors {
+    uuid article_id PK
+    uuid contributor_id PK
+  }
+  contributors {
+    uuid id PK
+    uuid profile_id FK
+    text slug
+    uuid avatar_asset_id FK
+  }
+  article_tags {
+    uuid article_id PK
+    uuid tag_id PK
+  }
+  tags {
+    uuid id PK
+    text slug
+  }
+  article_media {
+    uuid article_id PK
+    uuid asset_id PK
+    article_media_usage usage PK
+  }
+  media_assets {
+    uuid id PK
+    asset_kind kind
+    uuid uploaded_by FK
+  }
+  article_revisions {
+    bigint id PK
+    uuid article_id FK
+    revision_kind kind
+    uuid saved_by FK
+  }
+  article_activity {
+    bigint id PK
+    uuid article_id FK
+    uuid actor_id FK
+  }
+  article_comments {
+    uuid id PK
+    uuid article_id FK
+    uuid parent_id FK
+    comment_status status
+    uuid moderated_by FK
+  }
+  article_comment_private {
+    uuid comment_id PK
+  }
+  publication_issues {
+    uuid id PK
+    text slug
+    uuid cover_asset_id FK
+    uuid pdf_asset_id FK
+  }
+  home_slots {
+    text slot PK
+    uuid article_id FK
+    uuid updated_by FK
+  }
+  profiles {
+    uuid id PK
+  }
+  article_daily_views {
+    uuid article_id PK
+    date day PK
+  }
+  sections ||--o{ categories : "section_id"
+  sections ||--o{ articles : "section_id"
+  categories ||--o{ articles : "category_id"
+  publication_issues ||--o{ articles : "issue_id"
+  media_assets ||--o{ articles : "cover_asset_id"
+  media_assets ||--o{ articles : "og_image_asset_id"
+  profiles ||--o{ articles : "created_by"
+  profiles ||--o{ articles : "updated_by"
+  articles ||--o{ article_authors : "article_id"
+  contributors ||--o{ article_authors : "contributor_id"
+  profiles ||--o{ contributors : "profile_id"
+  media_assets ||--o{ contributors : "avatar_asset_id"
+  articles ||--o{ article_tags : "article_id"
+  tags ||--o{ article_tags : "tag_id"
+  articles ||--o{ article_media : "article_id"
+  media_assets ||--o{ article_media : "asset_id"
+  profiles ||--o{ media_assets : "uploaded_by"
+  articles ||--o{ article_revisions : "article_id"
+  profiles ||--o{ article_revisions : "saved_by"
+  articles ||--o{ article_activity : "article_id"
+  profiles ||--o{ article_activity : "actor_id"
+  articles ||--o{ article_comments : "article_id"
+  article_comments ||--o{ article_comments : "parent_id"
+  profiles ||--o{ article_comments : "moderated_by"
+  article_comments ||--o{ article_comment_private : "comment_id"
+  media_assets ||--o{ publication_issues : "cover_asset_id"
+  media_assets ||--o{ publication_issues : "pdf_asset_id"
+  articles ||--o{ home_slots : "article_id"
+  profiles ||--o{ home_slots : "updated_by"
+  articles ||--o{ article_daily_views : "article_id"

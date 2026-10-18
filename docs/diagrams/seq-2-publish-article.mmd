@@ -1,0 +1,25 @@
+sequenceDiagram
+  autonumber
+  actor E as Publisher
+  participant UI as ArticleEditorPage
+  participant RPC as transition_article()
+  participant T1 as article_before_write
+  participant T2 as article_after_write
+  participant DB as articles / article_activity / article_revisions
+  E->>UI: Publish (or Schedule + time)
+  UI->>RPC: rpc(p_article_id, 'published', note)
+  RPC->>RPC: set app.transition_note
+  RPC->>DB: update articles set status = 'published'
+  DB->>T1: BEFORE UPDATE
+  T1->>T1: can_publish_articles()? transition allowed?
+  alt not allowed
+    T1-->>UI: error "You cannot move this article from … to …"
+  else allowed
+    T1->>T1: set published_at, clear scheduled_for
+    DB->>T2: AFTER UPDATE
+    T2->>DB: insert article_activity (from → to, note)
+    T2->>DB: insert article_revisions (kind = status)
+    RPC-->>UI: updated row
+    UI-->>E: "Published"
+  end
+  Note over DB: Readers see it when app.is_live(status, published_at) is true

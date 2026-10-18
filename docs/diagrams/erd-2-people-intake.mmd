@@ -1,0 +1,91 @@
+erDiagram
+  profiles {
+    uuid id PK
+    app_role role
+  }
+  staff_invites {
+    text email PK
+    app_role role
+    uuid invited_by FK
+  }
+  profile_sections {
+    uuid profile_id PK
+    uuid section_id PK
+  }
+  sections {
+    uuid id PK
+    text slug
+  }
+  contributors {
+    uuid id PK
+    uuid profile_id FK
+    text slug
+    uuid avatar_asset_id FK
+  }
+  team_terms {
+    uuid id PK
+  }
+  team_members {
+    uuid id PK
+    uuid term_id FK
+    uuid contributor_id FK
+    uuid photo_asset_id FK
+  }
+  article_submissions {
+    uuid id PK
+    uuid section_id FK
+    intake_status status
+    uuid reviewer_id FK
+    uuid converted_article_id FK
+  }
+  event_reports {
+    uuid id PK
+    intake_status status
+    uuid reviewer_id FK
+    uuid converted_article_id FK
+  }
+  intake_files {
+    uuid id PK
+    uuid submission_id FK
+    uuid event_report_id FK
+  }
+  contact_messages {
+    uuid id PK
+    contact_status status
+    uuid handled_by FK
+  }
+  department_contacts {
+    uuid id PK
+  }
+  site_settings {
+    text key PK
+    uuid updated_by FK
+  }
+  audit_log {
+    bigint id PK
+    uuid actor_id FK
+  }
+  articles {
+    uuid id PK
+  }
+  media_assets {
+    uuid id PK
+  }
+  profiles ||--o{ staff_invites : "invited_by"
+  profiles ||--o{ profile_sections : "profile_id"
+  sections ||--o{ profile_sections : "section_id"
+  profiles ||--o{ contributors : "profile_id"
+  media_assets ||--o{ contributors : "avatar_asset_id"
+  team_terms ||--o{ team_members : "term_id"
+  contributors ||--o{ team_members : "contributor_id"
+  media_assets ||--o{ team_members : "photo_asset_id"
+  sections ||--o{ article_submissions : "section_id"
+  profiles ||--o{ article_submissions : "reviewer_id"
+  articles ||--o{ article_submissions : "converted_article_id"
+  profiles ||--o{ event_reports : "reviewer_id"
+  articles ||--o{ event_reports : "converted_article_id"
+  article_submissions ||--o{ intake_files : "submission_id"
+  event_reports ||--o{ intake_files : "event_report_id"
+  profiles ||--o{ contact_messages : "handled_by"
+  profiles ||--o{ site_settings : "updated_by"
+  profiles ||--o{ audit_log : "actor_id"

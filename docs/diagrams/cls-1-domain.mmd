@@ -1,0 +1,93 @@
+classDiagram
+  direction LR
+  class Profile {
+    uuid id
+    text email
+    app_role role
+    bool is_active
+    bool can_publish
+  }
+  class Section {
+    text slug
+    text name
+    nav_placement nav_placement
+  }
+  class Category {
+    text slug
+    bool is_assignable
+  }
+  class Article {
+    text title
+    text slug
+    article_status status
+    timestamptz published_at
+    timestamptz scheduled_for
+    bool is_featured
+  }
+  class Contributor {
+    text name
+    contributor_type type
+  }
+  class MediaAsset {
+    text bucket
+    text path
+    text alt_text
+  }
+  class Edition {
+    int year
+    date starts_on
+    date ends_on
+    int points_gold
+  }
+  class Faction {
+    text name
+    text color
+  }
+  class Sport {
+    text name
+    sk_category category
+  }
+  class Event {
+    sk_division division
+    sk_format format
+    bool is_team
+    text result_unit
+    uuid[] seeds
+  }
+  class Match {
+    sk_match_status status
+    numeric score_a
+    numeric score_b
+    text source_a
+    text source_b
+    bool is_contest
+  }
+  class Entry {
+    int lane
+    numeric result
+    int place
+    text status
+  }
+  class Placement {
+    int place
+    sk_medal medal
+    date awarded_on
+  }
+  class Athlete {
+    text name
+    text program
+  }
+  Section "1" --> "*" Category
+  Category "1" --> "*" Article
+  Article "*" --> "*" Contributor : authors
+  Article --> MediaAsset : cover
+  Profile "0..1" --> "0..1" Contributor : byline
+  Edition "1" --> "*" Faction
+  Edition "1" --> "*" Sport
+  Sport "1" --> "*" Event
+  Event "1" --> "*" Match
+  Match "1" --> "*" Entry : line-up
+  Event "1" --> "*" Placement
+  Faction "1" --> "*" Athlete
+  Faction "1" --> "*" Placement
+  Match --> Faction : sides
