@@ -10,7 +10,7 @@ import { alsoLinks, menuMeta, useMenuLatest, type MenuLatest } from './moreMenu'
 
 function UtilityBar() {
   return (
-    <div className="hidden border-b border-line bg-paper text-meta text-ink-muted md:block">
+    <div className="hidden bg-green-900 text-meta text-on-dark-muted md:block">
       <div className="container-page flex h-[38px] items-center justify-between">
         <p>
           {formatLongDate()} <span aria-hidden>·</span> Baybay City, Leyte
@@ -21,7 +21,7 @@ function UtilityBar() {
               .filter((l) => l.to !== '/submit#guidelines')
               .map((l) => (
                 <li key={l.to}>
-                  <Link to={l.to} className="hover:text-ink hover:underline">
+                  <Link to={l.to} className="text-on-dark hover:text-lime hover:underline">
                     {l.short}
                   </Link>
                 </li>
@@ -37,7 +37,13 @@ function Masthead() {
   return (
     <div className="hidden border-b border-line bg-surface md:block">
       <div className="container-page grid h-[113px] grid-cols-[1fr_auto_1fr] items-center gap-6">
-        <span aria-hidden />
+        {/* the motto from the cover photo */}
+        <p className="hidden text-[15px] italic leading-snug text-ink-muted lg:block">
+          In the name of <strong className="font-extrabold text-lime-dark-text">TRUTH</strong>
+          <br />
+          and standing by it—we remain.
+        </p>
+        <span aria-hidden className="lg:hidden" />
         <Link to="/" className="flex items-center gap-4" aria-label="Amaranth — front page">
           <LogoMark className="h-[64px] lg:h-[76px]" />
           <span className="flex flex-col gap-0.5">
