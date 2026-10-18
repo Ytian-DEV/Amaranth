@@ -1639,7 +1639,7 @@ begin
 end;
 $$;
 
-revoke execute on function public.set_publish_access(uuid, boolean) from public;
+revoke execute on function public.set_publish_access(uuid, boolean) from public, anon;
 grant execute on function public.set_publish_access(uuid, boolean) to authenticated;
 
 create or replace function public.dashboard_stats()

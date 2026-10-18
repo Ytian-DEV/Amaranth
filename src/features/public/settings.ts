@@ -29,5 +29,7 @@ export function useSiteSettings() {
 export function useSocialLinks(): SocialLink[] {
   const { data } = useSiteSettings();
   const value = data?.social_links;
-  return Array.isArray(value) && value.length ? (value as unknown as SocialLink[]) : defaultSocial;
+  // only web links (a javascript: or data: URL saved in Settings would run on click)
+  const links = Array.isArray(value) ? (value as unknown as SocialLink[]).filter((l) => typeof l?.url === 'string' && /^https?:\/\//i.test(l.url)) : [];
+  return links.length ? links : defaultSocial;
 }

@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { IntakeStatus } from '@/lib/database.types';
-import { getSupabase, unwrap, unwrapMaybe } from '@/lib/supabase';
+import { getSupabase, unwrap, unwrapMaybe, pastLastPage } from '@/lib/supabase';
 
 export type IntakeKind = 'submission' | 'event';
 
@@ -63,7 +63,7 @@ export function useIntakeList(kind: IntakeKind, status: IntakeStatus | 'open', p
       let q = getSupabase().from(table(kind)).select(columns, { count: 'exact' });
       q = status === 'open' ? q.in('status', ['submitted', 'reviewing']) : q.eq('status', status);
       const { data, error, count } = await q.order('created_at', { ascending: false }).range(from, from + INTAKE_PAGE_SIZE - 1);
-      if (error) throw error;
+      if (error && !pastLastPage(error)) throw error;
       const rows = (data ?? []) as unknown[];
       return {
         total: count ?? 0,

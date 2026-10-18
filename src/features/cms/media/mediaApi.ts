@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { MediaAssetRow } from '@/lib/database.types';
-import { getSupabase, unwrap } from '@/lib/supabase';
+import { getSupabase, unwrap, pastLastPage } from '@/lib/supabase';
 
 export const MEDIA_PAGE_SIZE = 24;
 
@@ -17,7 +17,7 @@ export function useMediaList(filters: MediaFilters, userId: string | undefined) 
       if (q) query = query.or(`alt_text.ilike.%${q}%,caption.ilike.%${q}%,credit.ilike.%${q}%,path.ilike.%${q}%`);
       if (filters.mine && userId) query = query.eq('uploaded_by', userId);
       const { data, error, count } = await query.order('created_at', { ascending: false }).range(from, from + MEDIA_PAGE_SIZE - 1);
-      if (error) throw error;
+      if (error && !pastLastPage(error)) throw error;
       return { items: (data ?? []) as MediaAssetRow[], total: count ?? 0 };
     },
   });

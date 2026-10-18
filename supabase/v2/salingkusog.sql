@@ -691,11 +691,16 @@ grant execute on all functions in schema app to anon, authenticated, service_rol
 -- -----------------------------------------------------------------------------
 -- Realtime: live scores push to readers (Supabase only; skipped elsewhere)
 -- -----------------------------------------------------------------------------
+-- sk_matches: scores; sk_placements: medals and points (medal tally, points race, winners)
 do $$
+declare t text;
 begin
-  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
-     and not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'sk_matches') then
-    alter publication supabase_realtime add table public.sk_matches;
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    foreach t in array array['sk_matches', 'sk_placements'] loop
+      if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = t) then
+        execute format('alter publication supabase_realtime add table public.%I', t);
+      end if;
+    end loop;
   end if;
 end $$;
 
