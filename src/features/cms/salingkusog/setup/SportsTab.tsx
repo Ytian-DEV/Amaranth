@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { CalendarPlus, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Checkbox, Field, Input, Select } from '@/components/ui/Field';
@@ -7,7 +7,8 @@ import { Modal } from '@/components/ui/Modal';
 import type { SkCategory, SkDivision, SkEventRow, SkFormat, SkSportRow, SkVenueRow } from '@/lib/database.types';
 import { Card, CardHeader } from '../../ui';
 import { categories, categoryLabels, divisionLabels, divisions, formatLabels, formats } from '@/lib/skLabels';
-import { skErrorText, useDeleteSkRow, useSaveSkRow, useSkRows } from '../skApi';
+import { skErrorText, useDeleteSkRow, useSaveSkRow, useSkMatches, useSkRows } from '../skApi';
+import { BuildScheduleModal } from './BuildScheduleModal';
 import { useNameSlug, validSlug } from './form';
 import { RowActions, SlugInput } from './shared';
 
@@ -127,7 +128,10 @@ function EventModal({ sport, event, venues, nextOrder, onClose }: { sport: SkSpo
   );
 }
 
-type Modal_ = { kind: 'sport'; sport: SkSportRow | null } | { kind: 'event'; sport: SkSportRow; event: SkEventRow | null } | null;
+type Modal_ = { kind: 'sport'; sport: SkSportRow | null } | { kind: 'event'; sport: SkSportRow; event: SkEventRow | null } | { kind: 'build'; sport: SkSportRow; event: SkEventRow } | null;
+
+/** Formats whose games "Build schedule" can create. */
+const buildable = (e: SkEventRow) => e.is_team && (e.format === 'bracket' || e.format === 'round_robin' || e.format === 'round_robin_final');
 
 export function SportsView({
   sports,
@@ -139,6 +143,7 @@ export function SportsView({
   onAddEvent,
   onEditEvent,
   onDeleteEvent,
+  onBuild,
 }: {
   sports: SkSportRow[];
   events: SkEventRow[];
@@ -149,6 +154,7 @@ export function SportsView({
   onAddEvent: (s: SkSportRow) => void;
   onEditEvent: (s: SkSportRow, e: SkEventRow) => void;
   onDeleteEvent: (s: SkSportRow, e: SkEventRow) => void;
+  onBuild?: (s: SkSportRow, e: SkEventRow) => void;
 }) {
   const venueName = (id: string | null) => venues.find((v) => v.id === id)?.name;
   return (
@@ -180,6 +186,11 @@ export function SportsView({
                         {venueName(e.venue_id) && ` · ${venueName(e.venue_id)}`}
                       </p>
                     </div>
+                    {onBuild && buildable(e) && (
+                      <Button size="sm" variant="outline" icon={<CalendarPlus className="size-4" aria-hidden />} onClick={() => onBuild(s, e)}>
+                        Build schedule <span className="sr-only">for {s.name} {e.name}</span>
+                      </Button>
+                    )}
                     <RowActions label={`${s.name} ${e.name}`} onEdit={() => onEditEvent(s, e)} onDelete={() => onDeleteEvent(s, e)} />
                   </li>
                 ))}
@@ -200,8 +211,10 @@ export function SportsView({
   );
 }
 
-export function SportsTab({ editionId }: { editionId: string }) {
+export function SportsTab({ editionId, startsOn }: { editionId: string; startsOn: string }) {
   const sports = useSkRows('sk_sports', editionId);
+  const factions = useSkRows('sk_factions', editionId);
+  const matches = useSkMatches(editionId);
   const events = useSkRows('sk_events', editionId);
   const venues = useSkRows('sk_venues', editionId);
   const delSport = useDeleteSkRow('sk_sports');
@@ -226,7 +239,19 @@ export function SportsTab({ editionId }: { editionId: string }) {
         onAddEvent={(s) => setModal({ kind: 'event', sport: s, event: null })}
         onEditEvent={(s, e) => setModal({ kind: 'event', sport: s, event: e })}
         onDeleteEvent={(s, e) => window.confirm(`Delete ${s.name} · ${e.name}? Its games, results and medals are deleted too.`) && delEvent.mutate(e.id)}
+        onBuild={(s, e) => setModal({ kind: 'build', sport: s, event: e })}
       />
+      {modal?.kind === 'build' && (
+        <BuildScheduleModal
+          edition={{ starts_on: startsOn }}
+          sport={modal.sport}
+          event={evs.find((e) => e.id === modal.event.id) ?? modal.event}
+          factions={factions.data ?? []}
+          venues={venues.data}
+          games={(matches.data ?? []).filter((m) => m.event_id === modal.event.id)}
+          onClose={() => setModal(null)}
+        />
+      )}
       {modal?.kind === 'sport' && <SportModal editionId={editionId} sport={modal.sport} nextOrder={sports.data.length} onClose={() => setModal(null)} />}
       {modal?.kind === 'event' && (
         <EventModal sport={modal.sport} event={modal.event} venues={venues.data} nextOrder={evs.filter((e) => e.sport_id === modal.sport.id).length} onClose={() => setModal(null)} />

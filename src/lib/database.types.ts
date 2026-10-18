@@ -422,7 +422,7 @@ export type DashboardStats = {
 
 export type SkCategory = 'ball_games' | 'athletics' | 'combat_sports' | 'racket_sports' | 'aquatics' | 'mind_games' | 'esports' | 'dance_cheer' | 'pageant' | 'others';
 export type SkDivision = 'men' | 'women' | 'mixed' | 'open';
-export type SkFormat = 'bracket' | 'round_robin' | 'timed' | 'judged';
+export type SkFormat = 'bracket' | 'round_robin' | 'round_robin_final' | 'timed' | 'judged';
 export type SkMatchStatus = 'upcoming' | 'live' | 'final' | 'postponed' | 'cancelled';
 export type SkMedal = 'gold' | 'silver' | 'bronze';
 export type SkAwardKind = 'mvp_of_day' | 'athlete_of_day' | 'finals_mvp';
@@ -532,6 +532,8 @@ export type SkEventRow = {
   result_unit: string | null;
   venue_id: string | null;
   sort_order: number;
+  /** factions in seed order, set by "Build schedule" */
+  seeds: string[];
   created_at: string;
   updated_at: string;
 };
@@ -566,6 +568,9 @@ export type SkMatchRow = {
   started_at: string | null;
   ended_at: string | null;
   recap_article_id: string | null;
+  /** generated games: where the side comes from — seed:3, winner:<id>, loser:<id>, rank:2 */
+  source_a: string | null;
+  source_b: string | null;
   winner_side: 'a' | 'b' | null; // generated
   updated_by: string | null;
   created_at: string;
@@ -746,6 +751,19 @@ export type Database = {
     };
     Functions: {
       record_article_view: { Args: { p_article_id: string }; Returns: undefined };
+      sk_build_schedule: {
+        Args: {
+          p_event_id: string;
+          p_format: 'bracket' | 'round_robin' | 'round_robin_final';
+          p_seeds: string[];
+          p_first_at: string;
+          p_round_gap_hours?: number;
+          p_game_gap_minutes?: number;
+          p_venue_id?: string | null;
+          p_bronze?: boolean;
+        };
+        Returns: number;
+      };
       sk_set_placements: { Args: { p_event_id: string; p_rows: SkPlacementInput[] }; Returns: number };
       sk_countdown: { Args: Record<string, never>; Returns: SkCountdownRow[] };
       sk_points_timeline: { Args: { p_edition_id: string; p_hours: number }; Returns: SkPointsTimelineRow[] };

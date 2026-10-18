@@ -1,7 +1,8 @@
-import { Clock, MapPin } from 'lucide-react';
+import { Check, Clock, MapPin } from 'lucide-react';
 import { Img } from '@/components/ui/Img';
 import type { MediaAssetRow, SkFactionRow, SkMatchRow, SkMedal } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
+import { pendingSide } from '@/lib/skSources';
 import { clockLabel, dayLabel, readableOn, whenLabel } from './hub';
 import { manilaDate } from '@/lib/manila';
 import type { HubData } from './skData';
@@ -17,6 +18,7 @@ export function FactionBadge({
   size = 32,
   className,
   nameClassName,
+  placeholder = 'To be decided',
 }: {
   faction: Faction | undefined;
   logos?: MediaAssetRow[];
@@ -25,8 +27,10 @@ export function FactionBadge({
   size?: 32 | 40;
   className?: string;
   nameClassName?: string;
+  /** shown while the side isn't known: "Winner of Semifinal 1" */
+  placeholder?: string;
 }) {
-  const name = faction?.name ?? 'To be decided';
+  const name = faction?.name ?? placeholder;
   const logo = faction?.logo_asset_id ? logos.find((l) => l.id === faction.logo_asset_id) : undefined;
   const initials = faction?.short_name ?? name.slice(0, 2).toUpperCase();
   return (
@@ -87,24 +91,44 @@ export function MatchCard({ match, hub, dated, className }: { match: SkMatchRow;
   const a = side(match.side_a_id);
   const b = side(match.side_b_id);
   const label = `${sport?.name ?? ''} · ${event?.name ?? ''}`;
+  const waiting = (k: 'a' | 'b') => pendingSide(match, k, hub.matches) ?? 'To be decided';
   return (
-    <article className={cn('flex min-w-0 flex-col gap-3.5 rounded-[12px] border border-line bg-surface p-[18px]', className)} aria-label={`${label}: ${a?.name ?? 'TBD'} vs ${b?.name ?? 'TBD'}`}>
-      <div className="flex items-center justify-between gap-3">
-        <p className="truncate text-[11px] font-bold uppercase tracking-[0.99px] text-green-500-text">
-          {label}
-          {match.round && <span className="sr-only">, {match.round}</span>}
-        </p>
+    <article className={cn('flex min-w-0 flex-col gap-3.5 rounded-[12px] border border-line bg-surface p-[18px]', className)} aria-label={`${label}${match.round ? `, ${match.round}` : ''}: ${a?.name ?? waiting('a')} vs ${b?.name ?? waiting('b')}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-[11px] font-bold uppercase tracking-[0.99px] text-green-500-text">{label}</p>
+          {match.round && <p className="mt-0.5 truncate text-meta text-ink-muted">{match.round}</p>}
+        </div>
         <StatusTag match={match} />
       </div>
-      {[
-        [a, match.score_a, 'a'],
-        [b, match.score_b, 'b'],
-      ].map(([f, s, k]) => (
-        <div key={k as string} className="flex items-center justify-between gap-3">
-          <FactionBadge faction={f as Faction | undefined} logos={hub.logos} className={match.winner_side === k ? 'font-bold' : undefined} />
-          <span className={cn('font-serif text-[26px] font-semibold tabular-nums', match.winner_side && match.winner_side !== k ? 'text-ink-muted' : 'text-ink')}>{score(s as number | null)}</span>
-        </div>
-      ))}
+      {(
+        [
+          [a, match.score_a, 'a'],
+          [b, match.score_b, 'b'],
+        ] as const
+      ).map(([f, s, k]) => {
+        const won = match.winner_side === k;
+        const lost = !!match.winner_side && !won;
+        return (
+          <div key={k} className="flex items-center justify-between gap-3">
+            <span className="flex min-w-0 items-center gap-1.5">
+              <FactionBadge
+                faction={f}
+                logos={hub.logos}
+                placeholder={waiting(k)}
+                nameClassName={cn(won && 'font-bold', lost && 'text-ink-muted', !f && 'font-medium text-ink-muted')}
+              />
+              {won && (
+                <>
+                  <Check className="size-4 shrink-0 text-lime-dark-text" aria-hidden />
+                  <span className="sr-only">Winner</span>
+                </>
+              )}
+            </span>
+            <span className={cn('font-serif text-[26px] font-semibold tabular-nums', lost ? 'text-ink-muted' : 'text-ink')}>{score(s)}</span>
+          </div>
+        );
+      })}
       <div className="h-px bg-line" aria-hidden />
       <div className="flex flex-wrap items-center gap-x-[18px] gap-y-1 text-meta text-ink-muted">
         <span className="inline-flex items-center gap-1.5">

@@ -208,6 +208,15 @@ export function useUpdateMatch(id: string) {
   });
 }
 
+/** "Build schedule": creates an event's games; later rounds fill in by themselves (public.sk_build_schedule). */
+export function useBuildSchedule() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: Database['public']['Functions']['sk_build_schedule']['Args']) => unwrap(await sb().rpc('sk_build_schedule', args)),
+    onSettled: () => void client.invalidateQueries({ queryKey: ['sk'] }),
+  });
+}
+
 export function useCreateMatch() {
   const client = useQueryClient();
   return useMutation({

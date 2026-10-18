@@ -17,14 +17,21 @@ export function roundTitle(rounds: (string | null)[], order: number) {
 
 export type BracketColumn<T> = { order: number; title: string; matches: T[] };
 
+/** Column from the round's name, for games typed in or imported without a round order. */
+const nameOrder = (round: string | null) =>
+  /quarter/i.test(round ?? '') ? 1 : /semi/i.test(round ?? '') ? 2 : /final/i.test(round ?? '') ? 3 : 0;
+
 /** Knockout games by bracket column (round_order), top to bottom; the bronze game is kept apart. */
 export function bracketColumns<T extends Pick<SkMatchRow, 'round' | 'round_order' | 'bracket_slot' | 'scheduled_at'>>(games: T[]) {
   const bronze = games.find((g) => isBronzeRound(g.round)) ?? null;
   const main = games.filter((g) => g !== bronze);
-  const orders = [...new Set(main.map((g) => g.round_order))].sort((a, b) => a - b);
+  // a final saved with the semifinals' round order would share their column: go by the names instead
+  const byName = new Set(main.map((g) => g.round_order)).size < new Set(main.map((g) => nameOrder(g.round))).size;
+  const orderOf = (g: T) => (byName ? nameOrder(g.round) : g.round_order);
+  const orders = [...new Set(main.map(orderOf))].sort((a, b) => a - b);
   const columns: BracketColumn<T>[] = orders.map((order) => {
     const matches = main
-      .filter((g) => g.round_order === order)
+      .filter((g) => orderOf(g) === order)
       .sort((a, b) => (a.bracket_slot ?? 99) - (b.bracket_slot ?? 99) || a.scheduled_at.localeCompare(b.scheduled_at));
     return { order, title: roundTitle(matches.map((m) => m.round), order), matches };
   });
@@ -32,14 +39,28 @@ export function bracketColumns<T extends Pick<SkMatchRow, 'round' | 'round_order
 }
 
 export const formatLine = (format: SkFormat, hasBronze: boolean) =>
-  format === 'bracket' ? (hasBronze ? 'Single elimination + bronze game' : 'Single elimination') : format === 'round_robin' ? 'Round robin' : format === 'timed' ? 'Timed final' : 'Judged';
+  format === 'bracket'
+    ? hasBronze
+      ? 'Single elimination + bronze game'
+      : 'Single elimination'
+    : format === 'round_robin'
+      ? 'Round robin'
+      : format === 'round_robin_final'
+        ? 'Round robin + final'
+        : format === 'timed'
+          ? 'Timed final'
+          : 'Judged';
 
 export type TableRow = { factionId: string; played: number; wins: number; losses: number; draws: number; pf: number; pa: number };
 
-/** Round-robin standings from finished games: wins, then point difference. */
-export function roundRobinTable(games: Pick<SkMatchRow, 'status' | 'side_a_id' | 'side_b_id' | 'score_a' | 'score_b'>[]) {
+/**
+ * Round-robin standings from finished games, ranked like app.sk_rr_table: wins, point difference,
+ * wins against the teams level on both, points scored, then seed.
+ */
+export function roundRobinTable(games: Pick<SkMatchRow, 'status' | 'side_a_id' | 'side_b_id' | 'score_a' | 'score_b'>[], seeds: string[] = []) {
   const rows = new Map<string, TableRow>();
   const row = (id: string) => rows.get(id) ?? rows.set(id, { factionId: id, played: 0, wins: 0, losses: 0, draws: 0, pf: 0, pa: 0 }).get(id)!;
+  for (const id of seeds) row(id);
   for (const g of games) {
     if (g.side_a_id) row(g.side_a_id);
     if (g.side_b_id) row(g.side_b_id);
@@ -62,7 +83,16 @@ export function roundRobinTable(games: Pick<SkMatchRow, 'status' | 'side_a_id' |
       b.draws++;
     }
   }
-  return [...rows.values()].sort((x, y) => y.wins - x.wins || y.pf - y.pa - (x.pf - x.pa) || y.pf - x.pf);
+  const level = (x: TableRow, y: TableRow) => x.wins === y.wins && x.pf - x.pa === y.pf - y.pa;
+  const h2h = (x: TableRow) =>
+    games.filter((g) => {
+      if (g.status !== 'final' || g.score_a === null || g.score_b === null) return false;
+      const [me, opp, mine, theirs] = g.side_a_id === x.factionId ? [g.side_a_id, g.side_b_id, g.score_a, g.score_b] : [g.side_b_id, g.side_a_id, g.score_b, g.score_a];
+      const o = opp ? rows.get(opp) : undefined;
+      return me === x.factionId && !!o && level(o, x) && mine > theirs;
+    }).length;
+  const seed = (id: string) => (seeds.includes(id) ? seeds.indexOf(id) : 999);
+  return [...rows.values()].sort((x, y) => y.wins - x.wins || y.pf - y.pa - (x.pf - x.pa) || h2h(y) - h2h(x) || y.pf - x.pf || seed(x.factionId) - seed(y.factionId));
 }
 
 /** The stat to rank by: PTS when present, else the most recorded one. */

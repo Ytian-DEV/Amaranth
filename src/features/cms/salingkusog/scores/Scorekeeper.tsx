@@ -8,8 +8,8 @@ import { Pill } from '@/components/ui/StatusPill';
 import type { SkEditionRow, SkFactionRow, SkMatchRow, SkMatchStatus, SkPeriod } from '@/lib/database.types';
 import { formatDateTime } from '@/lib/format';
 import { Card, CardHeader } from '../../ui';
-import { clampScore, manilaDate, nextPeriodLabel, scoreSteps, statusActions, statusLabels } from '../scoring';
-import { skErrorText, useDeleteMatch, useMatchRealtime, useSkMatch, useUpdateMatch } from '../skApi';
+import { clampScore, eventFinished, isKnockout, manilaDate, nextPeriodLabel, scoreSteps, statusActions, statusLabels } from '../scoring';
+import { skErrorText, useDeleteMatch, useMatchRealtime, useSkMatch, useSkMatches, useSkPlacements, useUpdateMatch } from '../skApi';
 import { BoxScore } from './BoxScore';
 import { GameModal } from './GameModal';
 import { namer, useSkLookups, type SkLookups } from './lookups';
@@ -207,6 +207,8 @@ export function Scorekeeper({ edition }: { edition: SkEditionRow }) {
   const navigate = useNavigate();
   const match = useSkMatch(matchId);
   const lookups = useSkLookups(edition.id);
+  const allGames = useSkMatches(edition.id);
+  const placements = useSkPlacements(edition.id);
   const update = useUpdateMatch(matchId ?? '');
   const del = useDeleteMatch();
   const [draft, setDraft] = useState<Partial<Draft>>({});
@@ -258,6 +260,8 @@ export function Scorekeeper({ edition }: { edition: SkEditionRow }) {
 
   function onStatus(to: SkMatchStatus) {
     if (to === 'final' && (shown.score_a === null || shown.score_b === null)) return setError('Enter both scores before finishing the game.');
+    const knockout = isKnockout(shown, lookups.data?.events.find((e) => e.id === shown.event_id));
+    if (to === 'final' && shown.score_a === shown.score_b && knockout) return setError('A knockout game needs a winner. Add the tiebreak (overtime, penalties, extra set) to the score first.');
     if (to === 'final' && shown.score_a === shown.score_b && !window.confirm('The score is tied, so no winner will be recorded. Finish anyway?')) return;
     if (to === 'cancelled' && !window.confirm('Cancel this game?')) return;
     const extra: Partial<SkMatchRow> = { status: to };
@@ -268,8 +272,21 @@ export function Scorekeeper({ edition }: { edition: SkEditionRow }) {
     void flush(extra);
   }
 
+  // the event's last game is in and no medals are saved yet: send staff to confirm them
+  const eventGames = (allGames.data ?? []).map((g) => (g.id === shown.id ? shown : g)).filter((g) => g.event_id === shown.event_id);
+  const confirmMedals = shown.status === 'final' && eventFinished(eventGames) && placements.data !== undefined && !placements.data.some((p) => p.event_id === shown.event_id);
+
   return (
     <>
+      {confirmMedals && (
+        <Alert tone="success" className="mb-4">
+          That was the last game of {namer(lookups.data).eventName(shown.event_id)}.{' '}
+          <Link to={`/admin/salingkusog/results/${shown.event_id}`} className="font-semibold underline">
+            Check and confirm the medals
+          </Link>
+          .
+        </Alert>
+      )}
       <ScorekeeperView
         match={shown}
         lookups={lookups.data}

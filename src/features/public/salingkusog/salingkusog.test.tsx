@@ -91,7 +91,7 @@ describe('Medal Tally', () => {
     expect(first).toHaveTextContent('Primordial Tiamat');
     expect(first).toHaveTextContent('12 gold');
     expect(first).toHaveTextContent('90');
-    expect(screen.getByRole('article', { name: /Basketball · Men: Centicore Vanguard vs Mystic Moirai/ })).toHaveTextContent('Live');
+    expect(screen.getByRole('article', { name: /Basketball · Men.*: Centicore Vanguard vs Mystic Moirai/ })).toHaveTextContent('Live');
     expect(screen.getByRole('link', { name: /Full schedule/ })).toHaveAttribute('href', '/salingkusog/schedule');
   });
 });
