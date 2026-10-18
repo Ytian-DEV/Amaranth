@@ -27,7 +27,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    preloadFonts([/inter-latin-wght-normal-[\w-]+\.woff2$/, /fraunces-latin-wght-normal-[\w-]+\.woff2$/]),
+    preloadFonts([/montserrat-latin-wght-normal-[\w-]+\.woff2$/, /cinzel-latin-700-normal-[\w-]+\.woff2$/]),
   ],
   resolve: {
     alias: [{ find: '@', replacement: path.resolve(__dirname, './src') }],

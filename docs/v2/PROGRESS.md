@@ -77,7 +77,14 @@
 
 - `perf/edge-cache-images` (2026-10-18): performance pass 2 on production data (see `docs/v2/PERF.md`): CDN-cached `/api/r` for signed-out public reads, 320/960 px image sizes + Media Library "Make web sizes" backfill, srcset on the last raw images, debounced recap search.
 
-**Next:** Nothing queued: Track B is done. The user decides what comes next (open a `develop` → `main` PR for Track B, or one of the follow-ups above).
+## Brand 2026 (approved by the EIC, 2026-10-18)
+Design: Figma page "Brand 2026" (94:121). Plan: 1 tokens + fonts → 2 header/footer → 3 components → 4 pages; one branch each, user approves before the next.
+- [x] 1 `feature/brand-tokens-fonts`: colour tokens to the Brand 2026 palette (page #FAFAF7, deep forest #0F2A1A/#14361F bands, logo lime #B5F000 for fills, lime ink #3F6A00 for lime text), Montserrat (headlines + text) and Cinzel (wordmark only, `--font-wordmark`) self-hosted via Fontsource; Fraunces and Inter removed; heavier type scale; contrast script covers the new pairs (39/39 AA). Social cards use Montserrat + Cinzel. Fixed two phone overflows the wider font exposed (match recap faction names, card preview).
+- [ ] 2 `feature/brand-header-footer`
+- [ ] 3 `feature/brand-components`
+- [ ] 4 `feature/brand-pages`
+
+**Next:** Brand step 2 `feature/brand-header-footer` (awaiting the user's go).
 
 | # | Branch | Status |
 |---|---|---|

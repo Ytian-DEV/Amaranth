@@ -1,14 +1,14 @@
 /*
- * AMARANTH design tokens — from the Figma variables (file jpKBeBp37twnW7eXj0Nk2S).
+ * AMARANTH design tokens — Figma file jpKBeBp37twnW7eXj0Nk2S, variable mode "Brand 2026"
+ * (branding from the Facebook page: deep forest green, logo lime, Montserrat + Cinzel wordmark).
  *
  * `@theme static` makes Tailwind emit every token as a CSS custom property on
  * :root AND generate utilities from it (bg-paper, text-ink, font-serif,
  * text-headline-m, rounded-lg …). Components use those utilities or var(--…);
  * never hex values.
  *
- * Added for WCAG AA (small text ≥ 4.5:1 on paper, surface, green-soft, lime-soft):
- *   --color-green-500-text  #1b7943  (Figma green-500 #1f8a4c is 4.12:1 on paper)
- *   --color-lime-dark-text  #58720c  (Figma lime-dark #6e8f0f is 3.53:1 on paper)
+ * Lime is a fill colour (pills, buttons, active states). Lime *text* on light backgrounds
+ * uses --color-lime-dark-text ("lime ink"), which keeps WCAG AA.
  *   medal chips: Figma draws white numbers on gold/silver/bronze (1.9–3.6:1), so chips
  *   use ink on gold and silver and white on --color-bronze-deep #8a5526.
  * Run `npm run check:contrast` after changing colours.
@@ -16,27 +16,27 @@
 @theme static {
   --color-*: initial;
 
-  --color-paper: #faf8f3;
+  --color-paper: #fafaf7;
   --color-surface: #ffffff;
-  --color-ink: #15201a;
-  --color-ink-muted: #5e6b63;
-  --color-line: #e4e0d6;
-  --color-photo: #c9d6cc;
-  --color-green-900: #0a2e1f;
-  --color-green-800: #0c4029;
-  --color-green-700: #0e5a36;
-  --color-green-500: #1f8a4c;
-  --color-green-500-text: #1b7943;
-  --color-green-soft: #e6f0ea;
-  --color-lime: #a8d02a;
-  --color-lime-dark: #6e8f0f;
-  --color-lime-dark-text: #58720c;
-  --color-lime-soft: #f1f7dc;
+  --color-ink: #111a14;
+  --color-ink-muted: #5b665e;
+  --color-line: #e4e7df;
+  --color-photo: #dde3d7;
+  --color-green-900: #0f2a1a;
+  --color-green-800: #12301e;
+  --color-green-700: #14361f;
+  --color-green-500: #2f6b1a;
+  --color-green-500-text: #2f6b1a;
+  --color-green-soft: #eef3e8;
+  --color-lime: #b5f000;
+  --color-lime-dark: #5e8f00;
+  --color-lime-dark-text: #3f6a00;
+  --color-lime-soft: #f2f8dc;
   --color-alert: #c8102e;
   --color-alert-soft: #fbe9ec;
   --color-on-dark: #ffffff;
-  --color-on-dark-muted: #b9c9bf;
-  --color-scrim: rgb(10 46 31 / 0.55);
+  --color-on-dark-muted: #b8c7bc;
+  --color-scrim: rgb(15 42 26 / 0.55);
   --color-transparent: transparent;
   --color-current: currentColor;
 
@@ -63,8 +63,11 @@
   --color-status-scheduled-soft: #e5eefb;
   --color-status-archived-soft: #ecebe6;
 
-  --font-serif: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Montserrat for headlines and text (the posts' heavy geometric sans); Cinzel only for the
+     AMARANTH wordmark (the cover's Trajan-style serif). `font-serif` is the headline face. */
+  --font-serif: 'Montserrat Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Montserrat Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-wordmark: 'Cinzel', Georgia, 'Times New Roman', serif;
 
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -77,43 +80,43 @@
   /* Figma text styles */
   --text-display-xl: 56px;
   --text-display-xl--line-height: 1.06;
-  --text-display-xl--letter-spacing: -1.5px;
-  --text-display-xl--font-weight: 700;
+  --text-display-xl--letter-spacing: -1.2px;
+  --text-display-xl--font-weight: 800;
   --text-display-l: 40px;
   --text-display-l--line-height: 1.1;
-  --text-display-l--letter-spacing: -1px;
-  --text-display-l--font-weight: 700;
+  --text-display-l--letter-spacing: -0.8px;
+  --text-display-l--font-weight: 800;
   --text-headline-l: 32px;
   --text-headline-l--line-height: 1.15;
-  --text-headline-l--letter-spacing: -1px;
-  --text-headline-l--font-weight: 600;
-  --text-headline-m: 22px;
-  --text-headline-m--line-height: 1.25;
-  --text-headline-m--letter-spacing: -0.5px;
-  --text-headline-m--font-weight: 600;
-  --text-headline-s: 17px;
-  --text-headline-s--line-height: 1.3;
-  --text-headline-s--font-weight: 600;
+  --text-headline-l--letter-spacing: -0.5px;
+  --text-headline-l--font-weight: 800;
+  --text-headline-m: 21px;
+  --text-headline-m--line-height: 1.28;
+  --text-headline-m--letter-spacing: -0.2px;
+  --text-headline-m--font-weight: 800;
+  --text-headline-s: 16px;
+  --text-headline-s--line-height: 1.32;
+  --text-headline-s--font-weight: 700;
   --text-numeral: 30px;
   --text-numeral--line-height: 1;
   --text-body-l: 17px;
-  --text-body-l--line-height: 1.6;
+  --text-body-l--line-height: 1.65;
   --text-body-m: 15px;
-  --text-body-m--line-height: 1.55;
+  --text-body-m--line-height: 1.6;
   --text-meta: 13px;
   --text-meta--line-height: 1.4;
   --text-meta--font-weight: 500;
   --text-button: 14px;
   --text-button--line-height: 1.2;
-  --text-button--font-weight: 600;
+  --text-button--font-weight: 700;
   --text-nav: 13px;
   --text-nav--line-height: 1.2;
   --text-nav--letter-spacing: 0.04em;
-  --text-nav--font-weight: 600;
+  --text-nav--font-weight: 700;
   --text-kicker: 11px;
   --text-kicker--line-height: 1.2;
-  --text-kicker--letter-spacing: 0.09em;
-  --text-kicker--font-weight: 700;
+  --text-kicker--letter-spacing: 0.1em;
+  --text-kicker--font-weight: 800;
 
   --container-page: 1200px;
 }
