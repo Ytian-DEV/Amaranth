@@ -39,11 +39,22 @@ select tests.expect_count('archive months lists live months only', 'select * fro
 
 select tests.expect_count('board seed: one current term with 18 members', $$select 1 from public.team_members m join public.team_terms t on t.id = m.term_id where t.is_current$$, 18);
 
+-- forms: closed to browsers, open to /api/submit (service role)
+select tests.expect_error('anon cannot call the comment form directly',
+  $$select public.submit_comment('00000000-0000-0000-0000-000000000001', 'Reader', 'r@example.com', 'Great story!')$$, 'permission denied');
+select tests.expect_error('anon cannot call the contact form directly',
+  $$select public.send_contact_message('Ana', 'ana@example.com', 'Hello', 'general', 'I have a question about joining.')$$, 'permission denied');
+select tests.expect_error('anon cannot upload to intake (signed links only)',
+  $$insert into storage.objects (bucket_id, name) values ('intake', 'submissions/x/file.pdf')$$);
+select tests.as_service();
+
 -- comments
-select tests.expect_ok('anon can comment',
+select tests.expect_ok('form api can comment',
   $$select public.submit_comment('00000000-0000-0000-0000-000000000001', 'Reader', 'r@example.com', 'Great story!')$$);
+select tests.login(null);
 select tests.expect_count('pending comment is hidden', 'select id from public.article_comments', 0);
 select tests.expect_count('commenter email is private', 'select * from public.article_comment_private', 0);
+select tests.as_service();
 select tests.expect_error('cannot comment on a draft',
   $$select public.submit_comment('00000000-0000-0000-0000-000000000002', 'Reader', 'r@example.com', 'Hello')$$,
   'closed');
@@ -52,17 +63,17 @@ select tests.expect_error('bad email rejected',
   'valid email');
 
 -- intake
-select tests.expect_ok('anon can submit an article',
+select tests.expect_ok('form api can submit an article',
   $$select public.submit_article('Juan Dela Cruz', 'juan@example.com', 'BS Agriculture', 'news',
      'A love letter to the Agri canteen', null, repeat('word ', 30),
      '[{"path": "submissions/abc/story.pdf", "name": "story.pdf"}]')$$);
 select tests.expect_error('submission file must exist',
   $$select public.submit_article('Juan Dela Cruz', 'juan2@example.com', null, 'news', 'Title here', null, null,
      '[{"path": "submissions/missing.pdf", "name": "x.pdf"}]')$$, 'not uploaded');
-select tests.expect_ok('anon can send event report',
+select tests.expect_ok('form api can send event report',
   $$select public.submit_event_report('Student Council', 'Ana', 'ana@example.com', 'Org Fair 2026', current_date,
      'Gym', 'A full day of org booths and performances.')$$);
-select tests.expect_ok('anon can send contact message',
+select tests.expect_ok('form api can send contact message',
   $$select public.send_contact_message('Ana', 'ana@example.com', 'Hello', 'general', 'I have a question about joining.')$$);
 select tests.expect_ok('rate limit allows 3', $$select public.send_contact_message('Ana', 'ana@example.com', 'Hello', 'general', 'Second message here.')$$);
 select tests.expect_ok('rate limit allows 3 (3rd)', $$select public.send_contact_message('Ana', 'ana@example.com', 'Hello', 'general', 'Third message here.')$$);
@@ -72,10 +83,7 @@ select tests.expect_ok('honeypot silently accepted',
   $$select public.send_contact_message('Bot', 'bot@example.com', 'x', 'general', 'spam spam spam', 'http://spam')$$);
 
 -- storage
-select tests.expect_ok('anon can upload to intake/submissions',
-  $$insert into storage.objects (bucket_id, name) values ('intake', 'submissions/x/file.pdf')$$);
-select tests.expect_error('anon cannot upload outside intake folders',
-  $$insert into storage.objects (bucket_id, name) values ('intake', 'other/file.pdf')$$);
+select tests.login(null);
 select tests.expect_error('anon cannot upload to media',
   $$insert into storage.objects (bucket_id, name) values ('media', 'x.jpg')$$);
 select tests.expect_count('anon cannot list intake files', $$select id from storage.objects where bucket_id = 'intake'$$, 0);

@@ -3,7 +3,8 @@ import type { ContactCategory, DepartmentContactRow } from '@/lib/database.types
 import { isSupabaseConfigured } from '@/lib/env';
 import { getSupabase, unwrap } from '@/lib/supabase';
 import { defaultSections } from '../nav';
-import { uploadIntakeFiles } from './uploads';
+import { sendForm } from '@/lib/sendForm';
+import { prepareIntakeFiles } from './uploads';
 
 export function useSubmissionSections() {
   const query = useQuery({
@@ -39,10 +40,10 @@ export type ArticleSubmission = {
 
 export function useSubmitArticle() {
   return useMutation({
-    mutationFn: async (v: ArticleSubmission) => {
-      const files = await uploadIntakeFiles('submissions', v.files);
-      return unwrap(
-        await getSupabase().rpc('submit_article', {
+    mutationFn: async (v: ArticleSubmission) =>
+      sendForm(
+        'article',
+        {
           p_name: v.name.trim(),
           p_email: v.email.trim(),
           p_affiliation: v.affiliation.trim() || null,
@@ -50,11 +51,10 @@ export function useSubmitArticle() {
           p_title: v.title.trim(),
           p_summary: v.summary.trim() || null,
           p_body: v.body.trim() || null,
-          p_files: files,
           p_website: v.website || null,
-        }),
-      );
-    },
+        },
+        await prepareIntakeFiles(v.files),
+      ),
   });
 }
 
@@ -72,10 +72,10 @@ export type EventSubmission = {
 
 export function useSubmitEvent() {
   return useMutation({
-    mutationFn: async (v: EventSubmission) => {
-      const files = await uploadIntakeFiles('events', v.files);
-      return unwrap(
-        await getSupabase().rpc('submit_event_report', {
+    mutationFn: async (v: EventSubmission) =>
+      sendForm(
+        'event',
+        {
           p_organization: v.organization.trim(),
           p_contact_name: v.contactName.trim(),
           p_contact_email: v.email.trim(),
@@ -83,11 +83,10 @@ export function useSubmitEvent() {
           p_event_date: v.date || null,
           p_venue: v.venue.trim() || null,
           p_summary: v.summary.trim(),
-          p_files: files,
           p_website: v.website || null,
-        }),
-      );
-    },
+        },
+        await prepareIntakeFiles(v.files),
+      ),
   });
 }
 
@@ -96,15 +95,13 @@ export type ContactInput = { name: string; email: string; subject: string; categ
 export function useSendContact() {
   return useMutation({
     mutationFn: async (v: ContactInput) =>
-      unwrap(
-        await getSupabase().rpc('send_contact_message', {
-          p_name: v.name.trim(),
-          p_email: v.email.trim(),
-          p_subject: v.subject.trim(),
-          p_category: v.category,
-          p_message: v.message.trim(),
-          p_website: v.website || null,
-        }),
-      ),
+      sendForm('contact', {
+        p_name: v.name.trim(),
+        p_email: v.email.trim(),
+        p_subject: v.subject.trim(),
+        p_category: v.category,
+        p_message: v.message.trim(),
+        p_website: v.website || null,
+      }),
   });
 }

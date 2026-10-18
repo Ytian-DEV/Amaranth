@@ -1719,14 +1719,16 @@ revoke execute on function public.convert_intake_to_article(text, uuid, uuid) fr
 revoke execute on function public.dashboard_stats() from public, anon, authenticated;
 revoke execute on function public.media_usage(uuid) from public, anon, authenticated;
 
+-- The four public forms go through /api/submit (Cloudflare Turnstile CAPTCHA, api/submit.ts),
+-- which calls them with the service role; browsers can't call them directly.
 grant execute on function public.record_article_view(uuid) to anon, authenticated;
 grant execute on function public.most_read_articles(integer, integer) to anon, authenticated;
 grant execute on function public.archive_months() to anon, authenticated;
 grant execute on function public.search_articles(text, text, date, date, integer, integer, boolean) to anon, authenticated;
-grant execute on function public.submit_comment(uuid, text, text, text, uuid, text) to anon, authenticated;
-grant execute on function public.submit_article(text, text, text, text, text, text, text, jsonb, text) to anon, authenticated;
-grant execute on function public.submit_event_report(text, text, text, text, date, text, text, jsonb, text) to anon, authenticated;
-grant execute on function public.send_contact_message(text, text, text, public.contact_category, text, text) to anon, authenticated;
+grant execute on function public.submit_comment(uuid, text, text, text, uuid, text) to service_role;
+grant execute on function public.submit_article(text, text, text, text, text, text, text, jsonb, text) to service_role;
+grant execute on function public.submit_event_report(text, text, text, text, date, text, text, jsonb, text) to service_role;
+grant execute on function public.send_contact_message(text, text, text, public.contact_category, text, text) to service_role;
 grant execute on function public.transition_article(uuid, public.article_status, text, timestamptz) to authenticated;
 grant execute on function public.add_article_note(uuid, text) to authenticated;
 grant execute on function public.convert_intake_to_article(text, uuid, uuid) to authenticated;
@@ -1952,9 +1954,9 @@ create policy v2_archives_write on storage.objects for all to authenticated
   using (bucket_id = 'archives' and app.can_publish())
   with check (bucket_id = 'archives' and app.can_publish());
 
+-- Intake attachments are uploaded with one-time signed links from /api/submit (after the CAPTCHA),
+-- so there is no open upload policy any more.
 drop policy if exists v2_intake_upload on storage.objects;
-create policy v2_intake_upload on storage.objects for insert to anon, authenticated
-  with check (bucket_id = 'intake' and (storage.foldername(name))[1] in ('submissions', 'events'));
 
 drop policy if exists v2_intake_editor on storage.objects;
 create policy v2_intake_editor on storage.objects for select to authenticated

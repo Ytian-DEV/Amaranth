@@ -8,6 +8,7 @@ import { errorText } from '@/lib/errors';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { PageHeader } from '../PageHeader';
 import { useSiteSettings } from '../settings';
+import { Turnstile } from '@/components/ui/Turnstile';
 import { Honeypot, SuccessPanel } from './FormBits';
 import { useDepartmentContacts, useSendContact, type ContactInput } from './intakeData';
 import { focusFirstError, hasErrors, validate, type Errors } from './validate';
@@ -104,6 +105,7 @@ export function ContactForm({ onSubmit }: { onSubmit: (v: ContactInput) => Promi
         )}
       </Field>
       <Honeypot value={values.website} onChange={(website) => setValues((v) => ({ ...v, website }))} />
+      <Turnstile />
       <Button type="submit" size="lg" loading={status === 'sending'} className="self-start">
         Send message
       </Button>

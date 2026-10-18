@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { toStoryItem, type StoryItem } from '@/components/story/types';
 import type { ArticleCardRow, ArticleStatus, MediaVariant } from '@/lib/database.types';
 import type { ImageSource } from '@/lib/media';
+import { sendForm } from '@/lib/sendForm';
 import { getSupabase, unwrap, unwrapMaybe } from '@/lib/supabase';
 import { liveCards } from '../articles';
 
@@ -161,15 +162,13 @@ export type CommentInput = { name: string; email: string; body: string; parentId
 export function useSubmitComment(articleId: string) {
   return useMutation({
     mutationFn: async (input: CommentInput) =>
-      unwrap(
-        await getSupabase().rpc('submit_comment', {
-          p_article_id: articleId,
-          p_name: input.name,
-          p_email: input.email,
-          p_body: input.body,
-          p_parent_id: input.parentId ?? null,
-          p_website: input.website ?? null,
-        }),
-      ),
+      sendForm('comment', {
+        p_article_id: articleId,
+        p_name: input.name,
+        p_email: input.email,
+        p_body: input.body,
+        p_parent_id: input.parentId ?? null,
+        p_website: input.website || null,
+      }),
   });
 }
