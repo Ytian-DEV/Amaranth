@@ -25,6 +25,18 @@ begin
 end;
 $$;
 
+-- Act as the service role (what /api/submit uses).
+create or replace function tests.as_service()
+returns void
+language plpgsql
+as $$
+begin
+  execute 'reset role';
+  perform set_config('request.jwt.claims', json_build_object('role', 'service_role')::text, false);
+  execute 'set role service_role';
+end;
+$$;
+
 create or replace function tests.logout()
 returns void
 language plpgsql
