@@ -161,6 +161,7 @@ function FixtureSalingkusog() {
       <SalingkusogHeader edition={skFixture.edition} factions={skFixture.factions} sportsCount={18} liveCount={1} phase={skPhase} />
       <Routes>
         <Route index element={<MedalTallyView edition={skFixture.edition} hub={skHub} table={skFixture.medalTable} race={skFixture.pointsByDay} phase={skPhase} now={new Date('2026-11-03T01:30:00Z')} />} />
+        <Route path="final" element={<MedalTallyView edition={skFixture.edition} hub={{ ...skHub, matches: skHub.matches.map((m) => (m.status === 'cancelled' ? m : { ...m, status: 'final' as const })) }} table={skFixture.medalTable} race={skFixture.pointsByDay} phase={{ kind: 'after', of: 6 }} />} />
         <Route path="schedule" element={<FixtureSchedule />} />
         <Route path="winners" element={<FixtureWinners />} />
         <Route path="sports" element={<SportView sport={skFixture.sports[0]} event={skFixture.events[0]} hub={skHub} placements={skFixture.placements} athletes={skFixture.athletes} leaders={skFixture.leaders} />} />
@@ -197,6 +198,7 @@ const devScreens: { path: string; label: string }[] = [
   { path: 'countdown', label: 'Salingkusog countdown (ticking)' },
   { path: 'countdown/done', label: 'Salingkusog countdown — the games have begun' },
   { path: 'salingkusog', label: 'Salingkusog — Medal Tally' },
+  { path: 'salingkusog/final', label: 'Salingkusog — Official and final medal tally' },
   { path: 'salingkusog/schedule', label: 'Salingkusog — Schedule & Results (filters work)' },
   { path: 'salingkusog/winners', label: 'Salingkusog — Winners per game' },
   { path: 'salingkusog/factions', label: 'Salingkusog — Faction profile' },

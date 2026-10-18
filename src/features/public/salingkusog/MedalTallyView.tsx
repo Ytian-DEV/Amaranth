@@ -3,7 +3,7 @@ import { LogoLoader } from '@/components/ui/LogoLoader';
 import type { SkEditionRow, SkMedalTableRow, SkPointsByDayRow, SkPointsTimelineRow } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
 import { useTweenedNumber, useTweenedNumbers } from '@/lib/useTween';
-import { liveAndNext, podiumOrder, raceRanges, raceSeries, readableOn, standingsDay, standingsHeadline, stepLabel, timelineSeries, type HubPhase, type RaceRange } from './hub';
+import { finalHeadline, liveAndNext, placeTitle, podiumOrder, raceRanges, resultsProgress, raceSeries, readableOn, standingsDay, standingsHeadline, stepLabel, timelineSeries, type HubPhase, type RaceRange } from './hub';
 import { FactionBadge, MatchCard, MedalChip } from './SkBits';
 import type { HubData } from './skData';
 
@@ -39,16 +39,44 @@ function PodiumStep({ r, hub }: { r: SkMedalTableRow; hub: HubData }) {
 
 function Podium({ rows, hub, phase }: { rows: SkMedalTableRow[]; hub: HubData; phase: HubPhase }) {
   const day = standingsDay(phase);
+  const progress = resultsProgress(hub.matches);
+  const official = progress.final;
+  const winners = official ? [...rows].filter((r) => r.rank <= 3 && r.points > 0).sort((a, b) => a.rank - b.rank) : [];
   return (
     <section aria-labelledby="sk-podium" className="bg-night-2 text-on-dark">
       <div className="container-page flex flex-col items-center gap-6 pt-8 md:gap-9 md:pt-12">
         <div className="flex flex-col items-center gap-1.5 text-center">
           <p className="text-[11px] font-bold uppercase tracking-[0.99px] text-lime">
-            {phase.kind === 'after' ? 'Final standings' : day ? `Overall standings after Day ${day}` : 'Overall standings'}
+            {official ? 'Official and final medal tally' : phase.kind === 'after' ? 'Final standings' : day ? `Overall standings after Day ${day}` : 'Overall standings'}
           </p>
           <h2 id="sk-podium" className="font-serif text-[22px] font-semibold leading-tight tracking-[-0.36px] md:text-[36px]">
-            {standingsHeadline(rows)}
+            {official ? finalHeadline(rows) : standingsHeadline(rows)}
           </h2>
+          {progress.total > 0 && !official && (
+            <div className="mt-2 flex w-full max-w-[320px] flex-col items-center gap-2">
+              <p className="text-meta text-on-dark-muted">
+                Results in: <span className="font-semibold tabular-nums text-on-dark">{progress.done}</span> of <span className="tabular-nums">{progress.total}</span> matches
+              </p>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-on-dark)_14%,transparent)]" role="progressbar" aria-label="Matches finished" aria-valuemin={0} aria-valuemax={progress.total} aria-valuenow={progress.done}>
+                <div className="h-full rounded-full bg-lime" style={{ width: `${(progress.done / progress.total) * 100}%` }} />
+              </div>
+            </div>
+          )}
+          {official && (
+            <>
+              <p className="mt-1 text-meta text-on-dark-muted">All {progress.total} matches are finished. These results are official.</p>
+              {winners.length > 0 && (
+                <ul aria-label="Winners" className="mt-3 flex flex-wrap justify-center gap-x-6 gap-y-2">
+                  {winners.map((r) => (
+                    <li key={r.faction_id} className="flex items-baseline gap-2">
+                      <span className="text-[11px] font-bold uppercase tracking-[0.99px] text-on-dark-muted">{placeTitle(r.rank)}</span>
+                      <span className="font-semibold">{r.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
         </div>
         <ol className="flex w-full max-w-[1060px] items-end justify-center gap-1.5 md:gap-5">
           {podiumOrder(rows).map((r) => (
@@ -59,6 +87,15 @@ function Podium({ rows, hub, phase }: { rows: SkMedalTableRow[]; hub: HubData; p
     </section>
   );
 }
+
+/** Gold, silver and bronze tints for the top three rows (ties share the tint); the rest stay white. */
+const placeTint = (rank: number) =>
+  [
+    '',
+    'bg-[color-mix(in_srgb,var(--color-gold)_16%,var(--color-surface))]',
+    'bg-[color-mix(in_srgb,var(--color-silver)_20%,var(--color-surface))]',
+    'bg-[color-mix(in_srgb,var(--color-bronze)_16%,var(--color-surface))]',
+  ][rank] ?? '';
 
 /** Whole number that counts up to `value`. */
 function CountUp({ value }: { value: number }) {
@@ -90,7 +127,7 @@ function MedalTable({ rows, hub, edition }: { rows: SkMedalTableRow[]; hub: HubD
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.faction_id} className="border-t border-line">
+              <tr key={r.faction_id} className={cn('border-t border-line', placeTint(r.rank))}>
                 <td className="py-4 pl-6 font-serif text-[30px] italic leading-none text-lime-dark">{r.rank}</td>
                 <th scope="row" className="py-4 font-normal">
                   <FactionBadge faction={faction(r.faction_id)} logos={hub.logos} />
@@ -109,7 +146,7 @@ function MedalTable({ rows, hub, edition }: { rows: SkMedalTableRow[]; hub: HubD
       {/* phone: cards */}
       <ol className="flex flex-col gap-2.5 md:hidden">
         {rows.map((r) => (
-          <li key={r.faction_id} className="flex flex-col gap-2.5 rounded-[12px] border border-line bg-surface p-3.5">
+          <li key={r.faction_id} className={cn('flex flex-col gap-2.5 rounded-[12px] border border-line bg-surface p-3.5', placeTint(r.rank))}>
             <div className="flex items-center gap-2.5">
               <span className="w-6 shrink-0 font-serif text-[26px] italic leading-none text-lime-dark">
                 <span className="sr-only">Rank </span>
