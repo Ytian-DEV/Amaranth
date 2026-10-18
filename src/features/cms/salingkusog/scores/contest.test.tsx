@@ -5,8 +5,19 @@ import { skFixture } from '@/dev/skFixtures';
 import type { SkEntryRow, SkMatchRow } from '@/lib/database.types';
 import { SportsView } from '../setup/SportsTab';
 import { ContestScorekeeper } from './ContestScorekeeper';
+import { GameModal } from './GameModal';
 
 const noop = () => undefined;
+
+// jsdom has no <dialog> methods
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
+    this.open = true;
+  };
+  HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
+    this.open = false;
+  };
+});
 const race = skFixture.events[3]; // 100m dash: timed, individual, seconds
 const session = { ...skFixture.matches[0], id: 'c1', event_id: race.id, side_a_id: null, side_b_id: null, is_contest: true, status: 'live', round: 'Final' } as SkMatchRow;
 const entry = (id: string, faction_id: string, lane: number, extra: Partial<SkEntryRow> = {}) =>
@@ -54,5 +65,32 @@ describe('Create contest', () => {
     expect(screen.getAllByRole('button', { name: /Create contest/ })).toHaveLength(1);
     fireEvent.click(screen.getByRole('button', { name: /Create contest/ }));
     expect(onContest).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: race.id }));
+  });
+});
+
+describe('game details form', () => {
+  const modal = (match: SkMatchRow | null) =>
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <GameModal lookups={lookups} match={match} day="2026-11-03" onClose={noop} />
+      </QueryClientProvider>,
+    );
+
+  it('locks the teams of a generated game', () => {
+    modal({ ...skFixture.matches[0], source_a: 'winner:m1', source_b: 'winner:m2' });
+    expect(screen.getByText(/fill in by themselves/)).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: 'Side A' })).toBeDisabled();
+  });
+
+  it('has no sides for a contest', () => {
+    modal(session);
+    expect(screen.getByRole('dialog', { name: 'Edit contest' })).toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: 'Side A' })).not.toBeInTheDocument();
+  });
+
+  it('sends timed and judged events to Create contest', () => {
+    modal(null);
+    fireEvent.change(screen.getByRole('combobox', { name: /Event/ }), { target: { value: race.id } });
+    expect(screen.getByText(/use “Create contest”/)).toBeInTheDocument();
   });
 });
