@@ -133,7 +133,8 @@ function EventModal({ sport, event, venues, nextOrder, onClose }: { sport: SkSpo
 type Modal_ = { kind: 'sport'; sport: SkSportRow | null } | { kind: 'event'; sport: SkSportRow; event: SkEventRow | null } | { kind: 'build' | 'contest'; sport: SkSportRow; event: SkEventRow } | null;
 
 /** Formats whose games "Build schedule" can create. */
-const buildable = (e: SkEventRow) => e.is_team && (e.format === 'bracket' || e.format === 'round_robin' || e.format === 'round_robin_final');
+// team or individual: each side is a faction (in individual events, its player)
+const buildable = (e: SkEventRow) => e.format === 'bracket' || e.format === 'round_robin' || e.format === 'round_robin_final';
 
 export function SportsView({
   sports,

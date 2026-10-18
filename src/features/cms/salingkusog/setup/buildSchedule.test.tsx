@@ -26,6 +26,12 @@ describe('Build schedule', () => {
     expect(onBuild).toHaveBeenCalledWith(expect.objectContaining({ slug: 'basketball' }), expect.objectContaining({ id: 'bb-m' }));
   });
 
+  it('is offered for individual events too (chess, arnis, taekwondo)', () => {
+    const chess = { ...skFixture.events[0], id: 'chess-m', name: 'Chess Men', is_team: false, format: 'round_robin_final' as const };
+    render(<SportsView sports={skFixture.sports} events={[chess]} venues={skFixture.venues} onAddSport={noop} onEditSport={noop} onDeleteSport={noop} onAddEvent={noop} onEditEvent={noop} onDeleteEvent={noop} onBuild={noop} />);
+    expect(screen.getByRole('button', { name: /Build schedule for Basketball Chess Men/ })).toBeInTheDocument();
+  });
+
   it('orders the seeds and says how many games it creates', () => {
     wrap(<BuildScheduleModal edition={skFixture.edition} sport={skFixture.sports[0]} event={skFixture.events[0]} factions={skFixture.factions} venues={skFixture.venues} games={[]} onClose={noop} />);
     expect(screen.getByText(/Creates 4 games over 2 rounds/)).toBeInTheDocument();
