@@ -21,8 +21,8 @@ export function Lockup({
       <span className="flex flex-col">
         <span
           className={cn(
-            'font-serif font-bold leading-none tracking-[0.06em]',
-            tone === 'light' ? 'text-on-dark' : 'text-green-900',
+            'font-wordmark font-bold leading-none tracking-[0.08em]',
+            tone === 'light' ? 'text-lime' : 'text-green-900',
           )}
         >
           AMARANTH
