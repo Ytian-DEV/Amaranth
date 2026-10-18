@@ -55,11 +55,11 @@ function Scoreboard({ match, hub, placements }: { match: SkMatchRow; hub: HubDat
         <h2 id="recap-score" className="sr-only">
           {a?.name ?? 'TBD'} {scored ? `${match.score_a} – ${match.score_b}` : 'vs'} {b?.name ?? 'TBD'}
         </h2>
-        <div className="grid w-full max-w-[980px] grid-cols-[1fr_auto_1fr] items-start gap-3 md:gap-8">
+        <div className="grid w-full max-w-[980px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-3 md:gap-8">
           {[a, b].map((f, i) => (
             <div key={i} className={cn('flex flex-col items-center gap-2 text-center md:gap-3', i === 1 && 'order-3')}>
               <Emblem faction={f} logos={hub.logos} />
-              <p className="font-serif text-[17px] font-semibold leading-tight md:text-[26px]">{f?.name ?? 'To be decided'}</p>
+              <p className="font-serif text-[15px] font-semibold leading-tight break-words [hyphens:auto] md:text-[26px]">{f?.name ?? 'To be decided'}</p>
               <p className="hidden whitespace-pre text-meta text-on-dark-muted md:block">{note(i === 0 ? match.side_a_id : match.side_b_id)}</p>
             </div>
           ))}

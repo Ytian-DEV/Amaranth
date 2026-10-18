@@ -108,11 +108,13 @@ export function readPalette(): Palette {
   return { night: v('night'), night2: v('night-2'), lime: v('lime'), gold: v('gold'), white: v('on-dark'), muted: v('on-dark-muted'), green900: v('green-900') };
 }
 
-const SERIF = '"Fraunces Variable", Georgia, serif';
-const SANS = '"Inter Variable", system-ui, sans-serif';
+// headline face and text face are both Montserrat (brand); Cinzel is only for the AMARANTH wordmark
+const SERIF = '"Montserrat Variable", system-ui, sans-serif';
+const SANS = '"Montserrat Variable", system-ui, sans-serif';
+const WORDMARK = '"Cinzel", Georgia, serif';
 
 export async function loadCardFonts() {
-  await Promise.all([document.fonts.load(`700 100px ${SERIF}`), document.fonts.load(`700 30px ${SANS}`), document.fonts.load(`500 30px ${SANS}`), document.fonts.load(`600 30px ${SANS}`)]);
+  await Promise.all([document.fonts.load(`800 100px ${SERIF}`), document.fonts.load(`700 30px ${SANS}`), document.fonts.load(`500 30px ${SANS}`), document.fonts.load(`600 30px ${SANS}`), document.fonts.load(`700 34px ${WORDMARK}`)]);
 }
 
 export function loadImage(src: string | undefined): Promise<HTMLImageElement | null> {
@@ -261,7 +263,7 @@ function drawMvp(ctx: CanvasRenderingContext2D, d: SocialCardData, p: Palette, p
     ctx.fillRect(pad + i * seg, stripeY, seg, 7);
   });
 
-  ctx.font = `700 34px ${SERIF}`;
+  ctx.font = `700 34px ${WORDMARK}`;
   const brandW = ctx.measureText('AMARANTH').width + 8 * 3;
   if (d.footer) {
     ctx.fillStyle = p.muted;
@@ -269,7 +271,7 @@ function drawMvp(ctx: CanvasRenderingContext2D, d: SocialCardData, p: Palette, p
     ctx.fillText(d.footer, pad, 1180);
   }
   ctx.fillStyle = p.white;
-  ctx.font = `700 34px ${SERIF}`;
+  ctx.font = `700 34px ${WORDMARK}`;
   spaced(ctx, 'AMARANTH', d.width - pad, 1182, 3, 'right');
 }
 

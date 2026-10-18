@@ -63,8 +63,8 @@ export function FixtureSocialCards() {
   }, []);
   return (
     <div className="flex flex-wrap items-start gap-6">
-      <canvas ref={mvp} role="img" aria-label="MVP of the Day card" className="h-auto w-[360px] rounded-md border border-line" />
-      <canvas ref={aotd} role="img" aria-label="Athlete of the Day card" className="h-auto w-[360px] rounded-md border border-line" />
+      <canvas ref={mvp} role="img" aria-label="MVP of the Day card" className="h-auto w-full max-w-[360px] rounded-md border border-line" />
+      <canvas ref={aotd} role="img" aria-label="Athlete of the Day card" className="h-auto w-full max-w-[360px] rounded-md border border-line" />
     </div>
   );
 }
