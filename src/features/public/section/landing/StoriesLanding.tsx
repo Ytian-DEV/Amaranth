@@ -9,7 +9,7 @@ import { inCategory, picker } from './data';
 import { allHref, categoryHref } from './links';
 
 // tile colours when a story has no photo (from the design's sample tiles)
-const tileBg = ['bg-green-700', 'bg-lime-dark', 'bg-green-900', 'bg-green-500', 'bg-night'];
+const tileBg = ['bg-green-700', 'bg-lime-dark', 'bg-green-900', 'bg-green-500', 'bg-green-800'];
 
 function StoryTile({ story, i }: { story: StoryItem; i: number }) {
   const src = story.image ? publicUrl(story.image.bucket, story.image.path) : null;

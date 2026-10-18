@@ -14,7 +14,7 @@ type Tile = { to: string; eyebrow: string; title: string; body: string };
 const tileTone = [
   { bg: 'bg-green-700 text-on-dark', eyebrow: 'text-lime', body: 'text-on-dark-muted' },
   { bg: 'bg-lime text-green-900', eyebrow: 'text-green-900', body: 'text-green-900' },
-  { bg: 'bg-night text-on-dark', eyebrow: 'text-lime', body: 'text-on-dark-muted' },
+  { bg: 'bg-green-900 text-on-dark', eyebrow: 'text-lime', body: 'text-on-dark-muted' },
 ];
 
 function CoverageTile({ tile, i }: { tile: Tile; i: number }) {
@@ -49,7 +49,7 @@ export function SpecialsLanding({ section, categories, items }: LandingProps) {
 
   return (
     <div>
-      <header className="bg-night text-on-dark">
+      <header className="bg-green-900 text-on-dark">
         <div className="container-page flex flex-col gap-8 py-12 md:py-16">
           {lead ? (
             <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
@@ -68,7 +68,7 @@ export function SpecialsLanding({ section, categories, items }: LandingProps) {
                   {parts.length ? 'Start with part 1' : 'Read the report'}
                 </ButtonLink>
               </div>
-              <Img {...lead.image} ratio="560/400" priority sizes="(min-width: 768px) 560px, 100vw" className="rounded-[12px] bg-night-2" />
+              <Img {...lead.image} ratio="560/400" priority sizes="(min-width: 768px) 560px, 100vw" className="rounded-[12px] bg-green-800" />
             </div>
           ) : (
             <h1 className="font-serif text-[44px] font-bold md:text-[64px]">{section.name}</h1>
@@ -76,7 +76,7 @@ export function SpecialsLanding({ section, categories, items }: LandingProps) {
           {parts.length > 0 && lead && (
             <ol className="grid gap-3 md:grid-cols-3 md:gap-4">
               {[...parts, lead].slice(0, 3).map((s: StoryItem, i) => (
-                <li key={s.id} className="group relative flex flex-col gap-1.5 rounded-[10px] bg-night-2 p-5">
+                <li key={s.id} className="group relative flex flex-col gap-1.5 rounded-[10px] bg-green-800 p-5">
                   <p className="text-kicker uppercase text-lime">Part {i + 1}</p>
                   <Link to={articlePath(s.slug)} className="font-serif text-[18px] font-semibold leading-snug after:absolute after:inset-0 hover:underline">
                     {s.title}
