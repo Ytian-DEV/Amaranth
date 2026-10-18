@@ -581,6 +581,70 @@ revoke execute on function public.sk_countdown() from public;
 grant execute on function public.sk_countdown() to anon, authenticated;
 
 -- -----------------------------------------------------------------------------
+-- RPC: the points race in hour steps (1, 3, 6 or 12). Cumulative points per faction at
+-- the end of each step. 1/3/6 h cover the latest day with results; 12 h covers the whole
+-- edition. A result counts at the time it was entered when that was on the day it was
+-- won, otherwise at the end of that day. Steps in the future are left out.
+-- (Day by day stays the sk_points_by_day view.)
+-- -----------------------------------------------------------------------------
+create or replace function public.sk_points_timeline(p_edition_id uuid, p_hours integer)
+returns table (faction_id uuid, bucket_end timestamptz, points integer)
+language plpgsql
+stable
+security invoker
+set search_path = ''
+as $$
+declare
+  v_ed public.sk_editions%rowtype;
+  v_from date;
+  v_to date;
+  v_step interval;
+begin
+  if p_hours is null or p_hours not in (1, 3, 6, 12) then
+    raise exception 'Choose 1, 3, 6 or 12 hours' using errcode = '22023';
+  end if;
+  select * into v_ed from public.sk_editions where id = p_edition_id;
+  if not found then return; end if;
+  v_step := make_interval(hours => p_hours);
+  if p_hours < 12 then
+    select least(greatest(coalesce(max(p.awarded_on), v_ed.starts_on), v_ed.starts_on), v_ed.ends_on)
+      into v_from
+      from public.sk_placements p where p.edition_id = p_edition_id and p.medal is not null;
+    v_to := v_from;
+  else
+    v_from := v_ed.starts_on;
+    v_to := v_ed.ends_on;
+  end if;
+
+  return query
+  with pts as (
+    select p.faction_id as fid,
+           case when (p.created_at at time zone 'Asia/Manila')::date = p.awarded_on then p.created_at
+                else ((p.awarded_on + 1)::timestamp at time zone 'Asia/Manila') - interval '1 second' end as at,
+           case p.medal when 'gold' then v_ed.points_gold when 'silver' then v_ed.points_silver when 'bronze' then v_ed.points_bronze else 0 end as n
+    from public.sk_placements p
+    where p.edition_id = p_edition_id and p.medal is not null
+  ),
+  steps as (
+    select g + v_step as ends
+    from generate_series(v_from::timestamp at time zone 'Asia/Manila',
+                         ((v_to + 1)::timestamp at time zone 'Asia/Manila') - v_step,
+                         v_step) as g
+    where g < now()
+  )
+  select f.id, s.ends,
+         coalesce((select sum(x.n) from pts x where x.fid = f.id and x.at < s.ends), 0)::integer
+  from steps s
+  cross join public.sk_factions f
+  where f.edition_id = p_edition_id
+  order by s.ends, f.sort_order, f.name;
+end;
+$$;
+
+revoke execute on function public.sk_points_timeline(uuid, integer) from public;
+grant execute on function public.sk_points_timeline(uuid, integer) to anon, authenticated;
+
+-- -----------------------------------------------------------------------------
 -- RLS
 -- -----------------------------------------------------------------------------
 do $$

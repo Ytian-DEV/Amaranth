@@ -616,6 +616,7 @@ export type SkMedalTableRow = {
   rank: number;
 };
 export type SkPointsByDayRow = { edition_id: string; faction_id: string; day: string; day_number: number; points: number };
+export type SkPointsTimelineRow = { faction_id: string; bucket_end: string; points: number };
 export type SkHeadToHeadRow = { edition_id: string; faction_id: string; opponent_id: string; wins: number; losses: number };
 export type SkEventStatusRow = {
   edition_id: string;
@@ -744,6 +745,7 @@ export type Database = {
       record_article_view: { Args: { p_article_id: string }; Returns: undefined };
       sk_set_placements: { Args: { p_event_id: string; p_rows: SkPlacementInput[] }; Returns: number };
       sk_countdown: { Args: Record<string, never>; Returns: SkCountdownRow[] };
+      sk_points_timeline: { Args: { p_edition_id: string; p_hours: number }; Returns: SkPointsTimelineRow[] };
       staff_heartbeat: { Args: Record<string, never>; Returns: number };
       stats_overview: { Args: { p_from: string; p_to: string }; Returns: StatsOverview };
       stats_articles: { Args: { p_from: string; p_to: string; p_limit?: number }; Returns: StatsArticleRow[] };

@@ -1,5 +1,5 @@
 // Pure helpers for the public Salingkusog pages.
-import type { SkEditionRow, SkMatchRow, SkMedalTableRow, SkPointsByDayRow } from '@/lib/database.types';
+import type { SkEditionRow, SkMatchRow, SkMedalTableRow, SkPointsByDayRow, SkPointsTimelineRow } from '@/lib/database.types';
 import { dayRange, manilaDate, manilaTime } from '@/lib/manila';
 
 export type HubPhase = { kind: 'before'; startsIn: number } | { kind: 'during'; day: number; of: number } | { kind: 'after'; of: number };
@@ -171,4 +171,34 @@ export function shortEventLabel(sportName: string, event: { name: string; divisi
   const isDivisionName = /^(men|women|mixed|open)$/i.test(event.name.trim());
   if (isDivisionName && divisions[event.division]) return `${sportName} ${divisions[event.division]}`;
   return event.name.includes('·') ? event.name : `${sportName} · ${event.name}`;
+}
+
+export type RaceRange = 'day' | 1 | 3 | 6 | 12;
+export const raceRanges: { value: RaceRange; label: string }[] = [
+  { value: 1, label: '1h' },
+  { value: 3, label: '3h' },
+  { value: 6, label: '6h' },
+  { value: 12, label: '12h' },
+  { value: 'day', label: 'Day' },
+];
+
+/** "2 PM" (or "Oct 14, 2 PM") in Manila time for the end of a points-race step. */
+export function stepLabel(at: string, withDate: boolean) {
+  const [h, m] = manilaTime(at).split(':').map(Number);
+  const hour = h === 0 && m === 0 ? 'midnight' : `${h % 12 || 12}${m ? `:${String(m).padStart(2, '0')}` : ''} ${h < 12 ? 'AM' : 'PM'}`;
+  if (!withDate) return hour;
+  const d = new Date(`${manilaDate(new Date(Date.parse(at) - 1000))}T00:00:00Z`);
+  return `${d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', timeZone: 'UTC' })}, ${hour}`;
+}
+
+/** Hour-step rows → step ends (in order) and each faction's points per step. */
+export function timelineSeries(rows: SkPointsTimelineRow[]) {
+  const steps = [...new Set(rows.map((r) => r.bucket_end))].sort();
+  const series = new Map<string, number[]>();
+  for (const r of rows) {
+    const list = series.get(r.faction_id) ?? Array<number>(steps.length).fill(0);
+    list[steps.indexOf(r.bucket_end)] = r.points;
+    series.set(r.faction_id, list);
+  }
+  return { steps, series };
 }
