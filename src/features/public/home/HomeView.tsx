@@ -1,8 +1,9 @@
+import { LogoLoader } from '@/components/ui/LogoLoader';
 import { Link } from 'react-router-dom';
 import { SectionHeader, StoryCard, StoryCompact, StoryRow } from '@/components/story/Story';
 import { articlePath, storyMeta, type StoryItem } from '@/components/story/types';
 import { ButtonLink } from '@/components/ui/Button';
-import { EmptyState, Skeleton } from '@/components/ui/Feedback';
+import { EmptyState } from '@/components/ui/Feedback';
 import { Img } from '@/components/ui/Img';
 import { CategoryPill, Kicker } from '@/components/ui/Tag';
 import { formatReadingTime } from '@/lib/format';
@@ -240,21 +241,9 @@ export function HomeView({ data }: { data: HomeData }) {
 
 export function HomeSkeleton() {
   return (
-    <div className="container-page grid gap-12 py-12 lg:grid-cols-[minmax(0,772fr)_minmax(0,380fr)]" aria-busy>
+    <div aria-busy>
       <h1 className="sr-only">Loading the front page</h1>
-      <div className="flex flex-col gap-4">
-        <Skeleton className="aspect-[772/430]" />
-        <Skeleton className="h-3 w-40" />
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-      </div>
-      <div className="hidden flex-col gap-6 lg:flex">
-        <Skeleton className="h-7 w-40" />
-        {[0, 1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-16" />
-        ))}
-      </div>
+      <LogoLoader label="Loading the front page" />
     </div>
   );
 }

@@ -1,7 +1,8 @@
+import { LogoLoader } from '@/components/ui/LogoLoader';
 import { Link } from 'react-router-dom';
 import { StoryCard, StoryCompact } from '@/components/story/Story';
 import { articlePath, storyMeta, type StoryItem } from '@/components/story/types';
-import { EmptyState, Skeleton } from '@/components/ui/Feedback';
+import { EmptyState } from '@/components/ui/Feedback';
 import { Img } from '@/components/ui/Img';
 import { Pagination } from '@/components/ui/Pagination';
 import { Kicker } from '@/components/ui/Tag';
@@ -133,24 +134,9 @@ export function SectionView({
 
 export function SectionSkeleton() {
   return (
-    <div className="pb-16" aria-busy>
+    <div aria-busy>
       <h1 className="sr-only">Loading</h1>
-      <div className="border-b border-line bg-surface">
-        <div className="container-page flex flex-col gap-4 py-12">
-          <Skeleton className="h-10 w-56" />
-          <Skeleton className="h-4 w-96 max-w-full" />
-        </div>
-      </div>
-      <div className="container-page grid gap-12 pt-12 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="flex flex-col gap-3">
-            <Skeleton className="aspect-[360/220]" />
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
-        ))}
-      </div>
+      <LogoLoader />
     </div>
   );
 }
