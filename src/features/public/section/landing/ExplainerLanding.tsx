@@ -17,7 +17,7 @@ function QuestionCard({ story }: { story: StoryItem }) {
         </span>
       </div>
       <h3 className="font-serif text-[20px] font-semibold leading-snug text-ink">
-        <Link to={articlePath(story.slug)} className="after:absolute after:inset-0 group-hover:text-green-700">
+        <Link to={articlePath(story.slug)} className="after:absolute after:inset-0 group-hover-lime">
           {story.title}
         </Link>
       </h3>
@@ -45,7 +45,7 @@ export function ExplainerLanding({ section, categories, items }: LandingProps) {
             <article className="group relative flex flex-col gap-4">
               <Kicker>{joinMeta('Featured explainer', formatReadingTime(lead.readingMinutes))}</Kicker>
               <h2 className="font-serif text-[34px] font-bold leading-[1.06] tracking-[-0.8px] text-ink md:text-[52px]">
-                <Link to={articlePath(lead.slug)} className="after:absolute after:inset-0 hover:text-green-700">
+                <Link to={articlePath(lead.slug)} className="after:absolute after:inset-0 hover-lime">
                   {lead.title}
                 </Link>
               </h2>

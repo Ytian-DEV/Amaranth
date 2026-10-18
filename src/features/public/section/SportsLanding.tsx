@@ -96,7 +96,7 @@ function Lead({ story }: { story: StoryItem }) {
     <article className="group relative flex min-w-0 flex-col gap-3">
       <Img {...story.image} ratio="760/420" priority sizes="(min-width: 1024px) 760px, 100vw" />
       <Kicker className="mt-1">{story.label}</Kicker>
-      <h2 className="font-serif text-[28px] font-bold leading-[1.1] tracking-[-0.5px] text-ink group-hover:text-green-700 md:text-[44px] md:tracking-[-1px]">
+      <h2 className="font-serif text-[28px] font-bold leading-[1.1] tracking-[-0.5px] text-ink group-hover-lime md:text-[44px] md:tracking-[-1px]">
         <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
           {story.title}
         </Link>
@@ -169,7 +169,7 @@ export function SportsLanding({ categories, items, hasMore, sk }: {
           )}
           {categories.map((c) => (
             <li key={c.slug} className="shrink-0">
-              <Link to={`/sports?category=${encodeURIComponent(c.slug)}`} className="inline-flex h-9 items-center rounded-full border border-line bg-surface px-4 text-[14px] font-semibold text-ink hover:border-green-700">
+              <Link to={`/sports?category=${encodeURIComponent(c.slug)}`} className="inline-flex h-9 items-center rounded-full border border-line bg-surface px-4 text-[14px] font-semibold text-ink hover:border-lime">
                 {c.name}
               </Link>
             </li>

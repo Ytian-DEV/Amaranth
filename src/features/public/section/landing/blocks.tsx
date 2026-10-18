@@ -32,7 +32,7 @@ export function CategoryChips({ section, categories, allLabel, className }: { se
         </li>
         {categories.map((c) => (
           <li key={c.slug} className="shrink-0">
-            <Link to={categoryHref(section.slug, c.slug)} className="inline-flex h-9 items-center rounded-full border border-line bg-surface px-3.5 text-button text-ink hover:border-green-700">
+            <Link to={categoryHref(section.slug, c.slug)} className="inline-flex h-9 items-center rounded-full border border-line bg-surface px-3.5 text-button text-ink hover:border-lime">
               {c.name}
             </Link>
           </li>
@@ -70,7 +70,7 @@ export function Band({ tone = 'paper', className, children, label }: { tone?: 'p
 export function Headline({ story, as: Heading = 'h2', className }: { story: StoryItem; as?: 'h2' | 'h3'; className?: string }) {
   return (
     <Heading className={className}>
-      <Link to={articlePath(story.slug)} className="after:absolute after:inset-0 hover:text-green-700">
+      <Link to={articlePath(story.slug)} className="after:absolute after:inset-0 hover-lime">
         {story.title}
       </Link>
     </Heading>

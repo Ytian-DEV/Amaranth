@@ -23,7 +23,7 @@ export function Ticker({ items }: { items: TickerItem[] }) {
                 </span>
               )}
               {item.href ? (
-                <Link to={item.href} className="block truncate text-ink hover:text-green-700 hover:underline">
+                <Link to={item.href} className="block truncate text-ink hover-lime hover:underline">
                   {item.text}
                 </Link>
               ) : (
@@ -44,7 +44,7 @@ function LeadStory({ story }: { story: StoryItem }) {
         <Img {...story.image} ratio="772/430" priority sizes="(min-width: 1024px) 772px, 100vw" className="rounded-[24px]" />
         <CategoryPill label={story.label} className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 whitespace-nowrap shadow-card" />
       </div>
-      <h1 className="font-serif text-[30px] font-bold leading-[1.1] tracking-[-0.5px] text-ink group-hover:text-green-700 md:text-[44px] md:tracking-[-1px] lg:text-display-xl">
+      <h1 className="font-serif text-[30px] font-bold leading-[1.1] tracking-[-0.5px] text-ink group-hover-lime md:text-[44px] md:tracking-[-1px] lg:text-display-xl">
         <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
           {story.title}
         </Link>
@@ -115,7 +115,7 @@ function ViewItem({ story }: { story: StoryItem }) {
       <Img {...story.image} ratio="1/1" sizes="64px" rounded={false} className="size-16 shrink-0 rounded-full" />
       <div className="flex min-w-0 flex-col gap-1.5">
         <Kicker>{story.label.split(' · ').pop()}</Kicker>
-        <h3 className="font-serif text-headline-m text-ink group-hover:text-green-700">
+        <h3 className="font-serif text-headline-m text-ink group-hover-lime">
           <Link to={articlePath(story.slug)} className="after:absolute after:inset-0">
             {story.title}
           </Link>

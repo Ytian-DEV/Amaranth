@@ -87,7 +87,7 @@ export function EditorialBoardView({ data }: { data: BoardData }) {
                 className={
                   t.label === data.term
                     ? 'inline-flex h-9 items-center rounded-full bg-green-700 px-4 text-[14px] font-semibold text-on-dark'
-                    : 'inline-flex h-9 items-center rounded-full border border-line px-4 text-[14px] font-semibold text-ink hover:border-green-700'
+                    : 'inline-flex h-9 items-center rounded-full border border-line px-4 text-[14px] font-semibold text-ink hover:border-lime'
                 }
               >
                 {t.label}

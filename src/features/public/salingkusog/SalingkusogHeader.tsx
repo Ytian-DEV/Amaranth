@@ -69,7 +69,7 @@ export function SalingkusogHeader({
                 className={({ isActive }) =>
                   cn(
                     'block border-b-[3px] py-3 text-[13px] font-semibold uppercase tracking-[0.52px] md:py-3.5',
-                    activeFor(t.to, isActive) ? 'border-lime text-lime' : 'border-transparent text-green-soft hover:border-on-dark-muted',
+                    activeFor(t.to, isActive) ? 'border-lime text-lime' : 'border-transparent text-green-soft hover:border-lime hover:text-lime',
                   )
                 }
               >

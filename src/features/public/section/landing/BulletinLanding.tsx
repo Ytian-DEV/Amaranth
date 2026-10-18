@@ -15,7 +15,7 @@ function Notice({ story, fresh }: { story: StoryItem; fresh: boolean }) {
         <span>{joinMeta(story.byline, formatDateTime(story.publishedAt))}</span>
       </div>
       <h3 className="font-serif text-[20px] font-semibold leading-snug text-ink md:text-[22px]">
-        <Link to={articlePath(story.slug)} className="after:absolute after:inset-0 group-hover:text-green-700">
+        <Link to={articlePath(story.slug)} className="after:absolute after:inset-0 group-hover-lime">
           {story.title}
         </Link>
       </h3>

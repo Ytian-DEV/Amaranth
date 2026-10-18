@@ -92,7 +92,7 @@ export function ArchivesView({ issues, months }: { issues: Issue[] | undefined; 
                     <li key={m.month}>
                       <Link
                         to={`/archives/${m.month.slice(0, 7)}`}
-                        className="inline-flex h-10 items-center gap-2 rounded-full border border-line bg-surface px-4 text-[14px] font-semibold text-ink hover:border-green-700"
+                        className="inline-flex h-10 items-center gap-2 rounded-full border border-line bg-surface px-4 text-[14px] font-semibold text-ink hover:border-lime"
                       >
                         {monthLabel(m.month.slice(0, 7)).split(' ')[0]}
                         <span className="text-meta text-ink-muted">{m.articles}</span>

@@ -85,6 +85,8 @@ Design: Figma page "Brand 2026" (94:121). Plan: 1 tokens + fonts → 2 header/fo
 - [x] 3 `feature/brand-components`: `CategoryPill` (lime, specific word heavy: "**ENVIRONMENT** NEWS") on the home and landing leads (overlapping the photo edge) and the article header; rounder radii (6/12/16/20, lead photos 24); pill-shaped buttons; caps ExtraBold section headers; black-italic numerals; the post byline chip "via Name | Amaranth" on articles.
 - [x] 4 `feature/brand-pages`: home "Have a story" panel is the deep-forest CTA with lime outline and lime button; landing heroes and bands (Specials, Investigative, Literary call for submissions, Stories tiles) use deep forest instead of near-black (Salingkusog keeps its own night theme); article gets a carded author box and the dark "Got a news tip?" card. **Brand 2026 is applied.**
 
+- [x] 5 `feature/brand-lime-hover` (user request): hovers are lime. On light backgrounds `hover-lime` / `group-hover-lime` (app.css) turn text lime ink with a 3px lime underline, since pure lime text is unreadable on white; on dark bands links hover to lime; borders hover lime; buttons: primary/outline turn lime with dark text, lime accent inverts to deep green with lime text. Rechecked the performance checklist after branding: fonts are latin-only subsets (~91 KB incl. italic and Cinzel), local prod build Lighthouse home 73 / news 76 perf, a11y 100.
+
 **Next:** open the `develop` → `main` PR for Brand 2026 (the user opens it). Nothing else queued.
 
 | # | Branch | Status |
