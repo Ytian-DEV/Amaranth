@@ -1,6 +1,7 @@
 import { SectionHeader } from '@/components/story/Story';
 import type { SkEditionRow, SkMedalTableRow, SkPointsByDayRow } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
+import { useTweenedNumber, useTweenedNumbers } from '@/lib/useTween';
 import { liveAndNext, podiumOrder, raceSeries, readableOn, standingsDay, standingsHeadline, type HubPhase } from './hub';
 import { FactionBadge, MatchCard, MedalChip } from './SkBits';
 import type { HubData } from './skData';
@@ -8,9 +9,35 @@ import type { HubData } from './skData';
 const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? 'st' : n % 10 === 2 && n % 100 !== 12 ? 'nd' : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th'}`;
 const blockHeight = (rank: number) => ['', 'h-[150px] md:h-[240px]', 'h-[110px] md:h-[180px]', 'h-[85px] md:h-[140px]'][rank] ?? 'h-[65px] md:h-[100px]';
 
+/** One podium block: the points and medals count up from 0 and the block grows from the floor. */
+function PodiumStep({ r, hub }: { r: SkMedalTableRow; hub: HubData }) {
+  const [points, gold, silver, bronze, grow] = useTweenedNumbers([r.points, r.gold, r.silver, r.bronze, 1], 1100);
+  const f = hub.factions.find((x) => x.id === r.faction_id);
+  const textTone = readableOn(r.color, 3) === 'light' ? 'text-on-dark' : 'text-ink';
+  return (
+    <li className="flex min-w-0 max-w-[250px] flex-1 flex-col items-center gap-2 md:gap-3.5" aria-label={`${ordinal(r.rank)}: ${r.name}, ${r.points} points`}>
+      <FactionBadge faction={f} logos={hub.logos} theme="dark" nameClassName="hidden md:inline" />
+      <p className={cn('font-serif font-semibold leading-none tabular-nums', r.rank === 1 ? 'text-[24px] md:text-[40px]' : 'text-[20px] md:text-[30px]')}>
+        {Math.round(points)}
+        <span className="hidden md:inline"> pts</span>
+      </p>
+      <div className="hidden gap-2 md:flex">
+        <MedalChip medal="gold" count={Math.round(gold)} />
+        <MedalChip medal="silver" count={Math.round(silver)} />
+        <MedalChip medal="bronze" count={Math.round(bronze)} />
+      </div>
+      <div className={cn('grid w-full origin-bottom place-items-center rounded-t-[10px]', blockHeight(r.rank))} style={{ backgroundColor: r.color, transform: `scaleY(${grow})` }}>
+        <span className={cn('font-serif font-bold uppercase leading-none', textTone, r.rank === 1 ? 'text-[36px] md:text-[56px]' : 'text-[32px] md:text-[44px]')}>
+          <span className="md:hidden">{r.rank}</span>
+          <span className="hidden md:inline">{ordinal(r.rank)}</span>
+        </span>
+      </div>
+    </li>
+  );
+}
+
 function Podium({ rows, hub, phase }: { rows: SkMedalTableRow[]; hub: HubData; phase: HubPhase }) {
   const day = standingsDay(phase);
-  const faction = (id: string) => hub.factions.find((f) => f.id === id);
   return (
     <section aria-labelledby="sk-podium" className="bg-night-2 text-on-dark">
       <div className="container-page flex flex-col items-center gap-6 pt-8 md:gap-9 md:pt-12">
@@ -23,34 +50,18 @@ function Podium({ rows, hub, phase }: { rows: SkMedalTableRow[]; hub: HubData; p
           </h2>
         </div>
         <ol className="flex w-full max-w-[1060px] items-end justify-center gap-1.5 md:gap-5">
-          {podiumOrder(rows).map((r) => {
-            const f = faction(r.faction_id);
-            const textTone = readableOn(r.color, 3) === 'light' ? 'text-on-dark' : 'text-ink';
-            return (
-              <li key={r.faction_id} className="flex min-w-0 max-w-[250px] flex-1 flex-col items-center gap-2 md:gap-3.5" aria-label={`${ordinal(r.rank)}: ${r.name}, ${r.points} points`}>
-                <FactionBadge faction={f} logos={hub.logos} theme="dark" nameClassName="hidden md:inline" />
-                <p className={cn('font-serif font-semibold leading-none', r.rank === 1 ? 'text-[24px] md:text-[40px]' : 'text-[20px] md:text-[30px]')}>
-                  {r.points}
-                  <span className="hidden md:inline"> pts</span>
-                </p>
-                <div className="hidden gap-2 md:flex">
-                  <MedalChip medal="gold" count={r.gold} />
-                  <MedalChip medal="silver" count={r.silver} />
-                  <MedalChip medal="bronze" count={r.bronze} />
-                </div>
-                <div className={cn('grid w-full place-items-center rounded-t-[10px]', blockHeight(r.rank))} style={{ backgroundColor: r.color }}>
-                  <span className={cn('font-serif font-bold uppercase leading-none', textTone, r.rank === 1 ? 'text-[36px] md:text-[56px]' : 'text-[32px] md:text-[44px]')}>
-                    <span className="md:hidden">{r.rank}</span>
-                    <span className="hidden md:inline">{ordinal(r.rank)}</span>
-                  </span>
-                </div>
-              </li>
-            );
-          })}
+          {podiumOrder(rows).map((r) => (
+            <PodiumStep key={r.faction_id} r={r} hub={hub} />
+          ))}
         </ol>
       </div>
     </section>
   );
+}
+
+/** Whole number that counts up to `value`. */
+function CountUp({ value }: { value: number }) {
+  return <>{Math.round(useTweenedNumber(value))}</>;
 }
 
 function MedalTable({ rows, hub, edition }: { rows: SkMedalTableRow[]; hub: HubData; edition: Pick<SkEditionRow, 'points_gold' | 'points_silver' | 'points_bronze'> }) {
@@ -104,7 +115,7 @@ function MedalTable({ rows, hub, edition }: { rows: SkMedalTableRow[]; hub: HubD
                 {r.rank}
               </span>
               <FactionBadge faction={faction(r.faction_id)} logos={hub.logos} className="flex-1" />
-              <span className="shrink-0 font-serif text-[22px] font-semibold tabular-nums text-green-900">{r.points} pts</span>
+              <span className="shrink-0 font-serif text-[22px] font-semibold tabular-nums text-green-900"><CountUp value={r.points} /> pts</span>
             </div>
             <div className="flex items-center gap-2 pl-[34px]">
               <MedalChip medal="gold" count={r.gold} />
@@ -122,11 +133,17 @@ function MedalTable({ rows, hub, edition }: { rows: SkMedalTableRow[]; hub: HubD
 /** Cumulative points per day as an SVG line chart, with the numbers as a hidden table. */
 function PointsRace({ race, hub, upto, total }: { race: SkPointsByDayRow[]; hub: HubData; upto: number; total: number }) {
   const shown = Math.max(1, Math.min(upto || 1, total));
-  const series = raceSeries(race, shown);
+  const target = raceSeries(race, shown);
+  // lines rise from 0 on load and move to new totals when results come in
+  const flat = hub.factions.flatMap((f) => (target.get(f.id) ?? []).map((p) => p.points));
+  const tweened = useTweenedNumbers(flat, 1200);
+  const series = new Map<string, { day: number; points: number }[]>();
+  let k = 0;
+  for (const f of hub.factions) series.set(f.id, (target.get(f.id) ?? []).map((p) => ({ ...p, points: tweened[k++] ?? p.points })));
   const W = 640;
   const H = 290;
   const pad = { l: 30, r: 20, t: 16, b: 16 };
-  const max = Math.max(5, ...[...series.values()].flat().map((p) => p.points));
+  const max = Math.max(5, ...[...target.values()].flat().map((p) => p.points));
   const x = (day: number) => (shown === 1 ? (pad.l + W - pad.r) / 2 : pad.l + ((day - 1) / (shown - 1)) * (W - pad.l - pad.r));
   const y = (pts: number) => H - pad.b - (pts / max) * (H - pad.t - pad.b);
   const days = Array.from({ length: shown }, (_, i) => i + 1);
@@ -173,7 +190,7 @@ function PointsRace({ race, hub, upto, total }: { race: SkPointsByDayRow[]; hub:
               {factions.map((f) => (
                 <tr key={f.id}>
                   <th scope="row">{f.name}</th>
-                  {days.map((d) => <td key={d}>{series.get(f.id)?.find((p) => p.day === d)?.points ?? 0}</td>)}
+                  {days.map((d) => <td key={d}>{target.get(f.id)?.find((p) => p.day === d)?.points ?? 0}</td>)}
                 </tr>
               ))}
             </tbody>
