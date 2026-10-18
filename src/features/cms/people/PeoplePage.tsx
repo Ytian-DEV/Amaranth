@@ -1,6 +1,6 @@
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from '@/features/auth/AuthProvider';
-import { canPublish, isAdmin } from '@/features/auth/permissions';
+import { canGrantPublishing, canPublish, isAdmin } from '@/features/auth/permissions';
 import { cn } from '@/lib/cn';
 import { useDocumentTitle } from '@/lib/useDocumentTitle';
 import { CmsPageHeader } from '../ui';
@@ -9,13 +9,14 @@ import { ContributorsTab } from './ContributorsTab';
 import { InvitesTab } from './InvitesTab';
 import { StaffTab } from './StaffTab';
 
-/** /admin/staff/* — accounts and invites (admins), bylines and the editorial board (editors). */
+/** /admin/staff/* — accounts (admins; the Managing editor for publishing access), invites (admins), bylines and the editorial board (editors). */
 export function PeoplePage() {
   useDocumentTitle('Staff');
   const { profile } = useAuth();
   const admin = isAdmin(profile?.role);
+  const accounts = canGrantPublishing(profile?.role);
   const tabs = [
-    admin && { to: '/admin/staff', label: 'Accounts', end: true },
+    accounts && { to: '/admin/staff', label: 'Accounts', end: true },
     admin && { to: '/admin/staff/invites', label: 'Invites' },
     { to: '/admin/staff/contributors', label: 'Contributors' },
     canPublish(profile?.role) && { to: '/admin/staff/board', label: 'Editorial board' },
@@ -42,7 +43,7 @@ export function PeoplePage() {
         </ul>
       </nav>
       <Routes>
-        <Route index element={admin ? <StaffTab /> : <Navigate to="contributors" replace />} />
+        <Route index element={accounts ? <StaffTab /> : <Navigate to="contributors" replace />} />
         {admin && <Route path="invites" element={<InvitesTab />} />}
         <Route path="contributors" element={<ContributorsTab />} />
         {canPublish(profile?.role) && <Route path="board" element={<BoardTab />} />}

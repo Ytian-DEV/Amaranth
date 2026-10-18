@@ -6,7 +6,9 @@ insert into public.staff_invites (email, role, section_slugs) values
   ('eic@test.local', 'editor_in_chief', '{}'),
   ('news.editor@test.local', 'section_editor', '{news}'),
   ('writer@test.local', 'staff_writer', '{}'),
-  ('writer2@test.local', 'staff_writer', '{}')
+  ('writer2@test.local', 'staff_writer', '{}'),
+  ('pub.me@test.local', 'managing_editor', '{}'),
+  ('bm@test.local', 'business_manager', '{}')
 on conflict (email) do nothing;
 
 insert into auth.users (email, raw_user_meta_data)
@@ -17,7 +19,9 @@ from (values
   ('news.editor@test.local', 'Nora News'),
   ('writer@test.local', 'Wes Writer'),
   ('writer2@test.local', 'Wren Writer'),
-  ('stranger@test.local', 'Sam Stranger')
+  ('stranger@test.local', 'Sam Stranger'),
+  ('pub.me@test.local', 'Mia Managing'),
+  ('bm@test.local', 'Bo Business')
 ) as x(email, name)
 where not exists (select 1 from auth.users u where u.email = x.email);
 

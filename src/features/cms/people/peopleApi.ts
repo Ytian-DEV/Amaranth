@@ -43,11 +43,13 @@ export function useSectionsList() {
 export function useUpdateStaff() {
   const client = useQueryClient();
   return useMutation({
-    mutationFn: async (p: { id: string; role?: AppRole; is_active?: boolean; sectionIds?: string[] }) => {
+    mutationFn: async (p: { id: string; role?: AppRole; is_active?: boolean; sectionIds?: string[]; canPublish?: boolean }) => {
       const patch: Partial<ProfileRow> = {};
       if (p.role) patch.role = p.role;
       if (p.is_active !== undefined) patch.is_active = p.is_active;
       if (Object.keys(patch).length) unwrap(await sb().from('profiles').update(patch).eq('id', p.id));
+      // through an RPC: the Managing editor can't update other profiles directly
+      if (p.canPublish !== undefined) unwrap(await sb().rpc('set_publish_access', { p_profile_id: p.id, p_allowed: p.canPublish }));
       if (p.sectionIds) {
         unwrap(await sb().from('profile_sections').delete().eq('profile_id', p.id));
         if (p.sectionIds.length) {

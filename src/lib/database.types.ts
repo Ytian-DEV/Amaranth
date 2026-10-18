@@ -10,6 +10,7 @@ export type AppRole =
   | 'super_admin'
   | 'editor_in_chief'
   | 'managing_editor'
+  | 'business_manager'
   | 'section_editor'
   | 'staff_writer'
   | 'contributor';
@@ -56,6 +57,8 @@ export type ProfileRow = {
   bio: string | null;
   role: AppRole;
   is_active: boolean;
+  /** publishing access given in Staff (the managing roles and Business Manager always have it) */
+  can_publish: boolean;
   last_seen_at: string | null;
   created_at: string;
   updated_at: string;
@@ -746,6 +749,7 @@ export type Database = {
       sk_set_placements: { Args: { p_event_id: string; p_rows: SkPlacementInput[] }; Returns: number };
       sk_countdown: { Args: Record<string, never>; Returns: SkCountdownRow[] };
       sk_points_timeline: { Args: { p_edition_id: string; p_hours: number }; Returns: SkPointsTimelineRow[] };
+      set_publish_access: { Args: { p_profile_id: string; p_allowed: boolean }; Returns: undefined };
       staff_heartbeat: { Args: Record<string, never>; Returns: number };
       stats_overview: { Args: { p_from: string; p_to: string }; Returns: StatsOverview };
       stats_articles: { Args: { p_from: string; p_to: string; p_limit?: number }; Returns: StatsArticleRow[] };

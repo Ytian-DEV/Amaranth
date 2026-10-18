@@ -86,7 +86,7 @@ function Editor({ initialRow, initialDraft }: { initialRow: ArticleRow | null; i
   const ownContributor = contributors.data?.find((c) => c.profileId === userId);
   const isOwner = !row || row.created_by === userId || draft.authors.some((a) => a.contributorId === ownContributor?.id);
   const canEditSection = canPublish(role) || (role === 'section_editor' && Boolean(sectionId && mySections.data?.includes(sectionId)));
-  const ctx = { status, isOwner, canEditSection };
+  const ctx = { status, isOwner, canEditSection, publishAccess: profile?.can_publish };
   const editable = canEditContent(ctx);
   const writesLive = !['draft', 'rejected'].includes(status); // changes to live/locked articles need an explicit update
   const dirty = snapshot(draft) !== lastSaved.current;
