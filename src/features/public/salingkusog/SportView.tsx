@@ -3,11 +3,12 @@ import { Link, NavLink } from 'react-router-dom';
 import { SectionHeader } from '@/components/story/Story';
 import type { SkAthleteRow, SkEventLeaderRow, SkEventRow, SkMatchRow, SkPlacementRow, SkSportRow } from '@/lib/database.types';
 import { cn } from '@/lib/cn';
+import { isContestFormat } from '@/lib/skContests';
 import { isGroupGame, pendingSide } from '@/lib/skSources';
 import { manilaDate } from '@/lib/manila';
 import { categoryLabels } from '@/lib/skLabels';
 import { dayLabel } from './hub';
-import { FactionBadge, MatchCard } from './SkBits';
+import { ContestTable, FactionBadge, MatchCard } from './SkBits';
 import type { HubData } from './skData';
 import { bracketColumns, eventStatusLine, formatLine, isBronzeRound, leaderStat, roundRobinTable } from './sports';
 import { winnerCards } from './winners';
@@ -240,6 +241,22 @@ export function SportView({ sport, event, hub, placements, athletes, leaders }: 
                 <RoundRobin games={games} hub={hub} seeds={event.seeds} />
               </section>
             )}
+            {isContestFormat(event.format) &&
+              [...games]
+                .filter((g) => g.is_contest)
+                .sort((a, b) => b.scheduled_at.localeCompare(a.scheduled_at))
+                .map((g) => (
+                  <section key={g.id} aria-labelledby={`contest-${g.id}`} className="rounded-[14px] border border-line bg-surface p-5">
+                    <div className="mb-3 flex items-baseline justify-between gap-3">
+                      <h3 id={`contest-${g.id}`} className="font-serif text-[22px] font-semibold">
+                        {g.status === 'final' ? 'Results' : 'Performance order'}
+                        {g.round && g.round !== 'Final' && <span className="text-ink-muted"> · {g.round}</span>}
+                      </h3>
+                      {g.status === 'live' && <span className="text-[11px] font-bold uppercase tracking-[0.99px] text-alert">● Live</span>}
+                    </div>
+                    <ContestTable session={g} event={event} hub={hub} athletes={athletes} />
+                  </section>
+                ))}
             {card ? <WinnerCardView card={card} hub={hub} /> : <p className="rounded-[12px] border border-dashed border-line px-6 py-12 text-center text-body-m text-ink-muted">Results will appear here after the event.</p>}
           </div>
         )}

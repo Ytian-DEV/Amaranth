@@ -571,8 +571,27 @@ export type SkMatchRow = {
   /** generated games: where the side comes from — seed:3, winner:<id>, loser:<id>, rank:2 */
   source_a: string | null;
   source_b: string | null;
+  /** a contest session: every faction at once, results in sk_entries */
+  is_contest: boolean;
   winner_side: 'a' | 'b' | null; // generated
   updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type SkEntryStatus = 'ok' | 'dns' | 'dnf' | 'dq';
+/** One faction (or its athlete) in a contest session. */
+export type SkEntryRow = {
+  id: string;
+  edition_id: string;
+  match_id: string;
+  faction_id: string;
+  athlete_id: string | null;
+  lane: number;
+  /** seconds, metres or points (timed / measured events) */
+  result: number | null;
+  /** judged events: the place the judges announced */
+  place: number | null;
+  status: SkEntryStatus;
   created_at: string;
   updated_at: string;
 };
@@ -734,6 +753,7 @@ export type Database = {
         [FK<'sk_athlete_stats', 'match_id', 'sk_matches'>, FK<'sk_athlete_stats', 'athlete_id', 'sk_athletes'>]
       >;
       sk_placements: Table<SkPlacementRow, 'event_id' | 'place' | 'faction_id'>;
+      sk_entries: Table<SkEntryRow, 'match_id' | 'faction_id', [FK<'sk_entries', 'match_id', 'sk_matches'>]>;
       sk_awards: Table<
         SkAwardRow,
         'edition_id' | 'kind' | 'day' | 'athlete_id',
@@ -763,6 +783,10 @@ export type Database = {
           p_bronze?: boolean;
         };
         Returns: number;
+      };
+      sk_create_contest: {
+        Args: { p_event_id: string; p_at: string; p_venue_id?: string | null; p_round?: string | null; p_factions?: string[] | null; p_shuffle?: boolean };
+        Returns: string;
       };
       sk_set_placements: { Args: { p_event_id: string; p_rows: SkPlacementInput[] }; Returns: number };
       sk_countdown: { Args: Record<string, never>; Returns: SkCountdownRow[] };

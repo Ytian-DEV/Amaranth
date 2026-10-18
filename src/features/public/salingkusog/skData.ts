@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import type { MediaAssetRow, SkAthleteRow, SkEditionRow, SkEventRow, SkFactionRow, SkMatchRow, SkMedalTableRow, SkPlacementRow, SkPointsByDayRow, SkSportRow, SkVenueRow } from '@/lib/database.types';
+import type { MediaAssetRow, SkAthleteRow, SkEditionRow, SkEntryRow, SkEventRow, SkFactionRow, SkMatchRow, SkMedalTableRow, SkPlacementRow, SkPointsByDayRow, SkSportRow, SkVenueRow } from '@/lib/database.types';
 import { getSupabase, unwrap, unwrapMaybe } from '@/lib/supabase';
 
 const sb = () => getSupabase();
@@ -24,6 +24,8 @@ export type HubData = {
   venues: SkVenueRow[];
   logos: MediaAssetRow[];
   matches: SkMatchRow[];
+  /** contest line-ups and results (every faction at once) */
+  entries?: SkEntryRow[];
 };
 
 /** Names, colours and games every Salingkusog page needs. */
@@ -34,16 +36,17 @@ export function useHubData(editionId: string | undefined) {
     refetchInterval: LIVE_REFRESH,
     queryFn: async (): Promise<HubData> => {
       const id = editionId!;
-      const [factions, sports, events, venues, matches] = await Promise.all([
+      const [factions, sports, events, venues, matches, entries] = await Promise.all([
         sb().from('sk_factions').select('*').eq('edition_id', id).order('sort_order').then(unwrap),
         sb().from('sk_sports').select('*').eq('edition_id', id).order('sort_order').then(unwrap),
         sb().from('sk_events').select('*').eq('edition_id', id).order('sort_order').then(unwrap),
         sb().from('sk_venues').select('*').eq('edition_id', id).order('sort_order').then(unwrap),
         sb().from('sk_matches').select('*').eq('edition_id', id).order('scheduled_at').then(unwrap),
+        sb().from('sk_entries').select('*').eq('edition_id', id).order('lane').then(unwrap),
       ]);
       const logoIds = factions.map((f) => f.logo_asset_id).filter((x): x is string => !!x);
       const logos = logoIds.length ? unwrap(await sb().from('media_assets').select('*').in('id', logoIds)) : [];
-      return { factions, sports, events, venues, logos, matches };
+      return { factions, sports, events, venues, logos, matches, entries };
     },
   });
 }
@@ -89,6 +92,7 @@ export function useLiveGames(editionId: string | undefined) {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'sk_matches', filter: `edition_id=eq.${editionId}` }, () =>
           refresh('hub', 'standings', 'timeline', 'results'),
         )
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'sk_entries', filter: `edition_id=eq.${editionId}` }, () => refresh('hub'))
         .on('postgres_changes', { event: '*', schema: 'public', table: 'sk_placements', filter: `edition_id=eq.${editionId}` }, () =>
           refresh('standings', 'timeline', 'results'),
         )

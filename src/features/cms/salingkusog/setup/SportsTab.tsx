@@ -1,4 +1,4 @@
-import { CalendarPlus, Plus } from 'lucide-react';
+import { CalendarPlus, Plus, Users } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Checkbox, Field, Input, Select } from '@/components/ui/Field';
@@ -9,6 +9,8 @@ import { Card, CardHeader } from '../../ui';
 import { categories, categoryLabels, divisionLabels, divisions, formatLabels, formats } from '@/lib/skLabels';
 import { skErrorText, useDeleteSkRow, useSaveSkRow, useSkMatches, useSkRows } from '../skApi';
 import { BuildScheduleModal } from './BuildScheduleModal';
+import { CreateContestModal } from './CreateContestModal';
+import { isContestFormat } from '@/lib/skContests';
 import { useNameSlug, validSlug } from './form';
 import { RowActions, SlugInput } from './shared';
 
@@ -117,7 +119,7 @@ function EventModal({ sport, event, venues, nextOrder, onClose }: { sport: SkSpo
               </Select>
             )}
           </Field>
-          <Field label="Result unit" hint="For timed or measured events: s, m, pts">
+          <Field label="Result unit" hint="Timed or measured events: s = fastest wins; m or pts = highest wins">
             {({ id, describedBy }) => <Input id={id} aria-describedby={describedBy} maxLength={8} value={unit} onChange={(e) => setUnit(e.target.value)} />}
           </Field>
           <Field label="Order">{({ id }) => <Input id={id} type="number" min={0} value={order} onChange={(e) => setOrder(Number(e.target.value))} />}</Field>
@@ -128,7 +130,7 @@ function EventModal({ sport, event, venues, nextOrder, onClose }: { sport: SkSpo
   );
 }
 
-type Modal_ = { kind: 'sport'; sport: SkSportRow | null } | { kind: 'event'; sport: SkSportRow; event: SkEventRow | null } | { kind: 'build'; sport: SkSportRow; event: SkEventRow } | null;
+type Modal_ = { kind: 'sport'; sport: SkSportRow | null } | { kind: 'event'; sport: SkSportRow; event: SkEventRow | null } | { kind: 'build' | 'contest'; sport: SkSportRow; event: SkEventRow } | null;
 
 /** Formats whose games "Build schedule" can create. */
 const buildable = (e: SkEventRow) => e.is_team && (e.format === 'bracket' || e.format === 'round_robin' || e.format === 'round_robin_final');
@@ -144,6 +146,7 @@ export function SportsView({
   onEditEvent,
   onDeleteEvent,
   onBuild,
+  onContest,
 }: {
   sports: SkSportRow[];
   events: SkEventRow[];
@@ -155,6 +158,7 @@ export function SportsView({
   onEditEvent: (s: SkSportRow, e: SkEventRow) => void;
   onDeleteEvent: (s: SkSportRow, e: SkEventRow) => void;
   onBuild?: (s: SkSportRow, e: SkEventRow) => void;
+  onContest?: (s: SkSportRow, e: SkEventRow) => void;
 }) {
   const venueName = (id: string | null) => venues.find((v) => v.id === id)?.name;
   return (
@@ -189,6 +193,11 @@ export function SportsView({
                     {onBuild && buildable(e) && (
                       <Button size="sm" variant="outline" icon={<CalendarPlus className="size-4" aria-hidden />} onClick={() => onBuild(s, e)}>
                         Build schedule <span className="sr-only">for {s.name} {e.name}</span>
+                      </Button>
+                    )}
+                    {onContest && isContestFormat(e.format) && (
+                      <Button size="sm" variant="outline" icon={<Users className="size-4" aria-hidden />} onClick={() => onContest(s, e)}>
+                        Create contest <span className="sr-only">for {s.name} {e.name}</span>
                       </Button>
                     )}
                     <RowActions label={`${s.name} ${e.name}`} onEdit={() => onEditEvent(s, e)} onDelete={() => onDeleteEvent(s, e)} />
@@ -240,7 +249,11 @@ export function SportsTab({ editionId, startsOn }: { editionId: string; startsOn
         onEditEvent={(s, e) => setModal({ kind: 'event', sport: s, event: e })}
         onDeleteEvent={(s, e) => window.confirm(`Delete ${s.name} · ${e.name}? Its games, results and medals are deleted too.`) && delEvent.mutate(e.id)}
         onBuild={(s, e) => setModal({ kind: 'build', sport: s, event: e })}
+        onContest={(s, e) => setModal({ kind: 'contest', sport: s, event: e })}
       />
+      {modal?.kind === 'contest' && (
+        <CreateContestModal edition={{ starts_on: startsOn }} sport={modal.sport} event={modal.event} factions={factions.data ?? []} venues={venues.data} onClose={() => setModal(null)} />
+      )}
       {modal?.kind === 'build' && (
         <BuildScheduleModal
           edition={{ starts_on: startsOn }}

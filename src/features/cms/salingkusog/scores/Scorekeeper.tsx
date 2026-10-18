@@ -9,7 +9,8 @@ import type { SkEditionRow, SkFactionRow, SkMatchRow, SkMatchStatus, SkPeriod } 
 import { formatDateTime } from '@/lib/format';
 import { Card, CardHeader } from '../../ui';
 import { clampScore, eventFinished, isKnockout, manilaDate, nextPeriodLabel, scoreSteps, statusActions, statusLabels } from '../scoring';
-import { skErrorText, useDeleteMatch, useMatchRealtime, useSkMatch, useSkMatches, useSkPlacements, useUpdateMatch } from '../skApi';
+import { skErrorText, useDeleteMatch, useMatchRealtime, useSkEntries, useSkMatch, useSkMatches, useSkPlacements, useUpdateMatch } from '../skApi';
+import { ContestScorekeeper } from './ContestScorekeeper';
 import { BoxScore } from './BoxScore';
 import { GameModal } from './GameModal';
 import { namer, useSkLookups, type SkLookups } from './lookups';
@@ -209,6 +210,7 @@ export function Scorekeeper({ edition }: { edition: SkEditionRow }) {
   const lookups = useSkLookups(edition.id);
   const allGames = useSkMatches(edition.id);
   const placements = useSkPlacements(edition.id);
+  const entries = useSkEntries(edition.id);
   const update = useUpdateMatch(matchId ?? '');
   const del = useDeleteMatch();
   const [draft, setDraft] = useState<Partial<Draft>>({});
@@ -251,6 +253,24 @@ export function Scorekeeper({ edition }: { edition: SkEditionRow }) {
 
   const shown: SkMatchRow = { ...match.data, ...draft };
 
+  // the event's last game or contest is in and no medals are saved yet: send staff to confirm them
+  const eventGames = (allGames.data ?? []).map((g) => (g.id === shown.id ? shown : g)).filter((g) => g.event_id === shown.event_id);
+  const confirmMedals = shown.status === 'final' && eventFinished(eventGames) && placements.data !== undefined && !placements.data.some((p) => p.event_id === shown.event_id);
+
+  const contestEvent = lookups.data.events.find((e) => e.id === shown.event_id);
+  if (shown.is_contest && contestEvent) {
+    if (!entries.data) return <Skeleton className="h-96" />;
+    return (
+      <ContestScorekeeper
+        match={shown}
+        event={contestEvent}
+        entries={entries.data.filter((e) => e.match_id === shown.id)}
+        lookups={lookups.data}
+        confirmMedals={confirmMedals}
+      />
+    );
+  }
+
   function onDraft(patch: Partial<Draft>) {
     setSaved(false);
     setDraft((d) => ({ ...d, ...patch }));
@@ -271,10 +291,6 @@ export function Scorekeeper({ edition }: { edition: SkEditionRow }) {
     }
     void flush(extra);
   }
-
-  // the event's last game is in and no medals are saved yet: send staff to confirm them
-  const eventGames = (allGames.data ?? []).map((g) => (g.id === shown.id ? shown : g)).filter((g) => g.event_id === shown.event_id);
-  const confirmMedals = shown.status === 'final' && eventFinished(eventGames) && placements.data !== undefined && !placements.data.some((p) => p.event_id === shown.event_id);
 
   return (
     <>

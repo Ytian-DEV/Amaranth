@@ -10,6 +10,7 @@ import { cn } from '@/lib/cn';
 import { latestResults, shortEventLabel, standingsDay, type HubPhase } from '@/features/public/salingkusog/hub';
 import { SalingkusogMark } from '@/features/public/salingkusog/SalingkusogHeader';
 import { FactionBadge } from '@/features/public/salingkusog/SkBits';
+import { formatResult, rankEntries } from '@/lib/skContests';
 import type { HubData } from '@/features/public/salingkusog/skData';
 
 export type SportsSalingkusog = {
@@ -25,6 +26,24 @@ function ResultMini({ match, hub }: { match: SkMatchRow; hub: HubData }) {
   const sport = hub.sports.find((s) => s.id === event?.sport_id);
   const side = (id: string | null) => hub.factions.find((f) => f.id === id);
   const live = match.status === 'live';
+  if (match.is_contest && event && sport) {
+    // a contest: the top two instead of "A vs B", linking to the sport page
+    const top = rankEntries(event, (hub.entries ?? []).filter((e) => e.match_id === match.id)).slice(0, 2);
+    return (
+      <Link to={`/salingkusog/sports/${sport.slug}?event=${event.slug}`} className="flex w-[190px] shrink-0 flex-col gap-1.5 rounded-[8px] bg-green-800 px-3 py-2.5 text-on-dark hover:bg-green-700 md:w-[200px]">
+        <span className="flex items-center justify-between gap-2 text-[12px]">
+          <span className="truncate font-semibold">{shortEventLabel(sport.name, event)}</span>
+          <span className={cn('shrink-0 text-[10px] font-bold uppercase tracking-[0.9px]', live ? 'text-lime' : 'text-on-dark-muted')}>{live ? 'Live' : 'Final'}</span>
+        </span>
+        {top.map((e) => (
+          <span key={e.id} className="flex items-center justify-between gap-2">
+            <FactionBadge faction={side(e.faction_id)} logos={hub.logos} theme="dark" className="min-w-0 [&>span:first-child]:size-6 [&>span:first-child]:text-[9px]" nameClassName={cn('text-[12px]', e.rank === 1 ? 'font-bold' : 'font-medium')} />
+            <span className="shrink-0 text-[12px] font-semibold tabular-nums">{event.format === 'judged' ? (e.rank === 1 ? 'Winner' : '2nd') : formatResult(e.result, event.result_unit)}</span>
+          </span>
+        ))}
+      </Link>
+    );
+  }
   return (
     <Link to={`/salingkusog/match/${match.id}`} className="flex w-[190px] shrink-0 flex-col gap-1.5 rounded-[8px] bg-green-800 px-3 py-2.5 text-on-dark hover:bg-green-700 md:w-[200px]">
       <span className="flex items-center justify-between gap-2 text-[12px]">

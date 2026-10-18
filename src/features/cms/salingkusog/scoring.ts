@@ -1,6 +1,7 @@
 // Pure helpers for the scorekeeper, results and awards screens. Salingkusog runs on Philippine time (UTC+8, no DST).
 import { roundRobinTable } from '@/features/public/salingkusog/sports';
-import type { SkEditionRow, SkEventRow, SkMatchRow, SkMatchStatus, SkPlacementInput, SkSportRow } from '@/lib/database.types';
+import type { SkEditionRow, SkEntryRow, SkEventRow, SkMatchRow, SkMatchStatus, SkPlacementInput, SkSportRow } from '@/lib/database.types';
+import { contestPodium, isContestFormat } from '@/lib/skContests';
 import { isGroupGame } from '@/lib/skSources';
 import { dayRange, manilaDate, manilaTime } from '@/lib/manila';
 
@@ -102,17 +103,27 @@ export function podiumFromGames(games: Pick<SkMatchRow, 'round' | 'round_order' 
   return rows;
 }
 
-type Game = Pick<SkMatchRow, 'round' | 'round_order' | 'status' | 'side_a_id' | 'side_b_id' | 'score_a' | 'score_b' | 'winner_side' | 'ended_at' | 'scheduled_at' | 'source_a'>;
+type Game = Pick<SkMatchRow, 'id' | 'round' | 'round_order' | 'status' | 'side_a_id' | 'side_b_id' | 'score_a' | 'score_b' | 'winner_side' | 'ended_at' | 'scheduled_at' | 'source_a' | 'is_contest'>;
 
 /** Every game of the event is finished (cancelled ones don't count). */
 export const eventFinished = (games: Pick<SkMatchRow, 'status'>[]) => games.some((g) => g.status === 'final') && games.every((g) => g.status === 'final' || g.status === 'cancelled');
 
 /**
  * Medals the games point to, once the event's last game is final, for staff to confirm in
- * Results: knockout events from the final and bronze game, round robins from the standings.
+ * Results: knockout events from the final and bronze game, round robins from the standings,
+ * contests from the last session's places.
  */
-export function suggestedPodium(event: Pick<SkEventRow, 'format' | 'seeds'>, games: Game[]): SkPlacementInput[] {
+export function suggestedPodium(
+  event: Pick<SkEventRow, 'format' | 'seeds' | 'result_unit' | 'is_team'>,
+  games: Game[],
+  entries: Pick<SkEntryRow, 'match_id' | 'faction_id' | 'athlete_id' | 'lane' | 'result' | 'place' | 'status'>[] = [],
+): SkPlacementInput[] {
   if (!eventFinished(games)) return [];
+  if (isContestFormat(event.format)) {
+    const sessions = games.filter((g) => g.is_contest && g.status === 'final').sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
+    const last = sessions.find((g) => /final/i.test(g.round ?? '')) ?? sessions.at(-1);
+    return last ? contestPodium(event, last, entries.filter((e) => e.match_id === last.id)) : [];
+  }
   if (event.format === 'round_robin') {
     const done = games.filter((g) => g.status === 'final');
     const last = done.map((g) => g.ended_at ?? g.scheduled_at).sort().at(-1)!;

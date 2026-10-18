@@ -42,7 +42,7 @@ export function ScheduleView({
 }) {
   const days = dayRange(edition.starts_on, edition.ends_on);
   const sportOf = (eventId: string) => hub.events.find((e) => e.id === eventId)?.sport_id;
-  const groups = scheduleGroups(hub.matches, day, filters, sportOf, today);
+  const groups = scheduleGroups(hub.matches, day, filters, sportOf, today, (id) => (hub.entries ?? []).filter((e) => e.match_id === id).map((e) => e.faction_id));
   const filtered = !!(filters.sport || filters.faction || filters.venue || filters.show !== 'all');
   const set = (patch: Partial<ScheduleFilters>) => onFilters({ ...filters, ...patch });
   const pdfHref = pdf ? publicUrl(pdf.bucket, pdf.path) : undefined;
