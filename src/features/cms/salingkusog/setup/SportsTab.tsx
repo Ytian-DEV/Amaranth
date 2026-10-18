@@ -221,7 +221,7 @@ export function SportsView({
   );
 }
 
-export function SportsTab({ editionId, startsOn }: { editionId: string; startsOn: string }) {
+export function SportsTab({ editionId, startsOn, endsOn }: { editionId: string; startsOn: string; endsOn: string }) {
   const sports = useSkRows('sk_sports', editionId);
   const factions = useSkRows('sk_factions', editionId);
   const matches = useSkMatches(editionId);
@@ -257,7 +257,7 @@ export function SportsTab({ editionId, startsOn }: { editionId: string; startsOn
       )}
       {modal?.kind === 'build' && (
         <BuildScheduleModal
-          edition={{ starts_on: startsOn }}
+          edition={{ starts_on: startsOn, ends_on: endsOn }}
           sport={modal.sport}
           event={evs.find((e) => e.id === modal.event.id) ?? modal.event}
           factions={factions.data ?? []}

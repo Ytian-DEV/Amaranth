@@ -1,4 +1,4 @@
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
@@ -8,8 +8,9 @@ import { Pill } from '@/components/ui/StatusPill';
 import type { SkEntryRow, SkEntryStatus, SkEventRow, SkMatchRow, SkMatchStatus } from '@/lib/database.types';
 import { formatDateTime } from '@/lib/format';
 import { entryStatusLabels, formatResult, isTimeUnit, lowerWins, parseResult, rankEntries, sessionComplete } from '@/lib/skContests';
-import { statusActions, statusLabels } from '../scoring';
+import { manilaDate, statusActions, statusLabels } from '../scoring';
 import { skErrorText, useDeleteMatch, useSaveEntry, useUpdateMatch } from '../skApi';
+import { GameModal } from './GameModal';
 import { namer, type SkLookups } from './lookups';
 
 type Patch = Partial<Pick<SkEntryRow, 'athlete_id' | 'result' | 'place' | 'lane' | 'status'>>;
@@ -119,6 +120,7 @@ export function ContestScorekeeper({ match, event, entries, lookups, confirmMeda
   const saveEntry = useSaveEntry();
   const del = useDeleteMatch();
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
   const venue = n.venue(match.venue_id);
   const closed = match.status === 'final' || match.status === 'cancelled';
   const judged = event.format === 'judged';
@@ -210,6 +212,9 @@ export function ContestScorekeeper({ match, event, entries, lookups, confirmMeda
       </div>
 
       <div className="flex flex-wrap gap-2 border-t border-line pt-4">
+        <Button variant="outline" size="sm" icon={<Pencil className="size-4" aria-hidden />} onClick={() => setEditing(true)}>
+          Edit contest details
+        </Button>
         <Button
           variant="ghost"
           size="sm"
@@ -222,6 +227,7 @@ export function ContestScorekeeper({ match, event, entries, lookups, confirmMeda
           Delete contest
         </Button>
       </div>
+      {editing && <GameModal lookups={lookups} match={match} day={manilaDate(match.scheduled_at)} onClose={() => setEditing(false)} />}
     </div>
   );
 }

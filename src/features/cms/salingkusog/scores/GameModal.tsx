@@ -4,6 +4,7 @@ import { Field, Input, Select } from '@/components/ui/Field';
 import { Alert } from '@/components/ui/Feedback';
 import { Modal } from '@/components/ui/Modal';
 import type { SkMatchRow } from '@/lib/database.types';
+import { isContestFormat } from '@/lib/skContests';
 import { useDebounced } from '@/lib/useDebounced';
 import { numOrNull } from '../setup/form';
 import { fromLocalInput, toLocalInput } from '../scoring';
@@ -48,9 +49,15 @@ function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: 
   const articles = useRecapArticleOptions(useDebounced(articleSearch, 300), f.recap_article_id || null);
   const [error, setError] = useState<string | null>(null);
   const set = (k: keyof typeof f) => (e: { target: { value: string } }) => setF((x) => ({ ...x, [k]: e.target.value }));
+  // contests have no sides; generated games get theirs from earlier results (Build schedule)
+  const contest = !!match?.is_contest;
+  const generated = !!(match?.source_a || match?.source_b);
+  const pickedEvent = lookups.events.find((e) => e.id === f.event_id);
+  const needsContest = !match && !!pickedEvent && isContestFormat(pickedEvent.format);
 
   async function submit() {
     if (!f.event_id) return setError('Choose the event.');
+    if (needsContest) return setError('This is a timed or judged event: use “Create contest” in Sports & events so every faction is in one session.');
     if (!f.when) return setError('Choose the date and time.');
     if (f.side_a_id && f.side_a_id === f.side_b_id) return setError('A faction can’t play itself.');
     try {
@@ -60,8 +67,8 @@ function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: 
         round: f.round.trim() || null,
         scheduled_at: fromLocalInput(f.when),
         venue_id: f.venue_id || ev?.venue_id || null,
-        side_a_id: f.side_a_id || null,
-        side_b_id: f.side_b_id || null,
+        side_a_id: contest ? null : generated ? (match?.side_a_id ?? null) : f.side_a_id || null,
+        side_b_id: contest ? null : generated ? (match?.side_b_id ?? null) : f.side_b_id || null,
         round_order: Number(f.round_order) || 0,
         bracket_slot: numOrNull(f.bracket_slot),
         recap_article_id: f.recap_article_id || null,
@@ -87,7 +94,7 @@ function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: 
     <Modal
       open
       onClose={onClose}
-      title={match ? 'Edit game' : 'Add game'}
+      title={contest ? 'Edit contest' : match ? 'Edit game' : 'Add game'}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
@@ -97,9 +104,11 @@ function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: 
     >
       <div className="flex flex-col gap-4">
         {error && <Alert tone="error">{error}</Alert>}
+        {needsContest && <Alert tone="info">Dance, swimming, athletics and other events where every faction competes at once use “Create contest” in Sports & events.</Alert>}
+        {generated && <Alert tone="info">The teams in this game fill in by themselves from earlier results (Build schedule). You can change its time, venue and recap here.</Alert>}
         <Field label="Event" required>
           {({ id }) => (
-            <Select id={id} value={f.event_id} onChange={set('event_id')}>
+            <Select id={id} value={f.event_id} onChange={set('event_id')} disabled={contest || generated}>
               <option value="">Choose…</option>
               {lookups.sports.map((s) => (
                 <optgroup key={s.id} label={s.name}>
@@ -120,8 +129,12 @@ function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: 
             {({ id, describedBy }) => <Input id={id} aria-describedby={describedBy} value={f.round} onChange={set('round')} />}
           </Field>
           <Field label="Starts (Philippine time)" required>{({ id }) => <Input id={id} type="datetime-local" value={f.when} onChange={set('when')} />}</Field>
-          <Field label="Side A">{({ id }) => <Select id={id} value={f.side_a_id} onChange={set('side_a_id')}>{factionOptions}</Select>}</Field>
-          <Field label="Side B">{({ id }) => <Select id={id} value={f.side_b_id} onChange={set('side_b_id')}>{factionOptions}</Select>}</Field>
+          {!contest && (
+            <>
+              <Field label="Side A">{({ id }) => <Select id={id} value={f.side_a_id} onChange={set('side_a_id')} disabled={generated}>{factionOptions}</Select>}</Field>
+              <Field label="Side B">{({ id }) => <Select id={id} value={f.side_b_id} onChange={set('side_b_id')} disabled={generated}>{factionOptions}</Select>}</Field>
+            </>
+          )}
           <Field label="Venue" hint="Empty = the event’s main venue">
             {({ id, describedBy }) => (
               <Select id={id} aria-describedby={describedBy} value={f.venue_id} onChange={set('venue_id')}>
@@ -134,7 +147,7 @@ function GameForm({ lookups, match, day, onClose, busy, save }: Props & { busy: 
               </Select>
             )}
           </Field>
-          <div className="grid grid-cols-2 gap-3">
+          <div className={contest || generated ? 'hidden' : 'grid grid-cols-2 gap-3'}>
             <Field label="Bracket column" hint="0 = first round">
               {({ id, describedBy }) => <Input id={id} aria-describedby={describedBy} type="number" min={0} value={f.round_order} onChange={set('round_order')} />}
             </Field>

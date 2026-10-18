@@ -14,7 +14,7 @@ import { buildFormats, scheduleSize, type BuildFormat } from './buildSchedule';
 const isBuildFormat = (f: string): f is BuildFormat => buildFormats.some((b) => b.value === f);
 
 export function BuildScheduleModal({ edition, sport, event, factions, venues, games, onClose }: {
-  edition: Pick<SkEditionRow, 'starts_on'>;
+  edition: Pick<SkEditionRow, 'starts_on' | 'ends_on'>;
   sport: SkSportRow;
   event: SkEventRow;
   factions: SkFactionRow[];
@@ -37,6 +37,9 @@ export function BuildScheduleModal({ edition, sport, event, factions, venues, ga
 
   const played = games.some((g) => g.status === 'live' || g.status === 'final');
   const size = scheduleSize(format, seeds.length, bronze);
+  // the last round's day, to warn when it falls after the games end (the Scores tab only shows edition days)
+  const lastDay = firstAt && size.rounds ? manilaDate(new Date(new Date(fromLocalInput(firstAt)).getTime() + (size.rounds - 1) * (Number(roundGap) || 0) * 3_600_000).toISOString()) : null;
+  const tooLate = !!lastDay && lastDay > edition.ends_on;
   const name = (id: string | null) => factions.find((f) => f.id === id)?.name;
   const move = (i: number, d: -1 | 1) =>
     setSeeds((s) => {
@@ -105,7 +108,7 @@ export function BuildScheduleModal({ edition, sport, event, factions, venues, ga
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button loading={build.isPending} disabled={played} onClick={() => void submit()}>
+          <Button loading={build.isPending} disabled={played || tooLate} onClick={() => void submit()}>
             {games.length ? 'Rebuild schedule' : 'Create games'}
           </Button>
         </>
@@ -177,6 +180,11 @@ export function BuildScheduleModal({ edition, sport, event, factions, venues, ga
         </div>
         {format !== 'round_robin' && <Checkbox label="Play a bronze game for 3rd place" checked={bronze} onChange={(e) => setBronze(e.target.checked)} />}
 
+        {tooLate && (
+          <Alert tone="error">
+            The last round would be on {formatShortDate(lastDay)}, after the games end ({formatShortDate(edition.ends_on)}). Start earlier or use fewer hours between rounds.
+          </Alert>
+        )}
         <p className="rounded-[10px] bg-paper px-4 py-3 text-body-m text-ink">
           {seeds.length < 2
             ? 'Pick at least 2 factions.'

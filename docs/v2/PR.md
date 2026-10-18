@@ -1,4 +1,4 @@
-**Title:** Brand 2026, Salingkusog live tally upgrades, publishing permissions and form security
+**Title:** Brand 2026, Salingkusog brackets and contests, publishing permissions and form security
 
 ## Summary
 
@@ -11,7 +11,7 @@ Everything merged to `develop` since PR #5.
   - "Results in: X of Y matches" with a progress bar; once every match is final the page reads **Official and final medal tally** and names the overall champion and runners-up.
   - Medal table rows 1–3 are tinted gold, silver and bronze.
   - Medals and results now update for readers instantly (Realtime on `sk_placements`), not only scores.
-- **Auto brackets and round robins:** a "Build schedule" button per event creates the games (single elimination with bronze game and byes, round robin, or round robin + final). Staff only enter scores: winners move on, round-robin rounds fill in once the previous round is done, and the final takes the top 2 of the standings. Cards say "Winner of Semifinal 1" instead of TBD, and the bracket shows its rounds in proper columns. Medals are suggested when an event ends; staff confirm them in Results.
+- **Auto brackets and round robins:** a "Build schedule" button per event (team or individual, e.g. chess, arnis, kyorugi) creates the games (single elimination with bronze game and byes, round robin, or round robin + final). Staff only enter scores: winners move on, round-robin rounds fill in once the previous round is done, and the final takes the top 2 of the standings. Cards say "Winner of Semifinal 1" instead of TBD, and the bracket shows its rounds in proper columns. Medals are suggested when an event ends; staff confirm them in Results.
 - **Contests** for events where every faction competes at once (dance, Pinoy pop, folkdance, hip-hop, painting, laro ng lahi, swimming, athletics): "Create contest" puts every faction in one session; staff type times or distances (places work themselves out) or, for judged events, the place the judges announce. Readers see the line-up, then the results with medal colours. Medals are suggested for staff to confirm.
 - **Literary** hero shows the lead story's photo on the green cover.
 - **Loading:** the Amaranth logo rotates while a page loads.
@@ -44,11 +44,13 @@ Everything merged to `develop` since PR #5.
 
 ## Checks
 
-`npm run check` (lint, typecheck, 251 tests, build) and `npm run db:test` (278 checks) pass.
+`npm run check` (lint, typecheck, 255 tests, build) and `npm run db:test` (278 checks) pass.
 
 ## Known follow-ups
 
 - Switch `Content-Security-Policy-Report-Only` to `Content-Security-Policy` once the preview shows no warnings.
 - Supabase Auth: consider turning off public sign-ups, leaked-password protection, and MFA for the Super admin and Executive Editor.
+- Games entered before Build schedule (CSV import or by hand) keep working as before but don't fill in by themselves; an event with games played can't be rebuilt.
+- Poomsae is usually judged: set those events to Judged so they use Create contest.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
