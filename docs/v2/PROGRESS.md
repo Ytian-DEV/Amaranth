@@ -104,7 +104,9 @@ Design: Figma page "Brand 2026" (94:121). Plan: 1 tokens + fonts → 2 header/fo
 - [x] `fix/build-schedule-individual`: Build schedule for individual events too (chess, arnis, taekwondo).
 - [x] `fix/pre-release-polish` (final check before main): the game form locks the teams of generated games and has no sides for contests; contests get "Edit contest details" (time, venue, name); "Add game" on a timed or judged event points to Create contest; Build schedule refuses a schedule whose last round falls after the edition ends; the dev checker ignores hidden inputs (Turnstile's). Final check: 53 screens clean at 375 and 1024, 255 tests, 278 SQL checks, 0 vulnerabilities, contrast AA, no dev code in the production bundle, develop merges cleanly into main.
 
-**Next:** the user opens the `develop` → `main` PR. Nothing else queued.
+- [x] `docs/defense-package`: defense documentation package in `docs/` (index `docs/README.md`): audit, SRS, SDD, database design with generated data dictionary, 24 diagrams, security and privacy, API reference, test documentation with RTM, runbook, developer guide, four user manuals, project management, limitations, glossary, demo script, Q&A, cheat sheets, screenshot list; exports in `docs/export/` (22 DOCX, combined PDF, 5 PPTX decks); build scripts in `docs/tools/`. No application code changed.
+
+**Next:** the user fills in the [TO CONFIRM] items listed in `docs/README.md`. Nothing else queued.
 
 | # | Branch | Status |
 |---|---|---|

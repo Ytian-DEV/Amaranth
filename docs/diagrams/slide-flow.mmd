@@ -1,0 +1,8 @@
+flowchart LR
+  c["<b>Create games</b><br/>CSV · Build schedule<br/>· Contest"] --> k["<b>Score live</b><br/>phone scorekeeper<br/>Realtime to readers"]
+  k --> f["<b>Finish</b><br/>knockout needs a winner"]
+  f --> a["<b>Auto-advance</b><br/>app.sk_resolve fills<br/>next games"]
+  a --> m["<b>Confirm medals</b><br/>suggested podium →<br/>staff save"]
+  m --> t["<b>Medal table</b><br/>computed view<br/>5 · 3 · 1 points"]
+  classDef hi fill:#b5f000,stroke:#14361f,color:#0f2a1a
+  class t hi

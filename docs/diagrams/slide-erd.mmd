@@ -1,0 +1,11 @@
+flowchart LR
+  E["<b>Edition</b><br/>dates · medal points"] --> F["<b>Faction</b><br/>name · colour · logo"]
+  E --> S["<b>Sport</b><br/>category"] --> V["<b>Event</b><br/>division · format · seeds"]
+  V --> M["<b>Match</b><br/>scores · status · sources<br/>or contest session"]
+  M --> N["<b>Entry</b><br/>contest result / place"]
+  V --> P["<b>Placement</b><br/>place → medal"]
+  F --> P
+  F --> A["<b>Athlete</b><br/>name · program · photo"]
+  P --> T["<b>sk_medal_table</b><br/>(computed view)"]
+  classDef hi fill:#b5f000,stroke:#14361f,color:#0f2a1a
+  class T hi

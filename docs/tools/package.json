@@ -1,0 +1,11 @@
+{
+  "name": "amaranth-docs-tools",
+  "private": true,
+  "type": "module",
+  "description": "Builds the Amaranth v2 documentation exports (diagrams, PDF, screenshots).",
+  "dependencies": {
+    "marked": "15.0.6",
+    "mermaid": "11.4.1",
+    "puppeteer-core": "23.11.1"
+  }
+}

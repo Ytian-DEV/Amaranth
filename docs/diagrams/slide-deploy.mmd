@@ -1,0 +1,24 @@
+flowchart LR
+  B["<b>Browser</b><br/>React SPA"]
+  subgraph V["Vercel"]
+    C["CDN<br/>assets · index.html"]
+    F["Functions<br/>/api/r · /api/e · /api/submit<br/>sitemap · rss · robots"]
+    M["Middleware<br/>crawler previews"]
+  end
+  subgraph SB["Supabase"]
+    R["PostgREST API"]
+    A["Auth"]
+    ST["Storage"]
+    RT["Realtime"]
+    P[("PostgreSQL<br/>RLS · triggers · pg_cron")]
+  end
+  B --> C
+  B --> F
+  B -- "JWT" --> R
+  B --> A
+  B --> ST
+  B -- "WebSocket" --> RT
+  F -- "service key" --> R
+  M --> R
+  R --> P
+  RT --> P

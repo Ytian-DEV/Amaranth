@@ -1,0 +1,36 @@
+"""Deck B4 — Staff Training (≈15 slides)."""
+D = 'docs/diagrams/'
+S = 'docs/screenshots/'
+
+SLIDES = [
+    dict(kind='title', title='Amaranth Newsroom — Staff Training', subtitle='Step by step for writers, editors, managers and the Salingkusog team', kicker='AMARANTH · TRAINING', meta='Version 1.0 · 2026-10-19',
+         notes='Welcome to the newsroom training. In the next half hour we will sign in, write and submit an article, review and publish, use the media library, and, for the Salingkusog team, keep scores and confirm medals.'),
+    dict(kind='table', title='Your role', rows=[['Role', 'You can'], ['Staff writer / Contributor', 'Write drafts, submit for review'], ['Section editor', '+ review, edit and feature your sections'], ['Business Manager', 'Write and publish'], ['Managing Editor', '+ publish, front page, statistics, team'], ['Executive Editor / Super admin', '+ staff, roles, settings']],
+         col_widths=[1, 1.4], notes='Find your role here. Everyone can write drafts and submit them. Section editors review their sections. The Business Manager, Managing Editor, Executive Editor and Super admin can publish. Staff can also be given publishing access individually.'),
+    dict(kind='split', title='1. Sign in', bullets=['Go to /admin/login', 'Email + password → Sign in', 'Forgot password? Use the email link', '“Access pending” = ask the Executive Editor'], image=S + 'adm-login.png', crop=(780, 220, 1260, 680), left_w=560,
+         notes='Open the site, go to slash admin slash login, and sign in with the email you were invited with. If you forget your password, use Forgot password and follow the link in your email. If you see Access pending, your account is not active yet.'),
+    dict(kind='image', title='2. The newsroom', image=S + 'adm-dashboard-writer.png', caption='Dashboard and menu; you only see what your role allows',
+         notes='The menu on the left shows the parts of the newsroom you can use. The dashboard shows your drafts and recent articles. Managers see more counts and the submission queue.'),
+    dict(kind='bullets', title='3. Write a draft', bullets=['Articles → New article', 'Choose a category; write title and body', 'Add cover photo, tags, summary, SEO', 'Autosaves every 2.5 seconds'],
+         notes='To write, open Articles and choose New article. Pick the category first, because it sets the section. Write the title and the body, then fill the side panels: cover photo and caption, tags and summary, and search and sharing. You never need to press save; it autosaves.'),
+    dict(kind='bullets', title='4. Submit for review', bullets=['Click Submit for review (add a note)', 'Locked while waiting', 'Return to draft to withdraw', 'Read your editor’s notes in Notes & activity'],
+         notes='When you are done, choose Submit for review and add a note if helpful. The article is locked while the editor looks at it, but you can withdraw it with Return to draft. Feedback appears under Notes and activity.'),
+    dict(kind='image', title='5. Review (Section editors)', image=S + 'adm-editor.png', caption='Start review → Return to draft / Reject (note required) / Publish / Schedule',
+         notes='Section editors open Needs review, choose Start review, and then return the article with a note, reject it with a required note, or, with publishing access, publish or schedule it. The buttons shown are exactly those your role allows.'),
+    dict(kind='bullets', title='6. Publish and schedule', bullets=['Publish = live now', 'Schedule = pick a future time; goes live by itself', 'Archive = take it off the site', 'Not allowed? The newsroom says why'],
+         notes='Publishers can publish now, schedule for a future time, or archive. Scheduled articles go live automatically. If you try something your role does not allow, the system explains it; this is enforced by the database, not just hidden in the interface.'),
+    dict(kind='stack', title='7. Media library', bullets=['Upload images (auto-compressed) and always add alt text', 'Images in use cannot be deleted'], image=S + 'adm-media.png', crop=(260, 0, 1440, 560), image_h=330,
+         notes='The media library compresses images automatically into web sizes. Please always add alt text so readers using screen readers understand the image. An image used in an article cannot be deleted until it is replaced.'),
+    dict(kind='bullets', title='8. Moderation (editors)', bullets=['Settings → Comments: approve, reject, spam', 'Settings → Inbox: contact messages', 'Submissions / Events: review, decline, convert', 'Turn into an article → draft opens'],
+         notes='Editors moderate comments, which stay hidden until approved, handle the contact inbox, and review story submissions and event reports. A good submission can be turned into a draft article in one step.'),
+    dict(kind='bullets', title='9. Managers only', bullets=['Staff → Accounts: roles, activation, Can publish', 'Settings → Front page: lead story, folio, ticker', 'Statistics: readers, top articles, sources', 'Salingkusog → Team: who enters scores'],
+         notes='Managers have a few extra screens: staff accounts, including publishing access; the front page and ticker; statistics; and choosing the Salingkusog team.'),
+    dict(kind='split', title='10. Salingkusog scorekeeping', bullets=['Scores → pick the day → open the game', 'Start game, tap scores, Finish game', 'Reopen to fix a mistake', 'Contests: enter times or places'], image=S + 'adm-sk-scorekeeper-mobile.png', left_w=660,
+         notes='For the Salingkusog team: open Scores, choose the day and the game, press Start game, tap the scores, and Finish game at the end. Use Reopen to fix a mistake. For contests, type each result or place and then Finish contest.'),
+    dict(kind='bullets', title='11. Confirm medals', bullets=['Results & medals → “Ready to confirm”', 'Check places 1–3; choose athletes if individual', 'Save results', 'The medal tally updates everywhere'],
+         notes='After an event’s last game, open Results and medals. Events that are complete say Ready to confirm. Check the suggested places, choose athletes for individual events, and save. The medal tally updates for everyone immediately.'),
+    dict(kind='table', title='Messages you may see', rows=[['Message', 'What to do'], ['This article is locked…', 'Wait for the editor or withdraw'], ['Category reserved for editors', 'Pick another category'], ['Pick a future time to schedule', 'Choose a later time'], ['A knockout game needs a winner', 'Add the tiebreak to the score'], ['Enter every result first', 'Fill results or mark DNS/DNF/DQ']],
+         col_widths=[1.1, 1], notes='These are the most common messages. Each one tells you what to do next. If something else goes wrong, take a screenshot and send it to the technical lead.'),
+    dict(kind='closing', title='You are ready', subtitle='Manuals: AMR-DOC-11a (managers) · 11b (editors and staff) · 11c (Salingkusog team)',
+         notes='That is everything you need to start. The user manuals have every step with screenshots. Thank you, and welcome to the newsroom.'),
+]

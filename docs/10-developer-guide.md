@@ -152,7 +152,7 @@ Follow ADR-012 and ADR-014 (AMR-DOC-03): add the enum value, generate games with
 # 8. Documentation and diagrams
 
 - Markdown sources: `docs/*.md`; diagrams: `docs/diagrams/*.mmd` (Mermaid) with rendered `.png`/`.svg`.
-- Exports (`docs/export/`): `.docx` per document, one combined `.pdf`, and the `.pptx` decks. They were produced with Pandoc (DOCX), Chrome print-to-PDF (PDF), python-pptx (decks) and Mermaid (diagrams) from a scratch build environment [TO CONFIRM where the build scripts will be kept; see `docs/README.md`].
+- Exports (`docs/export/`): `.docx` per document, one combined `.pdf`, and the `.pptx` decks, produced with Pandoc (DOCX), Chrome print-to-PDF (PDF), python-pptx (decks) and Mermaid (diagrams). The build scripts are in `docs/tools/`; see "Rebuilding" in `docs/README.md`.
 - Update `docs/v2/PROGRESS.md` with every merge.
 
 # 9. Common errors and fixes

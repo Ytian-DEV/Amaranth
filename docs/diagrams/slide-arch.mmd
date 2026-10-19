@@ -1,0 +1,6 @@
+flowchart LR
+  A["<b>Browser</b><br/>React 18 + TypeScript<br/>public site · newsroom"] -- "HTTPS + user token" --> D[("<b>Supabase</b><br/>PostgreSQL · RLS · triggers<br/>Auth · Storage · Realtime")]
+  A -- "forms · stats · cached reads" --> V["<b>Vercel</b><br/>CDN · /api functions<br/>crawler middleware"]
+  V -- "service key (server only)" --> D
+  A -. "CAPTCHA" .-> T["Cloudflare<br/>Turnstile"]
+  V -. "verify" .-> T
