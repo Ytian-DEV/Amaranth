@@ -1,0 +1,26 @@
+sequenceDiagram
+  autonumber
+  actor R as Reader
+  participant B as Browser form (sendForm)
+  participant CF as Cloudflare Turnstile
+  participant API as /api/submit (Vercel)
+  participant ST as Supabase Storage (intake)
+  participant DB as Postgres RPC (service role)
+  R->>B: fill form, attach files
+  B->>CF: execute widget
+  CF-->>B: one-time token
+  B->>API: {kind, token, args, files meta}
+  API->>CF: siteverify(token, secret)
+  CF-->>API: success
+  alt with attachments
+    API->>ST: create signed upload URLs
+    API-->>B: uploads[] + signed 30-min ticket
+    B->>ST: uploadToSignedUrl (each file)
+    B->>API: {kind, ticket, args, files meta}
+    API->>API: verify ticket HMAC, expiry, same content
+  end
+  API->>DB: submit_article / submit_event_report / submit_comment / send_contact_message
+  DB->>DB: honeypot, validation, rate limit per email
+  DB-->>API: id
+  API-->>B: 200 {id}
+  B-->>R: success message

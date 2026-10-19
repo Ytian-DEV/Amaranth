@@ -1,0 +1,7 @@
+flowchart LR
+  d([Draft]) -- submit --> s([Submitted]) -- start review --> r([In review])
+  r -- publish / schedule --> p([Published / Scheduled]) -- archive --> a([Archived])
+  s -- "return / reject" --> d
+  r -- "return / reject" --> d
+  classDef pub fill:#b5f000,stroke:#14361f,color:#0f2a1a
+  class p pub

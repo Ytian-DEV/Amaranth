@@ -1,0 +1,34 @@
+flowchart TB
+  R["Reader"]:::ext
+  S["Staff"]:::ext
+  T["Salingkusog team"]:::ext
+  P1(("1.0<br/>Authenticate<br/>and authorise"))
+  P2(("2.0<br/>Manage articles<br/>and workflow"))
+  P3(("3.0<br/>Serve public site"))
+  P4(("4.0<br/>Handle public<br/>intake"))
+  P5(("5.0<br/>Run Salingkusog"))
+  P6(("6.0<br/>Collect and report<br/>statistics"))
+  D1[("D1 profiles,<br/>staff_invites")]
+  D2[("D2 articles,<br/>revisions, activity")]
+  D3[("D3 media_assets +<br/>storage buckets")]
+  D4[("D4 submissions, events,<br/>comments, contact")]
+  D5[("D5 sk_* tables<br/>+ computed views")]
+  D6[("D6 stats_* tables")]
+  S --> P1 --> D1
+  S -- "drafts, transitions" --> P2
+  P2 <--> D2
+  P2 <--> D3
+  R -- "requests" --> P3
+  D2 --> P3
+  D5 --> P3
+  P3 -- "pages" --> R
+  R -- "forms + Turnstile token" --> P4
+  P4 --> D4
+  D4 -- "review queue" --> S
+  P4 -- "convert to draft" --> D2
+  T -- "fixtures, scores, results" --> P5
+  P5 <--> D5
+  R -- "pageview / share events" --> P6
+  P6 --> D6
+  D6 -- "reports" --> S
+  classDef ext fill:#ffffff,stroke:#14361f,stroke-width:2px

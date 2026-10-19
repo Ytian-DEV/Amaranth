@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  actor K as Scorekeeper (phone)
+  participant SK as Scorekeeper screen
+  participant DB as sk_matches
+  participant TR as Triggers
+  participant RT as Supabase Realtime
+  participant P as Reader's page
+  K->>SK: tap +2 / +3, change period
+  SK->>SK: update screen at once, save after 600 ms pause
+  SK->>DB: update score_a, score_b, periods, live_note
+  DB->>TR: sk_match_status (timestamps, updated_by)<br/>sk_knockout_needs_winner<br/>sk_matches_advance → app.sk_resolve
+  TR-->>DB: next games' sides (if any)
+  DB-->>RT: change on sk_matches
+  RT-->>P: postgres_changes (edition filter)
+  P->>P: invalidate hub, standings, timeline
+  P->>DB: refetch (RLS: published edition)
+  DB-->>P: new score
+  Note over SK,RT: Other scorekeepers on the same game also receive the change (useMatchRealtime)

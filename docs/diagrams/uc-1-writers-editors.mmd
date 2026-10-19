@@ -1,0 +1,20 @@
+flowchart LR
+  SW(["Staff writer /<br/>Contributor"])
+  SE(["Section editor"])
+  PUB(["Publisher<br/>(SA, EE, ME, BM,<br/>or granted)"])
+  subgraph Newsroom["Newsroom — articles"]
+    U1([Write and autosave draft])
+    U2([Submit for review])
+    U3([Withdraw to draft])
+    U4([Start review])
+    U5([Reject / return with note])
+    U6([Feature or prioritise])
+    U7([Publish now])
+    U8([Schedule for later])
+    U9([Archive / unpublish])
+    U10([Add note, view history])
+    U11([Upload media])
+  end
+  SW --- U1 & U2 & U3 & U10 & U11
+  SE --- U1 & U2 & U4 & U5 & U6 & U10 & U11
+  PUB --- U7 & U8 & U9 & U1 & U10

@@ -1,0 +1,19 @@
+sequenceDiagram
+  autonumber
+  actor S as Team member
+  participant R as Results editor
+  participant RPC as sk_set_placements()
+  participant DB as sk_placements
+  participant V as sk_medal_table / sk_points_by_day
+  participant RT as Supabase Realtime
+  participant P as Public tally page
+  R->>R: suggestedPodium(event, games, entries)
+  R-->>S: "Ready to confirm" with places 1–3
+  S->>R: check, adjust, Save results
+  R->>RPC: rpc(p_event_id, rows[])
+  RPC->>RPC: can_edit_sk()?
+  RPC->>DB: delete event's placements, insert new rows<br/>(medal from place: 1 gold, 2 silver, 3 bronze)
+  DB-->>RT: change on sk_placements
+  RT-->>P: postgres_changes
+  P->>V: refetch standings and timeline
+  V-->>P: medals, points, rank (computed on read)

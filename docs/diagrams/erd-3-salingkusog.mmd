@@ -1,0 +1,115 @@
+erDiagram
+  sk_editions {
+    uuid id PK
+    uuid schedule_pdf_asset_id FK
+    uuid map_asset_id FK
+  }
+  sk_factions {
+    uuid id PK
+    uuid edition_id FK
+    text slug
+    uuid logo_asset_id FK
+  }
+  sk_venues {
+    uuid id PK
+    uuid edition_id FK
+    text slug
+  }
+  sk_sports {
+    uuid id PK
+    uuid edition_id FK
+    text slug
+  }
+  sk_events {
+    uuid id PK
+    uuid sport_id FK
+    text slug
+    sk_format format
+    uuid venue_id FK
+  }
+  sk_athletes {
+    uuid id PK
+    uuid faction_id FK
+    text slug
+    uuid photo_asset_id FK
+  }
+  sk_matches {
+    uuid id PK
+    uuid event_id FK
+    uuid venue_id FK
+    sk_match_status status
+    uuid side_a_id FK
+    uuid side_b_id FK
+    uuid recap_article_id FK
+    uuid updated_by FK
+  }
+  sk_entries {
+    uuid id PK
+    uuid match_id FK
+    uuid faction_id FK
+    uuid athlete_id FK
+    smallint place
+    text status
+  }
+  sk_athlete_stats {
+    uuid match_id PK
+    uuid athlete_id PK
+  }
+  sk_placements {
+    uuid id PK
+    uuid event_id FK
+    smallint place
+    sk_medal medal
+    uuid faction_id FK
+    uuid athlete_id FK
+  }
+  sk_awards {
+    uuid id PK
+    sk_award_kind kind
+    date day
+    uuid athlete_id FK
+    uuid match_id FK
+    uuid event_id FK
+  }
+  sk_team {
+    uuid profile_id PK
+    uuid added_by FK
+  }
+  media_assets {
+    uuid id PK
+  }
+  profiles {
+    uuid id PK
+  }
+  articles {
+    uuid id PK
+  }
+  media_assets ||--o{ sk_editions : "schedule_pdf_asset_id"
+  media_assets ||--o{ sk_editions : "map_asset_id"
+  sk_editions ||--o{ sk_factions : "edition_id"
+  media_assets ||--o{ sk_factions : "logo_asset_id"
+  sk_editions ||--o{ sk_venues : "edition_id"
+  sk_editions ||--o{ sk_sports : "edition_id"
+  sk_sports ||--o{ sk_events : "sport_id"
+  sk_venues ||--o{ sk_events : "venue_id"
+  media_assets ||--o{ sk_athletes : "photo_asset_id"
+  sk_factions ||--o{ sk_athletes : "faction_id"
+  articles ||--o{ sk_matches : "recap_article_id"
+  profiles ||--o{ sk_matches : "updated_by"
+  sk_events ||--o{ sk_matches : "event_id"
+  sk_venues ||--o{ sk_matches : "venue_id"
+  sk_factions ||--o{ sk_matches : "side_a_id"
+  sk_factions ||--o{ sk_matches : "side_b_id"
+  sk_matches ||--o{ sk_entries : "match_id"
+  sk_factions ||--o{ sk_entries : "faction_id"
+  sk_athletes ||--o{ sk_entries : "athlete_id"
+  sk_matches ||--o{ sk_athlete_stats : "match_id"
+  sk_athletes ||--o{ sk_athlete_stats : "athlete_id"
+  sk_events ||--o{ sk_placements : "event_id"
+  sk_factions ||--o{ sk_placements : "faction_id"
+  sk_athletes ||--o{ sk_placements : "athlete_id"
+  sk_matches ||--o{ sk_awards : "match_id"
+  sk_events ||--o{ sk_awards : "event_id"
+  sk_athletes ||--o{ sk_awards : "athlete_id"
+  profiles ||--o{ sk_team : "profile_id"
+  profiles ||--o{ sk_team : "added_by"

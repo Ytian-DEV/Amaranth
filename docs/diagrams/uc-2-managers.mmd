@@ -1,0 +1,18 @@
+flowchart LR
+  SA(["Super admin"])
+  EE(["Executive Editor"])
+  ME(["Managing Editor"])
+  subgraph Admin["Newsroom — administration"]
+    A1([Invite staff, set roles and access])
+    A2([Grant super admin])
+    A3([Grant publishing access])
+    A4([Sections, categories, desks, general settings])
+    A5([Front page and ticker])
+    A6([Editorial board and print issues])
+    A7([View statistics])
+    A8([Read audit log])
+    A9([Choose Salingkusog team, countdown])
+  end
+  SA --- A1 & A2 & A3 & A4 & A5 & A6 & A7 & A8 & A9
+  EE --- A1 & A3 & A4 & A5 & A6 & A7 & A8 & A9
+  ME --- A3 & A5 & A6 & A7 & A9

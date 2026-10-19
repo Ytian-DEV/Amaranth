@@ -1,0 +1,21 @@
+sequenceDiagram
+  autonumber
+  actor U as Staff member
+  participant L as LoginPage (browser)
+  participant A as Supabase Auth
+  participant P as AuthProvider
+  participant DB as Postgres (RLS)
+  participant G as RequireStaff guard
+  U->>L: email + password
+  L->>A: signInWithPassword()
+  A-->>L: session (JWT)
+  L->>P: onAuthStateChange(session)
+  P->>DB: select * from profiles where id = auth.uid()
+  DB-->>P: profile (role, is_active, can_publish)
+  P->>G: status = signed-in, profile
+  alt profile missing or inactive
+    G-->>U: "Access pending" screen
+  else active staff
+    G-->>U: newsroom (menu filtered by role)
+  end
+  Note over DB: Every later query runs app.current_role()<br/>inside RLS, so hiding a menu item is not the security boundary

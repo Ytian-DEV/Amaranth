@@ -1,0 +1,15 @@
+flowchart LR
+  R["Reader"]:::ext
+  S["Staff"]:::ext
+  T["Salingkusog team"]:::ext
+  C["Crawlers"]:::ext
+  P(("0<br/>Amaranth v2<br/>system"))
+  R -- "search terms, comments,<br/>submissions, contact" --> P
+  P -- "articles, results,<br/>medal table, live scores" --> R
+  S -- "articles, media, settings,<br/>workflow decisions" --> P
+  P -- "queues, statistics,<br/>notes, history" --> S
+  T -- "fixtures, scores,<br/>placements, awards" --> P
+  P -- "standings, suggested podium" --> T
+  C -- "page requests" --> P
+  P -- "Open Graph tags, sitemap, RSS" --> C
+  classDef ext fill:#ffffff,stroke:#14361f,stroke-width:2px

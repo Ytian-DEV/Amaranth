@@ -1,0 +1,21 @@
+flowchart TB
+  s([Start]) --> a1{How are the games<br/>created?}
+  a1 -- "CSV import" --> a2[Import schedule:<br/>validate rows, skip duplicates]
+  a1 -- "Build schedule" --> a3[Pick format, seeds,<br/>first game, gaps]
+  a1 -- "Contest" --> a4[Create contest:<br/>one session, all factions]
+  a3 --> a5[sk_build_schedule creates games<br/>with sources seed / winner / loser / rank]
+  a2 --> g[Game: upcoming]
+  a5 --> g
+  g --> l[Scorekeeper: Start game<br/>status: live]
+  l --> sc[Update score, periods,<br/>live note — Realtime to readers]
+  sc --> f{Finish game}
+  f -- "knockout tie" --> x[Refused: needs a winner] --> sc
+  f -- ok --> fin[status: final<br/>winner_side computed]
+  fin --> adv[app.sk_resolve fills next games<br/>winner/loser · next RR round · ranks]
+  adv --> more{Event's last game?}
+  more -- no --> g
+  a4 --> ce[Contest scorekeeper:<br/>results or judged places] --> cf[Finish contest] --> more
+  more -- yes --> sug[Results: 'Ready to confirm'<br/>suggested podium]
+  sug --> conf[Staff confirm →<br/>sk_set_placements]
+  conf --> mt[sk_medal_table and points race<br/>recompute on read · Realtime refresh]
+  mt --> e([Public tally updated])

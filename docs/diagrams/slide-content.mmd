@@ -1,0 +1,10 @@
+flowchart LR
+  SEC["<b>Section</b><br/>12 · nav placement"] --> CAT["<b>Category</b><br/>assignable?"] --> ART["<b>Article</b><br/>status · published_at<br/>body · SEO · search"]
+  ART --> AUT["<b>Authors</b><br/>contributors"]
+  ART --> MED["<b>Media</b><br/>cover · inline"]
+  ART --> REV["<b>Revisions</b><br/>newest 50"]
+  ART --> ACT["<b>Activity</b><br/>status changes · notes"]
+  ART --> COM["<b>Comments</b><br/>moderated"] --> PRV["<b>Private email</b><br/>editors only"]
+  PRO["<b>Profile</b><br/>role · active · can_publish"] --> AUT
+  classDef hi fill:#b5f000,stroke:#14361f,color:#0f2a1a
+  class ART hi
